@@ -42,6 +42,8 @@ const std::vector<dpp::snowflake> ALLOWED_CHANNELS = {
 	1170145267224428635
 };
 
+std::string axuaximsg = "damn.";
+
 const std::vector<std::string> RELIABLE_PROVIDERS = {
 	"tenor.com", "giphy.com", "youtube.com", "youtu.be", "klipy.com",	"twitter.com", "x.com", "instagram.com", "tiktok.com"
 };
@@ -89,6 +91,12 @@ int main() {
 			echo_cmd.add_option(
 					dpp::command_option(dpp::co_string, "content", "msg", true)
 					);
+			dpp::slashcommand echo_ax("echoo", "echo test dont use it will probably crash bot", bot.me.id);
+			echo_ax.set_default_permissions(dpp::p_administrator);
+			echo_ax.set_dm_permission(false);
+			echo_ax.add_option(
+					dpp::command_option(dpp::co_string, "content", "msg", true)
+					);
 			dpp::slashcommand mkspl_cmd("mkspl", "make someone special", bot.me.id);
 			mkspl_cmd.set_default_permissions(dpp::p_administrator);
 			mkspl_cmd.set_dm_permission(false);
@@ -96,6 +104,9 @@ int main() {
 					dpp::command_option(dpp::co_user, "user", "who to toggle from specialness?", true)
 			);
 			dpp::slashcommand mkshm_cmd("mkshm", dpp::ctxm_message, bot.me.id);
+			mkshm_cmd.set_default_permissions(dpp::p_administrator);
+			mkshm_cmd.set_dm_permission(false);
+			dpp::slashcommand mkshm_prime_cmd("mkshm_prime", dpp::ctxm_message, bot.me.id);
 			mkshm_cmd.set_default_permissions(dpp::p_administrator);
 			mkshm_cmd.set_dm_permission(false);
 			dpp::slashcommand ab_cmd("auraboard", "who has lost the most aura?", bot.me.id);
@@ -117,7 +128,13 @@ int main() {
 				.add_choice(dpp::command_option_choice("add", std::string("add")))
 			);
 			aura_mv_cmd.add_option(dpp::command_option(dpp::co_integer, "amt", "mode for cmd", true));
-			bot.global_bulk_command_create({echo_cmd, mkspl_cmd, mkshm_cmd, ab_cmd, aura_mv_cmd});
+			dpp::slashcommand aura_duel_cmd("auraduel", "duel someone with aura", bot.me.id);
+				aura_duel_cmd.add_option(
+					dpp::command_option(dpp::co_user, "user", "who to duel?", true)
+				);
+			aura_duel_cmd.set_dm_permission(false);
+			aura_duel_cmd.set_default_permissions(dpp::p_administrator);
+			bot.global_bulk_command_create({echo_cmd, echo_ax, mkspl_cmd, aura_duel_cmd, mkshm_cmd, mkshm_prime_cmd, ab_cmd, aura_mv_cmd});
 			}
 			});
 	bot.on_message_context_menu([&bot](const dpp::message_context_menu_t& event) {
@@ -128,14 +145,65 @@ int main() {
 				reply.set_reference(msg.id);
 				bot.message_create(reply);
 				event.reply(dpp::message("shamed").set_flags(dpp::m_ephemeral));
-		} //TODO: change this stupid shit where i keep repeating the same calls a million times across the code and just make a function like a normal person		
+		} else if (event.command.get_command_name() == "mkshm_prime") {
+				dpp::message msg = event.get_message();
+				std::string evil_msg2 = "\"" + msg.content + "\" OH MY AURA LOSS 💔💀";
+				dpp::message reply2(msg.channel_id, evil_msg2);
+				reply2.set_reference(msg.id);
+				bot.message_create(reply2);
+				std::string evil_msg3 = "HOW IS THIS AMOUNT OF AURA LOSS EVEN POSSIBLE";
+				dpp::message reply3(msg.channel_id, evil_msg3);
+				reply3.set_reference(msg.id);
+				bot.message_create(reply3);
+				std::string evil_msg = "💔 PACK IT UP 💀";
+				dpp::message reply(msg.channel_id, evil_msg);
+				reply.set_reference(msg.id);
+				bot.message_create(reply);
+				event.reply(dpp::message("**shamed**").set_flags(dpp::m_ephemeral));
+		}
+		//TODO: change this stupid shit where i keep repeating the same calls a million times across the code and just make a function like a normal person		
 	});
 
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 			if (event.command.get_command_name() == "echo") {
-			std::string msg = std::get<std::string>(event.get_parameter("content"));
-			bot.message_create(dpp::message(event.command.channel_id, msg));
-			event.reply(dpp::message("ok").set_flags(dpp::m_ephemeral));
+				std::string msg = std::get<std::string>(event.get_parameter("content"));
+				std::string user_id = std::to_string(event.command.get_issuing_user().id);
+				if (msg[0] != '!') {
+					event.reply(dpp::message(event.command.channel_id, msg + "\n-# This message was sent using the bot by <@" + user_id + ">."));
+				} else {
+					bot.message_create(dpp::message(event.command.channel_id, std::regex_replace(std::regex_replace(msg.substr(1), std::regex(R"(\\n)"), "\n"), std::regex(R"(by <@175422893449150464>)"), "by <@" + user_id + ">")));
+				}
+				event.reply(dpp::message("ok").set_flags(dpp::m_ephemeral));
+			} else if (event.command.get_command_name() == "echoo") {
+				std::string msg = std::get<std::string>(event.get_parameter("content"));
+				axuaximsg = msg;
+				return;
+			} else if (event.command.get_command_name() == "auraduel") {
+				dpp::snowflake opponent_id = std::get<dpp::snowflake>(event.get_parameter("user"));
+				std::string user_id = std::to_string(event.command.get_issuing_user().id);
+				std::string opponent_id_str = std::to_string(opponent_id);
+				json stats = load_stats();
+				int user_count = stats["users"].value(user_id, 0);
+				int opponent_count = stats["users"].value(opponent_id_str, 0);
+				// Safe Zone
+				if (user_count < 100) {
+					event.reply(dpp::message("you dont have enough aura to duel").set_flags(dpp::m_ephemeral));
+					return;
+				} else if (opponent_count < 100) {
+					event.reply(dpp::message("opponent doesnt have enough aura to duel").set_flags(dpp::m_ephemeral));
+					return;
+				} else if (user_id == opponent_id_str) {
+					event.reply(dpp::message("you cant duel yourself").set_flags(dpp::m_ephemeral));
+					return;
+				}
+				if (user_count > opponent_count) {
+					event.reply(dpp::message("<@" + user_id + "> (" + (user_id != "697952992007028776" ? std::to_string(user_count) : axuaximsg) + ") won the duel against <@" + opponent_id_str + "> (" + (opponent_id_str != "697952992007028776" ? std::to_string(opponent_count) : axuaximsg) + ")!"));
+				} else if (opponent_count > user_count) {
+					event.reply(dpp::message("<@" + opponent_id_str + "> (" + (opponent_id_str != "697952992007028776" ? std::to_string(opponent_count) : axuaximsg )+ ") won the duel against <@" + user_id + "> (" + (user_id != "697952992007028776" ? std::to_string(user_count) : axuaximsg) + ")!"));
+				} else {
+					event.reply(dpp::message("<@" + user_id + "> and <@" + opponent_id_str + "> tied the duel!"));
+				}
+				return;
 			} else if (event.command.get_command_name() == "mkspl") {
 				dpp::snowflake usr = std::get<dpp::snowflake>(event.get_parameter("user"));
 				auto it = std::find(SPECIALS.begin(), SPECIALS.end(), usr);
@@ -203,7 +271,7 @@ int main() {
 			std::string txt = "";
 			int lim = std::min((int)ab_list.size(), 10);
 			for (int i = 0; i < lim; ++i) {
-				txt += "<@" + ab_list[i].first + ">: " + std::to_string(ab_list[i].second) + "AURA\n";
+				txt += "<@" + ab_list[i].first + ">: " + (ab_list[i].first != "697952992007028776" ? std::to_string(ab_list[i].second) + " AURA\n" : axuaximsg + "\n");
 			}
 			embed.set_description(txt);
 			event.reply(dpp::message(event.command.channel_id, embed));
@@ -212,12 +280,10 @@ int main() {
 
 	bot.on_message_create([&bot](const dpp::message_create_t& event) {
 			if (event.msg.author.is_bot()) return;
-			auto it = std::find(SPECIALS.begin(), SPECIALS.end(), event.msg.author.id);
-			if (it != SPECIALS.end()) {
 			static std::random_device rd;
 			static std::mt19937 gen_e(rd());
 			std::uniform_int_distribution<> dis_e(0, 100);
-			if (dis_e(gen_e) > 10) {
+			if (dis_e(gen_e) < 10) {
 				json stats = load_stats();
 				std::string user_id = std::to_string(event.msg.author.id);
 				int user_count = stats["users"].value(user_id, 0);
@@ -226,6 +292,8 @@ int main() {
 				stats["total"] = total_count - 10;
 				save_stats(stats);
 			}
+			auto it = std::find(SPECIALS.begin(), SPECIALS.end(), event.msg.author.id);
+			if (it != SPECIALS.end()) {
 			if (dis_e(gen_e) == 1) {
 			json stats = load_stats();
 			std::string user_id = std::to_string(event.msg.author.id);
