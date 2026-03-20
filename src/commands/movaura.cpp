@@ -24,10 +24,10 @@ namespace commands {
         std::string response;
 
         if (mode == "rmv") {
-            db::modify_aura(target_id, -amt);
+            db::rmv_aura(target_id, -amt);
             response = "holy aura loss, " + std::to_string(amt) + " from <@" + target_id.str() + ">.";
         } else if (mode == "add") {
-            db::modify_aura(target_id, amt);
+            db::add_aura(target_id, amt);
             response = "holy aura gain, " + std::to_string(amt) + " to <@" + target_id.str() + ">.";
         } else if (mode == "set") {
             db::set_aura(target_id, (int)amt); 

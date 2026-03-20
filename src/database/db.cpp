@@ -1,6 +1,8 @@
 #include "db.h"
 #include <sqlite3.h>
 #include <iostream>
+#include <vector>
+#include <string>
 
 namespace db {
     sqlite3* db_ptr = nullptr;
@@ -21,12 +23,7 @@ namespace db {
             ");";
         
         char* err_msg = nullptr;
-        if (sqlite3_exec(db_ptr, sql, nullptr, nullptr, &err_msg) != SQLITE_OK) {
-            std::cerr << "SQL error during init: " << err_msg << std::endl;
-            sqlite3_free(err_msg);
-        } else {
-            std::cout << "Database initialized successfully." << std::endl;
-        }
+        sqlite3_exec(db_ptr, sql, nullptr, nullptr, &err_msg);
     }
 
     int get_aura(dpp::snowflake user_id) {
@@ -77,10 +74,24 @@ namespace db {
     }
 
     void rmv_aura(dpp::snowflake user_id, int amount) {
-        add_aura(user_id, -amt);
+        add_aura(user_id, -amount);
     }
 
-    void set_aura() {
+    	int get_total_aura() {
+		const char* sql =
+			"SELECT SUM(aura) FROM users;";
+		sqlite3_stmt* stmt;
+		int total = 0;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			if (sqlite3_step(stmt) == SQLITE_ROW) {
+				total = sqlite3_column_int(stmt, 0);
+			}
+		}
+		sqlite3_finalize(stmt);
+		return total;
+	}
+
+    void set_aura(dpp::snowflake user_id, int amount) {
         std::string id_str = std::to_string(user_id);
         const char* sql =
             "INSERT INTO users (user_id, aura) VALUES (?, ?) "

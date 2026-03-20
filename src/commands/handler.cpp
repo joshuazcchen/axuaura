@@ -5,14 +5,11 @@ namespace commands {
     std::map<std::string, SlashHandler> slash_map = {
         {"echo", handle_echo},
         {"mkspl", handle_mkspl},
-        {"auraduel", handle_auraduel},
         {"auraboard", handle_auraboard},
         {"movaura", handle_movaura}
     };
     
     std::map<std::string, ContextHandler> context_map = {
-        {"mkshm", handle_mkshm},
-        {"mkshm_prime", handle_mkshm_prime}
     };
 
     void route_slash_command(dpp::cluster& bot, const dpp::slashcommand_t& event) {
@@ -29,13 +26,9 @@ namespace commands {
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.global_bulk_command_create({
                 get_echo_definition(bot),
-                get_echoo_definition(bot),
                 get_mkspl_definition(bot),
-                get_auraduel_definition(bot),
                 get_auraboard_definition(bot),
                 get_movaura_definition(bot),
-                get_mkshm_definition(bot),
-                get_mkshm_prime_definition(bot)
             });
         }
     }

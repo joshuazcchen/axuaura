@@ -1,4 +1,4 @@
-.PHONY: test prod
+.PHONY: test prod clean
 
 test:
 	@mkdir -p build_test
@@ -11,3 +11,6 @@ prod:
 	@cmake -S . -B build_prod -DBOT_NAME=axuaxi_prod
 	@cmake --build build_prod
 	@echo "BUILT PROD"
+
+clean:
+	rm -rf build_test

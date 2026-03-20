@@ -14,10 +14,8 @@ int main() {
     db::init();
 
     dpp::cluster bot(token_env, dpp::i_default_intents | dpp::i_message_content);
-    bot.on_log(dpp::utility::log_stderr());
-    
     bot.on_ready([&bot](const dpp::ready_t &event) {
-        std::cout << "version " << bot.me.format_full_name() << std::endl;
+        std::cout << "version " << bot.me.format_username() << std::endl;
         bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, "ponderin"));	
         commands::register_all(bot);
     });
