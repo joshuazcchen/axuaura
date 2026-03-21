@@ -1,5 +1,7 @@
 #include "config.h"
 
+// WHY IS THIS HERE??????? WHY DID I PUT THIS HERE???????? TODO TODO TODO TODO TODO TODO TODO TODO
+
 namespace config {
     std::vector<dpp::snowflake> SPECIALS = { 
         802736184546689044 
