@@ -28,8 +28,15 @@ namespace db {
 			"value TEXT" 
 			");";	
 
+		const char* duels_sql =
+			"CREATE TABLE IF NOT EXISTS duels ("
+			"challenger TEXT PRIMARY KEY, "
+			"target TEXT"
+			");";
+
 		sqlite3_exec(db_ptr, sql, nullptr, nullptr, nullptr);
 		sqlite3_exec(db_ptr, setting_sql, nullptr, nullptr, nullptr);
+		sqlite3_exec(db_ptr, duels_sql, nullptr, nullptr, nullptr);
 	}
 
 	int get_aura(dpp::snowflake user_id) {
@@ -160,4 +167,18 @@ namespace db {
 		std::string val = get_setting_str(key);
 		return (val == "true");
 	}
+
+//	bool check_duel(const std::string&key, std::string challenger, std::string target) {
+//		const char* sql = "SELECT EXISTS (SELECT 1 FROM duels WHERE target = " + target + ") "
+//	}
+//
+//	void issue_duel(const std::string&key, std::string challenger, std::string target) {
+//		const char* sql = "INSERT INTO duels (challenger, target) VALUES (?, ?) "
+//				  "ON CONFLICT(challenger) DO NOTHING;";
+//		sqlite3_stmt* stmt*;
+//
+//		if (sqlite3_prepare_v2(db_ptr, sql, -1, *stmt, nullptr) == SQLITE_OK) {
+//			
+//		}
+//	}
 }
