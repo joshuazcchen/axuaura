@@ -94,19 +94,31 @@ namespace commands {
             db::add_aura(challenger_id, wager);
             db::rmv_aura(opponent_id, wager);
         } else {
+            int challenger_loss = (wager * 3) / 2;  // 1.5x penalty for losing as challenger
             db::add_aura(opponent_id, wager);
-            db::rmv_aura(challenger_id, wager);
+            db::rmv_aura(challenger_id, challenger_loss);
         }
 
         std::string winner = challenger_wins ? fmt::format("<@{}>", challenger_id.str()) : fmt::format("<@{}>", opponent_id.str());
         std::string loser = challenger_wins ? fmt::format("<@{}>", opponent_id.str()) : fmt::format("<@{}>", challenger_id.str());
+        int challenger_loss = challenger_wins ? 0 : (wager * 3) / 2;
+        int loss_amount = challenger_wins ? wager : challenger_loss;
+
+        // Shame text for losers
+        std::string shame_text;
+        if (challenger_wins) {
+            shame_text = "Got absolutely OBLITERATED. Better luck next time, I guess? 💀";
+        } else {
+            shame_text = "YIKES. You got clapped as the CHALLENGER. That's embarrassing. 😬";
+        }
 
         dpp::embed result_embed = dpp::embed()
             .set_color(challenger_wins ? dpp::colors::green : dpp::colors::red)
             .set_title("⚔️ DUEL RESULTS")
             .set_description(fmt::format("{} **WINS** against {}!", winner, loser))
             .add_field("Prize", fmt::format("+{} AURA", wager), true)
-            .add_field("Loss", fmt::format("-{} AURA", wager), true);
+            .add_field("Loss", fmt::format("-{} AURA{}", loss_amount, !challenger_wins ? " (challenger penalty!)" : ""), true)
+            .add_field("💔 Shame", shame_text, false);
 
         bot.current_user_get(
             [&bot, result_embed, challenger_id, opponent_id](const dpp::confirmation_callback_t& callback) {
