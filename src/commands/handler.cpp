@@ -7,7 +7,8 @@ namespace commands {
         {"mkspl", handle_mkspl},
         {"auraboard", handle_auraboard},
         {"movaura", handle_movaura},
-        {"duel", handle_auraduel}
+        {"duel", handle_auraduel},
+	{"settings", handle_settings}
     };
 
     std::map<std::string, ContextHandler> context_map = {
@@ -31,6 +32,7 @@ namespace commands {
                 get_auraboard_definition(bot),
                 get_movaura_definition(bot),
                 get_auraduel_definition(bot),
+		get_settings_definition(bot),
             });
         }
     }

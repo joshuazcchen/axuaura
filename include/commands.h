@@ -26,6 +26,9 @@ namespace commands {
     void handle_auraduel(const dpp::slashcommand_t& event, dpp::cluster& bot);
     void process_duel_result(dpp::cluster& bot, dpp::snowflake challenger_id, dpp::snowflake opponent_id, int wager);
 
+    dpp::slashcommand get_settings_definition(dpp::cluster& bot);
+    void handle_settings(const dpp::slashcommand_t& event, dpp::cluster&bot);
+
     dpp::slashcommand get_auraboard_definition(dpp::cluster& bot);
     void handle_auraboard(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
