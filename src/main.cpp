@@ -7,17 +7,15 @@
 #include "events.h"
 
 int main() {
-	const char *token_env = std::getenv("BOT_TOKEN");
-	if (!token_env) {
-		std::cerr << "No token" << std::endl;
+	const char *token = std::getenv("BOT_TOKEN");
+	if (!token) {
 		exit(1);
 	}
 
 	db::init();
 
-	dpp::cluster bot(token_env, dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot(token, dpp::i_default_intents | dpp::i_message_content);
 	bot.on_ready([&bot](const dpp::ready_t &event) {
-			std::cout << "version " << bot.me.format_username() << std::endl;
 			bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, "ponderin"));	
 			commands::register_all(bot);
 			});
@@ -41,11 +39,11 @@ int main() {
 			// Parse button ID format: "duel_accept_<challenger_id>_<opponent_id>" or "duel_decline_..."
 			//try {
 			std::string button_type = event.custom_id.substr(5, event.custom_id.find('_', 5) - 5); // "accept" or "decline"
-			//} catch (...) {
-			//std::cout<<"error while getting button shit"<<std::endl;
-			//}
+													       //} catch (...) {
+													       //std::cout<<"error while getting button shit"<<std::endl;
+													       //}
 
-			// Extract IDs from custom_id
+													       // Extract IDs from custom_id
 			size_t first_underscore = event.custom_id.find('_', 5);
 			size_t second_underscore = event.custom_id.rfind('_');
 
