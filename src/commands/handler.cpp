@@ -6,9 +6,10 @@ namespace commands {
         {"echo", handle_echo},
         {"mkspl", handle_mkspl},
         {"auraboard", handle_auraboard},
-        {"movaura", handle_movaura}
+        {"movaura", handle_movaura},
+        {"duel", handle_auraduel}
     };
-    
+
     std::map<std::string, ContextHandler> context_map = {
     };
 
@@ -29,6 +30,7 @@ namespace commands {
                 get_mkspl_definition(bot),
                 get_auraboard_definition(bot),
                 get_movaura_definition(bot),
+                get_auraduel_definition(bot),
             });
         }
     }
