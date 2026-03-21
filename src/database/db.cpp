@@ -134,14 +134,14 @@ namespace db {
 		set_setting(key, val ? "true" : "false");
 	}
 
-	std::string get_setting_str(const std::string&key, std::string default_val = "kai") {
+	std::string get_setting_str(const std::string&key, std::string default_val) {
 		const char* sql = "SELECT value FROM settings WHERE key = ?;";
 		sqlite3_stmt* stmt;
 		std::string result = default_val;
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_TRANSIENT);
 			if (sqlite3_step(stmt) == SQLITE_ROW) {
-				const char* text = sqlite3_column_text(stmt, 0);
+				const unsigned char* text = sqlite3_column_text(stmt, 0);
 				if (text) {
 					result = reinterpret_cast<const char*>(text);
 				}
@@ -151,12 +151,12 @@ namespace db {
 		return result;
 	}
 
-	int get_setting_int(const std::string&key, int default_val = 7) {
+	int get_setting_int(const std::string&key, int default_val) {
 		std::string val = get_setting_str(key);
 		return val.empty() ? default_val : std::stoi(val);
 	}
 
-	bool get_setting_bool(const std::string& key, bool default_val = false) {
+	bool get_setting_bool(const std::string& key, bool default_val) {
 		std::string val = get_setting_str(key);
 		return (val == "true");
 	}
