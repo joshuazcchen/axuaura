@@ -45,7 +45,7 @@ namespace commands {
 		dpp::embed invite_embed = dpp::embed()
 			.set_color(dpp::colors::red)
 			.set_title("⚔️ DUEL CHALLENGE")
-			.set_description("<@" + challenger_id.str() + "> challenges you to a duel!")
+			.set_description("<@" + challenger_id.str() + "> challenges <@" + opponent_id + "> to a duel!")
 			.add_field("Wager", std::to_string(wager) + " AURA", true)
 			.add_field("Your Aura", std::to_string(opponent_aura) + " AURA", true)
 			.add_field("Challenger Aura", std::to_string(challenger_aura) + " AURA", true)
@@ -100,25 +100,19 @@ namespace commands {
 			db::rmv_aura(challenger_id, challenger_loss);
 		}
 
-		std::cout<<"fuck you"<<std::endl;
 		std::string winner = challenger_wins ? ("<@" + challenger_id.str() + ">") : ("<@" + opponent_id.str() + ">");
 		std::string loser = challenger_wins ? ("<@" + opponent_id.str() + ">") : ("<@" + challenger_id.str() + ">");
 		int challenger_loss = challenger_wins ? 0 : (wager * 3) / 2;
 		int loss_amount = challenger_wins ? wager : challenger_loss;
 
 		// Shame text for losers
-		std::cout<<"fuck you"<<std::endl;
 		std::string shame_text;
 		if (challenger_wins) {
 			shame_text = "Got absolutely OBLITERATED. Better luck next time, I guess? 💀";
-			std::cout<<"pizzeria via mario"<<std::endl;
 		} else {
 			shame_text = "YIKES. You got clapped as the CHALLENGER. That's embarrassing. 😬";
-
-			std::cout<<"mercanti"<<std::endl;
 		}
 
-		std::cout<<"spaghetti"<<std::endl;
 		dpp::embed result_embed = dpp::embed()
 			.set_color(challenger_wins ? dpp::colors::green : dpp::colors::red)
 			.set_title("⚔️ DUEL RESULTS")
@@ -127,7 +121,6 @@ namespace commands {
 			.add_field("Loss", "-" + std::to_string(loss_amount) + " AURA" + (!challenger_wins ? " (challenger penalty!)" : ""), true)
 			.add_field("💔 Shame", shame_text, false);
 
-		std::cout<<"i will diddle you"<<std::endl;
 		bot.message_create(dpp::message(channel_id, result_embed));
 	}
 }
