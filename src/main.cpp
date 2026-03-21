@@ -62,8 +62,8 @@ int main() {
             // Parse wager from embed if present
             if (!event.command.resolved.messages.empty()) {
                 auto msg = event.command.resolved.messages.begin()->second;
-                if (!msg->embeds.empty()) {
-                    auto embed = msg->embeds.front();
+                if (!msg.embeds.empty()) {
+                    auto embed = msg.embeds.front();
                     for (const auto& field : embed.fields) {
                         if (field.name == "Wager") {
                             // Extract number from "50 AURA" format
@@ -77,7 +77,7 @@ int main() {
             commands::process_duel_result(bot, challenger_id, opponent_id, wager);
             event.reply(dpp::message("Duel accepted! ⚔️").set_flags(dpp::m_ephemeral));
         } else if (button_type == "decline") {
-            event.reply(dpp::message(fmt::format("<@{}> declined the duel.", event.command.usr.id)).set_flags(dpp::m_ephemeral));
+            event.reply(dpp::message("<@" + event.command.usr.id.str() + "> declined the duel.").set_flags(dpp::m_ephemeral));
         }
     });
 

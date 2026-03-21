@@ -2,6 +2,7 @@
 #include "db.h"
 #include <random>
 #include <ctime>
+#include <variant>
 
 namespace commands {
 
@@ -17,8 +18,9 @@ namespace commands {
         dpp::snowflake opponent_id = std::get<dpp::snowflake>(event.get_parameter("opponent"));
         int64_t wager = 50; // default wager
 
-        if (event.get_parameter("wager")) {
-            wager = std::get<int64_t>(event.get_parameter("wager"));
+        dpp::command_value wager_param = event.get_parameter("wager");
+        if (!std::holds_alternative<std::monostate>(wager_param)) {
+            wager = std::get<int64_t>(wager_param);
         }
 
         // Validation
@@ -44,7 +46,7 @@ namespace commands {
         dpp::embed invite_embed = dpp::embed()
             .set_color(dpp::colors::red)
             .set_title("⚔️ DUEL CHALLENGE")
-            .set_description(fmt::format("<@{}> challenges you to a duel!", challenger_id.str()))
+            .set_description("<@" + challenger_id.str() + "> challenges you to a duel!")
             .add_field("Wager", std::to_string(wager) + " AURA", true)
             .add_field("Your Aura", std::to_string(opponent_aura) + " AURA", true)
             .add_field("Challenger Aura", std::to_string(challenger_aura) + " AURA", true)
@@ -59,14 +61,14 @@ namespace commands {
                 .add_component(
                     dpp::component()
                         .set_type(dpp::cot_button)
-                        .set_id(fmt::format("duel_accept_{}_{}", challenger_id.str(), opponent_id.str()))
+                        .set_id("duel_accept_" + challenger_id.str() + "_" + opponent_id.str())
                         .set_label("⚡ Accept")
                         .set_style(dpp::cos_success)
                 )
                 .add_component(
                     dpp::component()
                         .set_type(dpp::cot_button)
-                        .set_id(fmt::format("duel_decline_{}_{}", challenger_id.str(), opponent_id.str()))
+                        .set_id("duel_decline_" + challenger_id.str() + "_" + opponent_id.str())
                         .set_label("✋ Decline")
                         .set_style(dpp::cos_danger)
                 )
@@ -85,7 +87,8 @@ namespace commands {
         int challenger_win_chance = (total_aura > 0) ? (challenger_aura * 100) / total_aura : 50;
 
         // Weighted random duel outcome
-        std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)) + challenger_id.value + opponent_id.value);
+        size_t id_seed = std::hash<std::string>{}(challenger_id.str() + opponent_id.str());
+        std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)) + static_cast<unsigned>(id_seed));
         std::uniform_int_distribution<int> distribution(0, 99);
         int roll = distribution(rng);
         bool challenger_wins = roll < challenger_win_chance;
@@ -99,8 +102,8 @@ namespace commands {
             db::rmv_aura(challenger_id, challenger_loss);
         }
 
-        std::string winner = challenger_wins ? fmt::format("<@{}>", challenger_id.str()) : fmt::format("<@{}>", opponent_id.str());
-        std::string loser = challenger_wins ? fmt::format("<@{}>", opponent_id.str()) : fmt::format("<@{}>", challenger_id.str());
+        std::string winner = challenger_wins ? ("<@" + challenger_id.str() + ">") : ("<@" + opponent_id.str() + ">");
+        std::string loser = challenger_wins ? ("<@" + opponent_id.str() + ">") : ("<@" + challenger_id.str() + ">");
         int challenger_loss = challenger_wins ? 0 : (wager * 3) / 2;
         int loss_amount = challenger_wins ? wager : challenger_loss;
 
@@ -115,16 +118,15 @@ namespace commands {
         dpp::embed result_embed = dpp::embed()
             .set_color(challenger_wins ? dpp::colors::green : dpp::colors::red)
             .set_title("⚔️ DUEL RESULTS")
-            .set_description(fmt::format("{} **WINS** against {}!", winner, loser))
-            .add_field("Prize", fmt::format("+{} AURA", wager), true)
-            .add_field("Loss", fmt::format("-{} AURA{}", loss_amount, !challenger_wins ? " (challenger penalty!)" : ""), true)
+            .set_description(winner + " **WINS** against " + loser + "!")
+            .add_field("Prize", "+" + std::to_string(wager) + " AURA", true)
+            .add_field("Loss", "-" + std::to_string(loss_amount) + " AURA" + (!challenger_wins ? " (challenger penalty!)" : ""), true)
             .add_field("💔 Shame", shame_text, false);
 
         bot.current_user_get(
-            [&bot, result_embed, challenger_id, opponent_id](const dpp::confirmation_callback_t& callback) {
+            [result_embed](const dpp::confirmation_callback_t& callback) {
                 if (callback.is_error()) return;
             }
         );
     }
 }
-
