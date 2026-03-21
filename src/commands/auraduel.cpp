@@ -77,13 +77,18 @@ namespace commands {
 
     // Helper function to process duel results
     void process_duel_result(dpp::cluster& bot, dpp::snowflake challenger_id, dpp::snowflake opponent_id, int wager) {
-        // Random duel outcome
-        std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
-        std::uniform_int_distribution<int> distribution(0, 1);
-        bool challenger_wins = distribution(rng);
-
         int challenger_aura = db::get_aura(challenger_id);
         int opponent_aura = db::get_aura(opponent_id);
+
+        // Calculate win probability based on current auras
+        int total_aura = challenger_aura + opponent_aura;
+        int challenger_win_chance = (total_aura > 0) ? (challenger_aura * 100) / total_aura : 50;
+
+        // Weighted random duel outcome
+        std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)) + challenger_id.value + opponent_id.value);
+        std::uniform_int_distribution<int> distribution(0, 99);
+        int roll = distribution(rng);
+        bool challenger_wins = roll < challenger_win_chance;
 
         if (challenger_wins) {
             db::add_aura(challenger_id, wager);
