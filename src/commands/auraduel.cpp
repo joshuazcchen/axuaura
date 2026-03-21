@@ -45,7 +45,7 @@ namespace commands {
 		dpp::embed invite_embed = dpp::embed()
 			.set_color(dpp::colors::red)
 			.set_title("⚔️ DUEL CHALLENGE")
-			.set_description("<@" + challenger_id.str() + "> challenges <@" + opponent_id + "> to a duel!")
+			.set_description("<@" + challenger_id.str() + "> challenges <@" + std::to_string(opponent_id) + "> to a duel!")
 			.add_field("Wager", std::to_string(wager) + " AURA", true)
 			.add_field("Your Aura", std::to_string(opponent_aura) + " AURA", true)
 			.add_field("Challenger Aura", std::to_string(challenger_aura) + " AURA", true)
