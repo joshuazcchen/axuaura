@@ -32,9 +32,7 @@ namespace events {
 			return;
 		}
 
-		std::cout<<db::get_setting_int("aurachancegain", 10)<<std::endl;
 		if (dis(gen) <= db::get_setting_int("aurachancegain", 10)) {
-			std::cout<<"passively gained aura!"<<std::endl;
 			db::add_aura(user_id, db::get_setting_int("aurapassiveamt", 2));
 		}
 

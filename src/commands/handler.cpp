@@ -9,7 +9,8 @@ namespace commands {
         {"auraboard", handle_auraboard},
         {"movaura", handle_movaura},
         {"duel", handle_auraduel},
-	{"settings", handle_settings}
+	{"settings", handle_settings},
+	{"gamble", handle_gamble}
     };
 
     std::map<std::string, ContextHandler> context_map = {
@@ -36,6 +37,7 @@ namespace commands {
                 movaura_def(bot),
                 auraduel_def(bot),
 		settings_def(bot),
+		gamble_def(bot),
             });
         }
     }

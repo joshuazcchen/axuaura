@@ -20,10 +20,10 @@ namespace config {
     };
 
     const std::vector<std::string> AURA_LOSSES = {
-        "**HOLY AURA LOSS 💔**", "aura loss 💔", "💔💀 aura loss 😱", "Aura loss 💔", "damn you got less aura than axuaxi after that 💔", "holy aura loss 💔"
+        "**HOLY AURA LOSS <:heartem:1485404606480515172>**", "aura loss <:heartem:1485404606480515172>", "<:heartem:1485404606480515172> <:skem:1485404723501863085> aura loss <:downvote:1485404530924589228>", "Aura loss <:heartem:1485404606480515172>", "damn you got less aura than axuaxi after that <:heartem:1485404606480515172>", "holy aura loss <:heartem:1485404606480515172>"
     };
 
     const std::vector<std::string> SPANISH_LOSS = {
-        "adios aura 💔", "au rev'aura 💔", "AURA ⬇️  ", "你的aura减少。", "Aura berkurang 💔"
+        "adios aura <:heartem:1485404606480515172>", "au rev'aura <:heartem:1485404606480515172>", "AURA ⬇️  ", "你的aura减少。", "Aura berkurang <:heartem:1485404606480515172>"
     };
 }

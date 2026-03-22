@@ -29,6 +29,9 @@ namespace commands {
 		dpp::slashcommand settings_def(dpp::cluster& bot);
 		void handle_settings(const dpp::slashcommand_t& event, dpp::cluster&bot);
 
+		dpp::slashcommand gamble_def(dpp::cluster& bot);
+		void handle_gamble(const dpp::slashcommand_t& event, dpp::cluster&bot);
+
 		dpp::slashcommand auraboard_def(dpp::cluster& bot);
 		void handle_auraboard(const dpp::slashcommand_t& event, dpp::cluster& bot);
 

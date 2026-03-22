@@ -29,7 +29,6 @@ int main() {
 			});
 
 	bot.on_message_create([&bot](const dpp::message_create_t& event) {
-			std::cout<<"here"<<std::endl;
 			if (event.msg.author.is_bot()) return;
 			events::handle_message(event, bot);
 			});

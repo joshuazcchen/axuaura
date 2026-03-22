@@ -11,6 +11,7 @@ namespace commands {
 					.add_choice(dpp::command_option_choice("aurachancegain", std::string("aurachancegain")))
 					.add_choice(dpp::command_option_choice("aurapassiveamt", std::string("aurapassiveamt")))
 					.add_choice(dpp::command_option_choice("auralbozoamt", std::string("auralbozoamt")))
+					.add_choice(dpp::command_option_choice("auralossamt", std::string("auralbozoamt")))
 					.add_choice(dpp::command_option_choice("status", std::string("status")))
 				   )
 			.add_option(dpp::command_option(dpp::co_string, "value", "val"));
