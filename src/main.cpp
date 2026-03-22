@@ -29,61 +29,12 @@ int main() {
 			});
 
 	bot.on_message_create([&bot](const dpp::message_create_t& event) {
+			std::cout<<"here"<<std::endl;
 			if (event.msg.author.is_bot()) return;
 			events::handle_message(event, bot);
 			});
 
 	bot.on_button_click([&bot](const dpp::button_click_t& event) {
-			if (event.custom_id.find("duel_") != 0) return;
-
-			// Parse button ID format: "duel_accept_<challenger_id>_<opponent_id>" or "duel_decline_..."
-			//try {
-			std::string button_type = event.custom_id.substr(5, event.custom_id.find('_', 5) - 5); // "accept" or "decline"
-													       //} catch (...) {
-													       //std::cout<<"error while getting button shit"<<std::endl;
-													       //}
-
-													       // Extract IDs from custom_id
-			size_t first_underscore = event.custom_id.find('_', 5);
-			size_t second_underscore = event.custom_id.rfind('_');
-
-			dpp::snowflake challenger_id(event.custom_id.substr(first_underscore + 1, second_underscore - first_underscore - 1));
-			dpp::snowflake opponent_id(event.custom_id.substr(second_underscore + 1));
-
-			// Check if the button clicker is the opponent
-			if (event.command.usr.id != opponent_id) {
-			event.reply(dpp::message("Only <@" + opponent_id.str() + "> can respond to this duel!").set_flags(dpp::m_ephemeral));
-			return;
-			}
-
-			if (button_type == "accept") {
-				// Extract wager from message (we'll need to capture it somewhere)
-				// For now, default wager of 50
-				// TODO: store that???????
-				int wager = 50;
-
-				// Parse wager from embed if present
-				if (!event.command.resolved.messages.empty()) {
-					auto msg = event.command.resolved.messages.begin()->second;
-					if (!msg.embeds.empty()) {
-						auto embed = msg.embeds.front();
-						std::cout<<"p"<<std::endl;
-						for (auto& field : embed.fields) {
-							if (field.name == "Wager") {
-								// Extract number from "50 AURA" format
-								wager = std::stoi(field.value.substr(0, field.value.find(' ')));
-								break;
-							}
-						}
-					}
-				}
-
-				// ????
-				commands::process_duel_result(bot, event.command.channel_id, challenger_id, opponent_id, wager);
-				event.reply(dpp::message("Duel accepted! ⚔️").set_flags(dpp::m_ephemeral));
-			} else if (button_type == "decline") {
-				event.reply(dpp::message("<@" + event.command.usr.id.str() + "> declined the duel.").set_flags(dpp::m_ephemeral));
-			}
 	});
 
 	bot.start(dpp::st_wait);

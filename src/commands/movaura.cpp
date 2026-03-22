@@ -3,7 +3,7 @@
 
 namespace commands {
 
-    dpp::slashcommand get_movaura_definition(dpp::cluster& bot) {
+    dpp::slashcommand movaura_def(dpp::cluster& bot) {
         return dpp::slashcommand("movaura", "update aura for user", bot.me.id)
             .set_default_permissions(dpp::p_administrator)
             .add_option(dpp::command_option(dpp::co_user, "user", "who", true))

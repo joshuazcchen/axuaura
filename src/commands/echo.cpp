@@ -2,7 +2,7 @@
 #include <regex>
 
 namespace commands {
-	dpp::slashcommand get_echo_definition(dpp::cluster& bot) {
+	dpp::slashcommand echo_def(dpp::cluster& bot) {
 		dpp::slashcommand cmd("echo", "echo", bot.me.id);
 		cmd.set_default_permissions(dpp::p_administrator);
 		cmd.set_dm_permission(false);

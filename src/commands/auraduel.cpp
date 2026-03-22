@@ -6,7 +6,7 @@
 
 namespace commands {
 
-	dpp::slashcommand get_auraduel_definition(dpp::cluster& bot) {
+	dpp::slashcommand auraduel_def(dpp::cluster& bot) {
 		return dpp::slashcommand("duel", "Challenge someone to a duel for aura", bot.me.id)
 			.set_dm_permission(false)
 			.add_option(dpp::command_option(dpp::co_user, "opponent", "who do you want to duel?", true))

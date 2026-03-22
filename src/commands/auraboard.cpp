@@ -4,7 +4,7 @@
 
 namespace commands {
 
-    dpp::slashcommand get_auraboard_definition(dpp::cluster& bot) {
+    dpp::slashcommand auraboard_def(dpp::cluster& bot) {
         return dpp::slashcommand("auraboard", "who has lost the most aura?", bot.me.id)
             .add_option(
                 dpp::command_option(dpp::co_string, "sort", "top or bottom 10", true)

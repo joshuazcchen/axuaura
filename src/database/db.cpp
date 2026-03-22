@@ -23,20 +23,20 @@ namespace db {
 			");";
 
 		const char* setting_sql =
-			"CREATE TABLE IF NOT EXISTS setting ("
+			"CREATE TABLE IF NOT EXISTS settings ("
 			"key TEXT PRIMARY KEY, "
 			"value TEXT" 
 			");";	
 
-		const char* duels_sql =
-			"CREATE TABLE IF NOT EXISTS duels ("
-			"challenger TEXT PRIMARY KEY, "
-			"target TEXT"
-			");";
+		//const char* duels_sql =
+		//	"CREATE TABLE IF NOT EXISTS duels ("
+		//	"challenger TEXT PRIMARY KEY, "
+		//	"target TEXT"
+		//	");";
 
 		sqlite3_exec(db_ptr, sql, nullptr, nullptr, nullptr);
 		sqlite3_exec(db_ptr, setting_sql, nullptr, nullptr, nullptr);
-		sqlite3_exec(db_ptr, duels_sql, nullptr, nullptr, nullptr);
+		//sqlite3_exec(db_ptr, duels_sql, nullptr, nullptr, nullptr);
 	}
 
 	int get_aura(dpp::snowflake user_id) {
@@ -120,14 +120,14 @@ namespace db {
 	}
 	
 	void set_setting(const std::string& key, const std::string& val) {
-		const char* sql = "INSERT INTO setting (key, value) VALUES (?, ?) "
+		const char* sql = "INSERT INTO settings (key, value) VALUES (?, ?) "
 				  "ON CONFLICT(key) DO UPDATE SET value = ?;";
 		sqlite3_stmt* stmt;
 		
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 2, key.c_str(), -1, SQLITE_TRANSIENT);
-			sqlite3_bind_text(stmt, 3, key.c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, val.c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, val.c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_step(stmt);
 		}
 		sqlite3_finalize(stmt); 
@@ -159,12 +159,12 @@ namespace db {
 	}
 
 	int get_setting_int(const std::string&key, int default_val) {
-		std::string val = get_setting_str(key);
+		std::string val = get_setting_str(key, std::to_string(default_val));
 		return val.empty() ? default_val : std::stoi(val);
 	}
 
 	bool get_setting_bool(const std::string& key, bool default_val) {
-		std::string val = get_setting_str(key);
+		std::string val = get_setting_str(key, "false");
 		return (val == "true");
 	}
 

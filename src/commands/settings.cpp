@@ -3,7 +3,7 @@
 
 namespace commands {
 
-	dpp::slashcommand get_settings_definition(dpp::cluster& bot) {
+	dpp::slashcommand settings_def(dpp::cluster& bot) {
 		return dpp::slashcommand("settings", "set ings", bot.me.id)
 			.set_default_permissions(dpp::p_administrator)
 			.add_option(
@@ -20,17 +20,17 @@ namespace commands {
 		std::string target_setting = std::get<std::string>(event.get_parameter("setting"));
 		std::string new_val = std::get<std::string>(event.get_parameter("value"));
 
-		if (target_setting == "aura_rate") {
+		if (target_setting == "status") {
+			db::set_setting("status", new_val);
+			bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, new_val));
+		} else {
 			try {
 				int rate = std::stoi(new_val);
-				db::set_setting("aura_rate", rate);
+				db::set_setting(target_setting, rate);
 			} catch (...) {
 				event.reply(dpp::message("kys").set_flags(dpp::m_ephemeral));
 				return;
 			}
-		} else if (target_setting == "status") {
-			db::set_setting("status", new_val);
-			bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, new_val));
 		}
 
 		event.reply(dpp::message("your did it!").set_flags(dpp::m_ephemeral));

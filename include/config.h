@@ -6,6 +6,8 @@
 namespace config {
     extern std::vector<dpp::snowflake> SPECIALS;
     extern std::vector<dpp::snowflake> ALLOWED_CHANNELS;
+    extern dpp::snowflake NON_ENG_CH;
+    extern dpp::snowflake LOG_CH;
 
     extern const std::vector<std::string> AURA_LOSSES;
     extern const std::vector<std::string> SPANISH_LOSS;

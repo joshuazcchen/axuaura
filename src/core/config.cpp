@@ -12,6 +12,9 @@ namespace config {
         1482634709526904975, 1482470065415786628, 1469597924596912188, 1482470983813300465, 1469593150858465394, 1170145267224428635
     };
 
+    dpp::snowflake NON_ENG_CH = 1482901206018822296; 
+    dpp::snowflake LOG_CH = 1485390883841904740; 
+
     const std::vector<std::string> RELIABLE_PROVIDERS = {
         "tenor.com", "giphy.com", "youtube.com", "youtu.be", "klipy.com", "twitter.com", "x.com", "instagram.com", "tiktok.com"
     };
