@@ -1,6 +1,7 @@
 #include "commands.h"
 #include <iostream>
 #include "config.h"
+#include "buttons.h"
 
 namespace commands {
     std::map<std::string, SlashHandler> slash_map = {
@@ -30,6 +31,9 @@ namespace commands {
     }
 
     void register_all(dpp::cluster& bot) {
+        buttons::register_handler("duel_accept_", handle_duel_buttons);
+        buttons::register_handler("duel_decline_", handle_duel_buttons);
+
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.global_bulk_command_create({
                 echo_def(bot),
