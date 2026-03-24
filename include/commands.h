@@ -38,6 +38,9 @@ namespace commands {
 		dpp::slashcommand movaura_def(dpp::cluster& bot);
 		void handle_movaura(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
+		dpp::slashcommand bet_def(dpp::cluster& bot);
+		void handle_bet(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
 		// ctxm
 		dpp::slashcommand mkshm_def(dpp::cluster& bot);
 		void handle_mkshm(const dpp::message_context_menu_t& event, dpp::cluster& bot);
