@@ -87,7 +87,8 @@ namespace commands {
 		dpp::embed result_embed = get_duel_result_embed(result);
 
 		// Replace the original duel proposal message so the channel does not get flooded.
-		dpp::message result_msg(event.command.channel_id, event.command.msg.id, result_embed);
+		dpp::message result_msg(event.command.channel_id, result_embed);
+		result_msg.id = event.command.msg.id;
 		bot.message_edit(result_msg);
 	}
 
@@ -108,7 +109,8 @@ namespace commands {
 			.set_description("<@" + opponent_id.str() + "> declined <@" + challenger_id.str() + ">'s duel challenge.");
 
 		// Replace the original duel proposal message so buttons are no longer actionable.
-		dpp::message declined_msg(event.command.channel_id, event.command.msg.id, declined_embed);
+		dpp::message declined_msg(event.command.channel_id, declined_embed);
+		declined_msg.id = event.command.msg.id;
 		bot.message_edit(declined_msg);
 	}
 
