@@ -182,8 +182,8 @@ namespace commands {
 			.set_title("<:duelem:1485404560292974713> DUEL CHALLENGE <:duelem:1485404560292974713>")
 			.set_description("<@" + challenger_id.str() + "> challenges <@" + std::to_string(opponent_id) + "> to a duel!")
 			.add_field("Wager", std::to_string(wager) + " AURA", true)
-			.add_field("<@" + std::to_string(opponent_id) + ">'s Aura", std::to_string(opponent_aura) + " AURA", true)
-			.add_field("<@" + challenger_id.str() + ">'s Aura", std::to_string(challenger_aura) + " AURA", true)
+			.add_field("Challenged's Aura", std::to_string(opponent_aura) + " AURA", true)
+			.add_field("Challenger's Aura", std::to_string(challenger_aura) + " AURA", true)
 			.set_footer(dpp::embed_footer()
 					.set_text("Accept or decline the challenge below")
 					.set_icon("https://cdn-icons-png.flaticon.com/512/595/595533.png"));
