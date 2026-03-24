@@ -182,8 +182,8 @@ namespace commands {
 			.set_title("<:duelem:1485404560292974713> DUEL CHALLENGE <:duelem:1485404560292974713>")
 			.set_description("<@" + challenger_id.str() + "> challenges <@" + std::to_string(opponent_id) + "> to a duel!")
 			.add_field("Wager", std::to_string(wager) + " AURA", true)
-			.add_field("Your Aura", std::to_string(opponent_aura) + " AURA", true)
-			.add_field("Challenger Aura", std::to_string(challenger_aura) + " AURA", true)
+			.add_field("<@" + std::to_string(opponent_id) + ">'s Aura", std::to_string(opponent_aura) + " AURA", true)
+			.add_field("<@" + challenger_id.str() + ">'s Aura", std::to_string(challenger_aura) + " AURA", true)
 			.set_footer(dpp::embed_footer()
 					.set_text("Accept or decline the challenge below")
 					.set_icon("https://cdn-icons-png.flaticon.com/512/595/595533.png"));
@@ -195,14 +195,14 @@ namespace commands {
 					dpp::component()
 					.set_type(dpp::cot_button)
 					.set_id("duel_accept_" + challenger_id.str() + "_" + opponent_id.str() + "_" + std::to_string(wager))
-					.set_label(":white_check_mark: Accept")
+					.set_label("✅ Accept")
 					.set_style(dpp::cos_success)
 					)
 				.add_component(
 					dpp::component()
 					.set_type(dpp::cot_button)
 					.set_id("duel_decline_" + challenger_id.str() + "_" + opponent_id.str())
-					.set_label(":octagonal_sign: Decline")
+					.set_label("🛑 Decline")
 					.set_style(dpp::cos_danger)
 					)
 				);
