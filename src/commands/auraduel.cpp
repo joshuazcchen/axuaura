@@ -85,10 +85,13 @@ namespace commands {
 		// Process duel
 		auto result = process_duel_outcome(challenger_id, opponent_id, wager);
 		dpp::embed result_embed = get_duel_result_embed(result);
-		bot.message_create(dpp::message(event.command.channel_id, result_embed));
+
+		// Replace the original duel proposal message so the channel does not get flooded.
+		dpp::message result_msg(event.command.channel_id, event.command.msg.id, result_embed);
+		bot.message_edit(result_msg);
 	}
 
-	void handle_duel_decline(const dpp::button_click_t& event, dpp::cluster& bot, dpp::snowflake opponent_id) {
+	void handle_duel_decline(const dpp::button_click_t& event, dpp::cluster& bot, dpp::snowflake challenger_id, dpp::snowflake opponent_id) {
 		dpp::snowflake user_id = event.command.get_issuing_user().id;
 
 		// Only the opponent can decline
@@ -98,6 +101,15 @@ namespace commands {
 		}
 
 		event.reply(dpp::message(":octagonal_sign: Duel declined!").set_flags(dpp::m_ephemeral));
+
+		dpp::embed declined_embed = dpp::embed()
+			.set_color(dpp::colors::orange)
+			.set_title(":octagonal_sign: DUEL DECLINED")
+			.set_description("<@" + opponent_id.str() + "> declined <@" + challenger_id.str() + ">'s duel challenge.");
+
+		// Replace the original duel proposal message so buttons are no longer actionable.
+		dpp::message declined_msg(event.command.channel_id, event.command.msg.id, declined_embed);
+		bot.message_edit(declined_msg);
 	}
 
 	void handle_duel_buttons(const dpp::button_click_t& event, dpp::cluster& bot) {
@@ -123,8 +135,9 @@ namespace commands {
 			std::string ids = button_id.substr(13); // Remove "duel_decline_"
 			size_t underscore_pos = ids.find('_');
 			if (underscore_pos != std::string::npos) {
+				dpp::snowflake challenger_id = std::stoull(ids.substr(0, underscore_pos));
 				dpp::snowflake opponent_id = std::stoull(ids.substr(underscore_pos + 1));
-				handle_duel_decline(event, bot, opponent_id);
+				handle_duel_decline(event, bot, challenger_id, opponent_id);
 			}
 			return;
 		}
