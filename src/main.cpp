@@ -5,6 +5,7 @@
 #include "commands.h"
 #include "db.h"
 #include "events.h"
+#include "buttons.h"
 
 int main() {
 	const char *token = std::getenv("BOT_TOKEN");
@@ -34,6 +35,7 @@ int main() {
 			});
 
 	bot.on_button_click([&bot](const dpp::button_click_t& event) {
+		buttons::handle_button_click(event, bot);
 	});
 
 	bot.start(dpp::st_wait);
