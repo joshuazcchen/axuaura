@@ -15,6 +15,17 @@ namespace config {
     dpp::snowflake NON_ENG_CH = 1482901206018822296; 
     dpp::snowflake LOG_CH = 1485390883841904740; 
 
+    dpp::snowflake LEADER = 1489380735482728688;
+    dpp::snowflake NUM2 = 1489380736363532408;
+    dpp::snowflake NUM3 = 1489380734467838073;
+    dpp::snowflake LOSER = 1489380737361776640;
+    dpp::snowflake BOT2 = 1489380733137977424;
+    dpp::snowflake BOT3 = 1489380730013220974;
+
+    std::vector<dpp::snowflake> STUPID_ROLES = {
+        LEADER, NUM2, NUM3, LOSER, BOT2, BOT3
+    };
+
     const std::vector<std::string> RELIABLE_PROVIDERS = {
         "tenor.com", "giphy.com", "youtube.com", "youtu.be", "klipy.com", "twitter.com", "x.com", "instagram.com", "tiktok.com"
     };

@@ -9,7 +9,7 @@ namespace db {
 	void set_aura(dpp::snowflake user_id, int amount);
 	void add_aura(dpp::snowflake user_id, int amount);
 	void rmv_aura(dpp::snowflake user_id, int amount);
-	std::vector<std::pair<std::string, int>> get_ab(bool bottom);
+	std::vector<std::pair<std::string, int>> get_ab(int limit, bool bottom);
 	int get_total_aura();
 
 	void set_setting(const std::string& key, const std::string& val);

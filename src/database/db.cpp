@@ -73,10 +73,10 @@ namespace db {
 		return aura;
 	}
 
-	std::vector<std::pair<std::string, int>> get_ab(bool bottom) {
+	std::vector<std::pair<std::string, int>> get_ab(int limit, bool bottom) {
 		std::vector<std::pair<std::string, int>> results;
 		std::string order = bottom ? "ASC" : "DESC";
-		std::string sql = "SELECT user_id, aura FROM users ORDER BY aura " + order + " LIMIT 10;";
+		std::string sql = "SELECT user_id, aura FROM users ORDER BY aura " + order + " LIMIT " + std::to_string(limit) + ";";
 
 		sqlite3_stmt* stmt;
 		if (sqlite3_prepare_v2(db_ptr, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
@@ -193,10 +193,11 @@ namespace db {
 		sqlite3_stmt* stmt;
         if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
             while (sqlite3_step(stmt) == SQLITE_ROW) {
-                int id = sqlite3_column_int(stmt, 0);
-                const char* title = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-                const char* opts = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-        		list.push_back({id, title ? title : "", opts ? opts : ""});
+				Poll p;
+                p.p_id = sqlite3_column_int(stmt, 0);
+                p.title = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+                p.ops = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        		list.push_back(p);
             }
         }
         sqlite3_finalize(stmt);

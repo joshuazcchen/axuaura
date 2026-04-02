@@ -24,7 +24,7 @@ namespace commands {
             return;
         }
 
-        auto ab_list = db::get_ab(sort_mode == "bottom"); 
+        auto ab_list = db::get_ab(10, sort_mode == "bottom"); 
 
         dpp::embed embed = dpp::embed()
             .set_color(dpp::colors::white)
