@@ -8,8 +8,6 @@ namespace commands {
 		return dpp::slashcommand("gamble", "like horse gambling without the payout", bot.me.id)
 			.add_option(dpp::command_option(dpp::co_sub_command, "slots", "slots")
 					.add_option(dpp::command_option(dpp::co_integer, "bet", "ante", true)))
-			.add_option(dpp::command_option(dpp::co_sub_command, "super_slots", "super_slots")
-					.add_option(dpp::command_option(dpp::co_integer, "bet", "ante", true)))
 			.add_option(dpp::command_option(dpp::co_sub_command, "flip", "lame")
 			.add_option(dpp::command_option(dpp::co_integer, "bet", "ante", true))
 			.add_option(dpp::command_option(dpp::co_string, "choice", "axuaxi or lamexuaxi", true)
