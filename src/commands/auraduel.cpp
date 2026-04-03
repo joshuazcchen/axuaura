@@ -33,7 +33,7 @@ namespace commands {
 
 		std::uniform_int_distribution<int> distribution(0, 99);
 		int roll = distribution(gen);
-		int challenger_win_chance = (total_aura > 0) ? (int)(challenger_aura * 100LL) / total_aura : 50;
+		int challenger_win_chance = (total_aura > 0) ? static_cast<int>((challenger_aura * 100LL) / total_aura) : 50;
 		bool challenger_wins = roll < challenger_win_chance;
 
 		if (challenger_wins) {
