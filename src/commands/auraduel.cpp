@@ -1,6 +1,7 @@
 #include "commands.h"
 #include "db.h"
 #include <variant>
+#include <algorithm>
 #include <random>
 
 namespace commands {
@@ -22,13 +23,17 @@ namespace commands {
 		
 		// Use absolute values to calculate win chance - further from 0 = more advantage
 		int64_t total_aura = challenger_aura + opponent_aura;
-		int challenger_win_chance = (total_aura > 0) ? (int)(challenger_aura * 100) / total_aura : 50;
 
 		// better random generator mr Corgi, inspired from ur events.cpp
-		static std::random_device rd;
-		static std::mt19937 gen(rd());
+		thread_local std::mt19937 gen([]() {
+			std::random_device rd;
+			auto time_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+			return rd() ^ time_seed;
+		}());
+
 		std::uniform_int_distribution<int> distribution(0, 99);
 		int roll = distribution(gen);
+		int challenger_win_chance = (total_aura > 0) ? (int)(challenger_aura * 100) / total_aura : 50;
 		bool challenger_wins = roll < challenger_win_chance;
 
 		if (challenger_wins) {
