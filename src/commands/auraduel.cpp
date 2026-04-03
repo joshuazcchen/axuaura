@@ -17,12 +17,12 @@ namespace commands {
 
 	// Game logic
 	DuelResult process_duel_outcome(dpp::snowflake challenger_id, dpp::snowflake opponent_id, int wager) {
-		int challenger_aura = db::get_aura(challenger_id);
-		int opponent_aura = db::get_aura(opponent_id);
+		int64_t challenger_aura = std::abs((int64_t)db::get_aura(challenger_id));
+		int64_t opponent_aura = std::abs((int64_t)db::get_aura(opponent_id));
 		
 		// Use absolute values to calculate win chance - further from 0 = more advantage
-		int total_aura = std::abs(challenger_aura) + std::abs(opponent_aura);
-		int challenger_win_chance = (total_aura > 0) ? (std::abs(challenger_aura) * 100) / total_aura : 50;
+		int64_t total_aura = challenger_aura + opponent_aura;
+		int challenger_win_chance = (total_aura > 0) ? (int)(challenger_aura * 100) / total_aura : 50;
 
 		// better random generator mr Corgi, inspired from ur events.cpp
 		static std::random_device rd;
