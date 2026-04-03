@@ -24,7 +24,7 @@ namespace commands {
         std::string response;
 
         if (mode == "rmv") {
-            db::rmv_aura(target_id, -amt);
+            db::rmv_aura(target_id, amt);
             response = "holy aura loss, " + std::to_string(amt) + " from <@" + target_id.str() + ">.";
         } else if (mode == "add") {
             db::add_aura(target_id, amt);
