@@ -62,7 +62,7 @@ namespace commands {
 								event.reply(dpp::message("no bets rn").set_flags(dpp::m_ephemeral));
 								return;
 						}
-						std::string stats = "";
+						std::string stats = "this command does not really work rn for the amts\n ill fix it later -corgi\n";
 						for (const auto& p : polls) {
 								stats += "\n**" + std::to_string(p.p_id) + ":** " + p.title + "\n";
 								std::stringstream ss(p.ops);
@@ -88,7 +88,7 @@ namespace commands {
 						std::string ops = std::get<std::string>(event.get_parameter("options"));
 						int p_id = db::p_set_poll(title, ops);
 
-						event.reply(dpp::message("poll: " + title + "\nid: " + std::to_string(p_id) + "\noptions: " + ops));
+						event.reply(dpp::message("poll: " + title + "\nid: " + std::to_string(p_id) + "\noptions: " + ops + "\nplace bets using /bet place"));
 				} else if (scmd == "end") {
 						if (!event.command.get_resolved_permission(event.command.usr.id).has(dpp::p_administrator)) {
 								event.reply(dpp::message("no").set_flags(dpp::m_ephemeral));
