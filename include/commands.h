@@ -22,8 +22,8 @@ namespace commands {
 		dpp::slashcommand mkspl_def(dpp::cluster& bot);
 		void handle_mkspl(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
-		dpp::slashcommand duel2_def(dpp::cluster& bot);
-		void handle_duel2(const dpp::slashcommand_t& event, dpp::cluster& bot);
+		dpp::slashcommand duel_def(dpp::cluster& bot);
+		void handle_duel(const dpp::slashcommand_t& event, dpp::cluster& bot);
 		//void handle_duel_buttons(const dpp::button_click_t& event, dpp::cluster& bot);
 		//void process_duel_result(dpp::cluster& bot, dpp::snowflake channel_id, dpp::snowflake challenger_id, dpp::snowflake opponent_id, int wager);
 
@@ -44,6 +44,15 @@ namespace commands {
 
 		dpp::slashcommand smite_def(dpp::cluster& bot);
 		void handle_smite(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
+		dpp::slashcommand fixlevel_def(dpp::cluster & bot);
+		void handle_fixlevel(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
+		dpp::slashcommand leaderboard_def(dpp::cluster& bot);
+		void handle_leaderboard(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
+		dpp::slashcommand level_def(dpp::cluster& bot);
+		void handle_level(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
 		// ctxm DEPRECATED UNUSED
 		dpp::slashcommand mkshm_def(dpp::cluster& bot);

@@ -548,6 +548,22 @@ namespace db {
         sqlite3_finalize(stmt);
 	}
 
+	std::vector<std::pair<dpp::snowflake, int>> xp_top(int limit) {
+		std::vector<std::pair<dpp::snowflake, int>> result;
+		const char* sql = "SELECT user_id, xp FROM users WHERE xp > 0 ORDER BY xp DESC LIMIT ?;";
+		sqlite3_stmt* stmt;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_int(stmt, 1, limit);
+			while (sqlite3_step(stmt) == SQLITE_ROW) {
+				dpp::snowflake uid = std::stoull(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+				int xp = sqlite3_column_int(stmt, 1);
+				result.push_back({uid, xp});
+			}
+		}
+		sqlite3_finalize(stmt);
+		return result;
+	}
+
 	long vc_get(dpp::snowflake user_id) {
 		std::string id_str = std::to_string(user_id);
         const char* sql = "SELECT join_time FROM voice WHERE user_id = ?;";
