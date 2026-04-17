@@ -22,4 +22,10 @@ namespace config {
 		extern const std::vector<std::string> AURA_LOSSES;
 		extern const std::vector<std::string> SPANISH_LOSS;
 	    extern const std::vector<std::string> RELIABLE_PROVIDERS;
+
+		extern const std::map<int, dpp::snowflake> LVL_ROLES;
+		extern int XP_COOLDOWN;
+		extern int XP_MIN;
+		extern int XP_MAX;
+		extern dpp::snowflake LVL_CH;
 }

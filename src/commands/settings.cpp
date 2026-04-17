@@ -14,6 +14,9 @@ namespace commands {
 					.add_choice(dpp::command_option_choice("auralossamt", std::string("auralbozoamt")))
 					.add_choice(dpp::command_option_choice("duelminwager", std::string("duelminwager")))
 					.add_choice(dpp::command_option_choice("status", std::string("status")))
+					.add_choice(dpp::command_option_choice("XP_MIN", std::string("XP_MIN")))
+					.add_choice(dpp::command_option_choice("XP_MAX", std::string("XP_MAX")))
+					.add_choice(dpp::command_option_choice("XP_COOLDOWN", std::string("XP_COOLDOWN")))
 				   )
 			.add_option(dpp::command_option(dpp::co_string, "value", "val"));
 	}

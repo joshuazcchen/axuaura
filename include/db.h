@@ -41,4 +41,19 @@ namespace db {
 	void d_delete(dpp::snowflake challenger);
 	bool d_outgoing(dpp::snowflake challenger);
 	long d_time(dpp::snowflake challenger);
+
+	int xp_get(dpp::snowflake user_id);
+	int lvl_get(dpp::snowflake user_id);
+	void xp_add(dpp::snowflake user_id, int amt);
+	void xp_lvl_set(dpp::snowflake user_id, int xp, int lvl);
+	long xp_time_get(dpp::snowflake user_id);
+	void xp_time_set(dpp::snowflake user_id, long time);
+
+	long vc_get(dpp::snowflake user_id);
+	void vc_set(dpp::snowflake user_id, long time);
+	void vc_clr(dpp::snowflake user_id);
+
+	// just gonna use these temporarily to migrate over the messages and such from the switch
+	bool xp_migrate_get(dpp::snowflake user_id);
+	void xp_migrate_set(dpp::snowflake user_id, bool stat);
 }

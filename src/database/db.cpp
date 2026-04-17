@@ -20,7 +20,11 @@ namespace db {
 		const char* sql = 
 			"CREATE TABLE IF NOT EXISTS users ("
 			"user_id TEXT PRIMARY KEY, "
-			"aura INTEGER DEFAULT 0"
+			"aura INTEGER DEFAULT 0, "
+			"xp INTEGER DEFAULT 0, "
+			"level INTEGER DEFAULT 0, "
+			"xp_time INTEGER DEFAULT 0, "
+			"migrated INTEGER DEFAULT 0"
 			");";
 
 		const char* setting_sql =
@@ -53,6 +57,14 @@ namespace db {
 			"bet INTEGER, "
 			"issue_time INTEGER"
 			");";
+
+		// this is fucking stupid. TODO: find a way to not need to do this as a separate table but its not striking my brain rn with any easy solution that doesnt break shit.
+		const char* vc_sql = 
+			"CREATE TABLE IF NOT EXISTS voice ("
+			"user_id TEXT PRIMARY KEY, "
+			"join_time INTEGER"
+			");";
+
 
 		sqlite3_exec(db_ptr, sql, nullptr, nullptr, nullptr);
 		sqlite3_exec(db_ptr, setting_sql, nullptr, nullptr, nullptr);
@@ -430,17 +442,147 @@ namespace db {
 		return yes;
 	}
 
-//	bool check_duel(const std::string&key, std::string challenger, std::string target) {
-//		const char* sql = "SELECT EXISTS (SELECT 1 FROM duels WHERE target = " + target + ") "
-//	}
-//
-//	void issue_duel(const std::string&key, std::string challenger, std::string target) {
-//		const char* sql = "INSERT INTO duels (challenger, target) VALUES (?, ?) "
-//				  "ON CONFLICT(challenger) DO NOTHING;";
-//		sqlite3_stmt* stmt*;
-//
-//		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
-//			
-//		}
-//	}
+	int xp_get(dpp::snowflake user_id) {
+		std::string id_str = std::to_string(user_id);
+		const char* sql = "SELECT xp FROM users WHERE user_id = ?;";
+		sqlite3_stmt* stmt;
+		int xp = 0;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+            if (sqlite3_step(stmt) == SQLITE_ROW) xp = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+        return xp;
+	}
+
+	int lvl_get(dpp::snowflake user_id) {
+		std::string id_str = std::to_string(user_id);
+        const char* sql = "SELECT level FROM users WHERE user_id = ?;";
+        sqlite3_stmt* stmt;
+        int lvl = 0;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+            if (sqlite3_step(stmt) == SQLITE_ROW) lvl = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt); 
+        return lvl;
+	}
+
+	void xp_add(dpp::snowflake user_id, int amt) {
+		std::string id_str = std::to_string(user_id);
+        const char* sql = "INSERT INTO users (user_id, xp) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET xp = xp + ?;";
+        sqlite3_stmt* stmt;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(stmt, 2, amt);
+            sqlite3_bind_int(stmt, 3, amt);
+            sqlite3_step(stmt);
+        }
+        sqlite3_finalize(stmt);
+	}
+
+	void xp_lvl_set(dpp::snowflake user_id, int xp, int lvl) {
+        std::string id_str = std::to_string(user_id);
+        const char* sql = "INSERT INTO users (user_id, xp, level) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET xp = ?, level = ?;";
+        sqlite3_stmt* stmt;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(stmt, 2, xp);
+            sqlite3_bind_int(stmt, 3, lvl);
+            sqlite3_bind_int(stmt, 4, xp);
+            sqlite3_bind_int(stmt, 5, lvl);
+            sqlite3_step(stmt);
+        }
+        sqlite3_finalize(stmt);
+    }
+
+	long xp_time_get(dpp::snowflake user_id) {
+		std::string id_str = std::to_string(user_id);
+        const char* sql = "SELECT xp_time FROM users WHERE user_id = ?;";
+        sqlite3_stmt* stmt;
+        long time = 0;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+            if (sqlite3_step(stmt) == SQLITE_ROW) time = sqlite3_column_int64(stmt, 0);
+        }
+        sqlite3_finalize(stmt); 
+        return time;
+	}
+
+	void xp_time_set(dpp::snowflake user_id, long time) {
+		std::string id_str = std::to_string(user_id);
+        const char* sql = "INSERT INTO users (user_id, xp_time) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET xp_time = ?;";
+        sqlite3_stmt* stmt;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int64(stmt, 2, time);
+            sqlite3_bind_int64(stmt, 3, time);
+            sqlite3_step(stmt);
+        }
+        sqlite3_finalize(stmt);
+	}
+
+	bool xp_migrate_get(dpp::snowflake user_id) {
+		std::string id_str = std::to_string(user_id);
+		const char* sql = "SELECT migrated FROM users WHERE user_id = ?;";
+        sqlite3_stmt* stmt;
+        bool mig = false;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+            if (sqlite3_step(stmt) == SQLITE_ROW) mig = (sqlite3_column_int(stmt, 0) == 1);
+        }
+        sqlite3_finalize(stmt);
+        return mig;
+	}
+
+	void xp_migrate_set(dpp::snowflake user_id, bool stat) {
+		std::string id_str = std::to_string(user_id);
+        const char* sql = "INSERT INTO users (user_id, migrated) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET migrated = ?;";
+        sqlite3_stmt* stmt;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(stmt, 2, stat ? 1 : 0);
+            sqlite3_bind_int(stmt, 3, stat ? 1 : 0);
+            sqlite3_step(stmt);
+        }
+        sqlite3_finalize(stmt);
+	}
+
+	long vc_get(dpp::snowflake user_id) {
+		std::string id_str = std::to_string(user_id);
+        const char* sql = "SELECT join_time FROM voice WHERE user_id = ?;";
+        sqlite3_stmt* stmt;
+		long time = 0;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+			if (sqlite3_step(stmt) == SQLITE_ROW) time = sqlite3_column_int64(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+		return time;
+	}
+
+	void vc_set(dpp::snowflake user_id, long time) {
+		std::string id_str = std::to_string(user_id);
+        const char* sql = "INSERT INTO voice (user_id, join_time) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET join_time = ?;";
+        sqlite3_stmt* stmt;
+        if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_int64(stmt, 2, time);
+			sqlite3_bind_int64(stmt, 3, time);
+			sqlite3_step(stmt);
+		}
+		sqlite3_finalize(stmt);
+	}
+
+	void vc_clr(dpp::snowflake user_id) {
+		std::string id_str = std::to_string(user_id);
+
+		const char* sql = "DELETE FROM voice WHERE user_id = ?;";
+		sqlite3_stmt* stmt;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(stmt, 1, id_str.c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_step(stmt);
+		}
+		sqlite3_finalize(stmt);
+	}
 }
