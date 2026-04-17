@@ -1,233 +1,144 @@
 #include "commands.h"
 #include "db.h"
-#include <variant>
 #include <algorithm>
-#include <random>
 
 namespace commands {
 
-	// Duel result struct
-	struct DuelResult {
-		bool challenger_wins;
-		int prize_amount;
-		int loss_amount;
-		std::string winner_mention;
-		std::string loser_mention;
-		std::string shame_text;
-	};
-
-	// Game logic
-	DuelResult process_duel_outcome(dpp::snowflake challenger_id, dpp::snowflake opponent_id, int wager) {
-		int64_t challenger_aura = std::abs((int64_t)db::get_aura(challenger_id));
-		int64_t opponent_aura = std::abs((int64_t)db::get_aura(opponent_id));
-		
-		// Use absolute values to calculate win chance - further from 0 = more advantage
-		int64_t total_aura = challenger_aura + opponent_aura;
-
-		// better random generator mr Corgi, inspired from ur events.cpp
-		thread_local std::mt19937 gen([]() {
-			std::random_device rd;
-			auto time_seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-			return rd() ^ time_seed;
-		}());
-
-		std::uniform_int_distribution<int> distribution(0, 99);
-		int roll = distribution(gen);
-		int challenger_win_chance = (total_aura > 0) ? static_cast<int>((challenger_aura * 100LL) / total_aura) : 50;
-		challenger_win_chance = std::clamp(challenger_win_chance, 1, 99);
-		bool challenger_wins = roll < challenger_win_chance;
-
-		if (challenger_wins) {
-			db::add_aura(challenger_id, wager);
-			db::rmv_aura(opponent_id, wager);
-		} else {
-			int challenger_loss = (wager * 3) / 2;  // 1.5x penalty for losing as challenger
-			db::add_aura(opponent_id, wager);
-			db::rmv_aura(challenger_id, challenger_loss);
-		}
-
-		int challenger_loss = challenger_wins ? 0 : (wager * 3) / 2;
-		int loss_amount = challenger_wins ? wager : challenger_loss;
-
-		std::string shame_text;
-		if (challenger_wins) {
-			shame_text = "Got absolutely OBLITERATED. Maybe next time twin <:skem:1485404723501863085>.";
-		} else {
-			shame_text = "YIKES. You got clapped as the CHALLENGER. That's embarrassing <:heartem:1485404606480515172>.";
-		}
-
-		return DuelResult{
-			challenger_wins,
-			wager,
-			loss_amount,
-			challenger_wins ? ("<@" + challenger_id.str() + ">") : ("<@" + opponent_id.str() + ">"),
-			challenger_wins ? ("<@" + opponent_id.str() + ">") : ("<@" + challenger_id.str() + ">"),
-			shame_text
-		};
+	dpp::slashcommand duel2_def(dpp::cluster& bot) {
+		std::cout<<"COMMAND RETURNED"<<std::endl;
+		return dpp::slashcommand("duel2", "duel2", bot.me.id)
+			.add_option(dpp::command_option(dpp::co_sub_command, "challenge", "threaten someone")
+					.add_option(dpp::command_option(dpp::co_user, "target", "whomst", true))
+					.add_option(dpp::command_option(dpp::co_integer, "bet", "ante", true)))
+			.add_option(dpp::command_option(dpp::co_sub_command, "accept", "fight")
+					.add_option(dpp::command_option(dpp::co_user, "challenger", "who challenged you", true)))
+			.add_option(dpp::command_option(dpp::co_sub_command, "decline", "coward")
+					.add_option(dpp::command_option(dpp::co_user, "challenger", "who challenged you", true)))
+			.add_option(dpp::command_option(dpp::co_sub_command, "cancel", "retract your duel (what a loser)"));
 	}
 
-	dpp::embed get_duel_result_embed(const DuelResult& result) {
-		return dpp::embed()
-			.set_color(result.challenger_wins ? dpp::colors::green : dpp::colors::red)
-			.set_title("<:duelem:1485404560292974713> DUEL RESULTS <:duelem:1485404560292974713>")
-			.set_description(result.winner_mention + " **WINS** against " + result.loser_mention + "!")
-			.add_field("Prize", "+" + std::to_string(result.prize_amount) + " AURA", true)
-			.add_field("Loss", "-" + std::to_string(result.loss_amount) + " AURA" + (!result.challenger_wins ? " (challenger penalty!)" : ""), true)
-			.add_field("<:heartem:1485404606480515172> Shame", result.shame_text, false);
-	}
-
-	// Button handlers
-	void handle_duel_accept(const dpp::button_click_t& event, dpp::cluster& bot, dpp::snowflake challenger_id, dpp::snowflake opponent_id, int wager) {
+	void handle_duel2(const dpp::slashcommand_t& event, dpp::cluster& bot) {
+		auto sgn = [](int x) { return x >= 0 ? 1 : -1; };
+		auto cmd = event.command.get_command_interaction().options[0];
 		dpp::snowflake user_id = event.command.get_issuing_user().id;
+		if (cmd.name == "challenge") {
+			dpp::snowflake target = std::get<dpp::snowflake>(event.get_parameter("target"));
+			int64_t bet = std::get<int64_t>(event.get_parameter("bet"));
 
-		// correct opponent check
-		if (user_id != opponent_id) {
-			event.reply(dpp::message("Only <@" + opponent_id.str() + "> can accept this duel!").set_flags(dpp::m_ephemeral));
-			return;
-		}
-
-		event.reply(dpp::message("Duel accepted! Results incoming").set_flags(dpp::m_ephemeral));
-
-		// Process duel
-		auto result = process_duel_outcome(challenger_id, opponent_id, wager);
-		dpp::embed result_embed = get_duel_result_embed(result);
-
-		// Replace the original duel proposal message so the channel does not get flooded.
-		dpp::message result_msg(event.command.channel_id, result_embed);
-		result_msg.id = event.command.msg.id;
-		bot.message_edit(result_msg);
-	}
-
-	void handle_duel_decline(const dpp::button_click_t& event, dpp::cluster& bot, dpp::snowflake challenger_id, dpp::snowflake opponent_id) {
-		dpp::snowflake user_id = event.command.get_issuing_user().id;
-
-		// Only the opponent can decline
-		if (user_id != opponent_id) {
-			event.reply(dpp::message("Only <@" + opponent_id.str() + "> can decline this duel!").set_flags(dpp::m_ephemeral));
-			return;
-		}
-
-		event.reply(dpp::message(":octagonal_sign: Duel declined!").set_flags(dpp::m_ephemeral));
-
-		dpp::embed declined_embed = dpp::embed()
-			.set_color(dpp::colors::orange)
-			.set_title(":octagonal_sign: DUEL DECLINED")
-			.set_description("<@" + opponent_id.str() + "> declined <@" + challenger_id.str() + ">'s duel challenge.");
-
-		// Replace the original duel proposal message so buttons are no longer actionable.
-		dpp::message declined_msg(event.command.channel_id, declined_embed);
-		declined_msg.id = event.command.msg.id;
-		bot.message_edit(declined_msg);
-	}
-
-	void handle_duel_buttons(const dpp::button_click_t& event, dpp::cluster& bot) {
-		std::string button_id = event.custom_id;
-
-		// Handle duel accept buttons
-		if (button_id.find("duel_accept_") == 0) {
-			std::string ids = button_id.substr(12); // Remove "duel_accept_"
-			size_t first_underscore = ids.find('_');
-			size_t second_underscore = ids.find('_', first_underscore + 1);
-			
-			if (first_underscore != std::string::npos && second_underscore != std::string::npos) {
-				dpp::snowflake challenger_id = std::stoull(ids.substr(0, first_underscore));
-				dpp::snowflake opponent_id = std::stoull(ids.substr(first_underscore + 1, second_underscore - first_underscore - 1));
-				int wager = std::stoi(ids.substr(second_underscore + 1));
-				handle_duel_accept(event, bot, challenger_id, opponent_id, wager);
+			if (target == user_id) {
+				event.reply(dpp::message("tf? you tryna duel yourself?"));
+				return;
 			}
-			return;
-		}
-
-		// Handle duel decline buttons
-		if (button_id.find("duel_decline_") == 0) {
-			std::string ids = button_id.substr(13); // Remove "duel_decline_"
-			size_t underscore_pos = ids.find('_');
-			if (underscore_pos != std::string::npos) {
-				dpp::snowflake challenger_id = std::stoull(ids.substr(0, underscore_pos));
-				dpp::snowflake opponent_id = std::stoull(ids.substr(underscore_pos + 1));
-				handle_duel_decline(event, bot, challenger_id, opponent_id);
+			if (target == bot.me.id) {
+				event.reply(dpp::message("how you gonna duel ME and expect to win?"));
 			}
-			return;
+			if (target == 1492320672838582322) {
+				event.reply(dpp::message("dont be stupid. phil wins. you lose."));
+			}
+			int u_aura = db::get_aura(user_id);
+			int t_aura = db::get_aura(target);
+			int u_mag = std::abs(u_aura);
+			int t_mag = std::abs(t_aura);
+			int penalty = (int)(bet * 1.33333);
+			// in the interest of not taking someones aura away before the duel is accepted im gonna just make it so that the database stores that info.
+			if (bet < 0 && u_aura < 0) {
+				event.reply(dpp::message("you gotta duel based on magnitude, so always use positive values :D"));
+				return;
+			} else if (bet < 0) {
+				event.reply(dpp::message("you cannot duel negatives."));
+				return;
+			}
+
+			if (u_mag < bet) {
+				event.reply(dpp::message("holy broke. sit and think about what youre tryna do rq because you dont got enough aura."));
+				return;
+			}
+			if (u_mag < penalty) {
+				event.reply(dpp::message("sorry man, no can do, gotta have at least " + std::to_string(penalty) + " aura to make this bet. you can duel up to " + std::to_string((int)(u_aura/1.33333))));
+				return;
+			}
+			if (t_mag < bet) {
+				event.reply(dpp::message("your ~~victim~~ is too broke. pick on someone closer to your tax bracket."));
+				return;
+			}
+			db::d_issue(user_id, target, bet);
+			event.reply("<@" + std::to_string(target) + ">, hey, <@" + std::to_string(user_id) + "> thinks they're better than you. wanna try to prove them wrong? they're betting **" + std::to_string(bet) + "**.\n\naccept using /duel accept\n-# note that accepting a duel cancels your outgoing duels.");
+
+			dpp::snowflake ch_id = event.command.channel_id;
+			new dpp::oneshot_timer(&bot, 120, [&bot, user_id, target, ch_id](dpp::timer t) {
+				long issue_time = db::d_time(user_id);
+				if (issue_time != -1 && (std::time(nullptr) - issue_time >= 119)) {
+						db::d_delete(user_id);
+						bot.message_create(dpp::message(ch_id, "<@" + std::to_string(user_id) + ">'s duel to <@" + std::to_string(target) +"> expired"));
+				}
+			});
+
+		} else if (cmd.name == "accept") {
+			dpp::snowflake c_id = std::get<dpp::snowflake>(event.get_parameter("challenger"));
+			int bet = db::d_check(c_id, user_id);
+			if (bet == -1) {
+				event.reply(dpp::message("they dont wanna duel u lil bro"));
+				return;
+			}
+			if (bet < 0) {
+				event.reply(dpp::message("something went wrong lol"));
+				return;
+			}
+			int t_aura = db::get_aura(user_id); // its backwards here. target is the one accepting
+			int u_aura = db::get_aura(c_id);
+			int t_mag = std::abs(t_aura);
+			int u_mag = std::abs(u_aura);
+			int penalty = (int)(bet * 1.33333);
+			if (t_mag < bet) {
+				event.reply(dpp::message("you broke asf. cant afford this duel lol"));
+				db::d_delete(c_id);
+				return;
+			}
+			if (u_mag < penalty) {
+				event.reply(dpp::message("your challenger is broke asf what a loser lol. you win by default but they cant even afford to pay you back."));
+				db::d_delete(c_id);
+				return;
+			}
+			db::d_delete(c_id);
+			double prob_u = 0.5;
+			if (u_mag + t_mag > 0) {
+				prob_u = (double) u_mag / (u_mag + t_mag);
+			}
+			prob_u = std::max(0.10, std::min(0.90, prob_u));
+
+			double roll = (double)rand() / RAND_MAX;
+			bool chwin = (roll <= prob_u);
+			if (chwin) {
+				db::add_aura(c_id, sgn(u_aura) * bet);
+				db::rmv_aura(user_id, sgn(t_aura) * bet);
+				int new_u = db::get_aura(c_id);
+				int new_t = db::get_aura(user_id);
+
+				// TODO: this is completely unreadable because its temporary formatting.
+				event.reply("<@" + std::to_string(c_id) + "> mogs <@" + std::to_string(user_id) + ">.\n" + "<@" + std::to_string(c_id) + "> now at " + std::to_string(new_u) + "\n<@" + std::to_string(user_id) + "> now at " + std::to_string(new_t));
+			} else {
+				db::rmv_aura(c_id, sgn(u_aura) * penalty);
+				db::add_aura(user_id, sgn(t_aura) * penalty);
+				int new_u = db::get_aura(c_id);
+				int new_t = db::get_aura(user_id);
+
+				event.reply("<@" + std::to_string(user_id) + "> ABSOLUTELY mogs <@" + std::to_string(c_id) + ">.\n" + "<@" + std::to_string(c_id) + "> now at " + std::to_string(new_u) + "(extra loss bc they LOST despite initiating the challenge, lmfao)\n<@" + std::to_string(user_id) + "> now at " + std::to_string(new_t));
+			}
+		} else if (cmd.name == "decline") {
+			dpp::snowflake c_id = std::get<dpp::snowflake>(event.get_parameter("challenger"));
+			if (db::d_check(c_id, user_id) == -1) {
+				event.reply(dpp::message("they didnt even wanna duel u lil bro"));
+				return;
+			}
+			db::d_delete(c_id);
+			event.reply(dpp::message("<@" + std::to_string(user_id) + "> is too scared of <@" + std::to_string(c_id) + "> and ran away from the duel"));
+		} else if (cmd.name == "cancel") {
+			if (!db::d_outgoing(user_id)) {
+				event.reply(dpp::message("no log of you wanting to duel someone, idk what u tryna cancel").set_flags(dpp::m_ephemeral));
+				return;
+			}
+			db::d_delete(user_id);
+			event.reply(dpp::message("you successfully chickened out of your duel"));
 		}
-	}
-
-	dpp::slashcommand auraduel_def(dpp::cluster& bot) {
-		int min_wager = db::get_setting_int("duelminwager", 500);
-		return dpp::slashcommand("duel", "Challenge someone to a duel for aura", bot.me.id)
-			.set_dm_permission(false)
-			.add_option(dpp::command_option(dpp::co_user, "opponent", "who do you want to duel?", true))
-			.add_option(dpp::command_option(dpp::co_integer, "wager", "how much aura to wager (min " + std::to_string(min_wager) + ")", false));
-	}
-
-	void handle_auraduel(const dpp::slashcommand_t& event, dpp::cluster& bot) {
-		dpp::snowflake challenger_id = event.command.get_issuing_user().id;
-		dpp::snowflake opponent_id = std::get<dpp::snowflake>(event.get_parameter("opponent"));
-		int64_t wager = 500; // default wager
-		int min_wager = db::get_setting_int("duelminwager", 500);
-
-		dpp::command_value wager_param = event.get_parameter("wager");
-		if (!std::holds_alternative<std::monostate>(wager_param)) {
-			wager = std::get<int64_t>(wager_param);
-		}
-
-		// Validation
-		if (opponent_id == challenger_id) {
-			event.reply(dpp::message("You can't duel yourself, lol").set_flags(dpp::m_ephemeral));
-			return;
-		}
-
-		if (wager < min_wager) {
-			event.reply(dpp::message("Minimum wager is " + std::to_string(min_wager) + " aura").set_flags(dpp::m_ephemeral));
-			return;
-		}
-
-		int challenger_aura = db::get_aura(challenger_id);
-		int opponent_aura = db::get_aura(opponent_id);
-
-		// same sign duel only
-		bool challenger_negative = challenger_aura < 0;
-		bool opponent_negative = opponent_aura < 0;
-		if (challenger_negative != opponent_negative) {
-			event.reply(dpp::message("Tricky guy, u can only duel those with same aura sign!").set_flags(dpp::m_ephemeral));
-			return;
-		}
-
-		// Check wager using absolute values
-		if (std::abs(challenger_aura) < wager) {
-			event.reply(dpp::message("You don't have enough aura to wager that much!").set_flags(dpp::m_ephemeral));
-			return;
-		}
-
-		dpp::embed invite_embed = dpp::embed()
-			.set_color(dpp::colors::red)
-			.set_title("<:duelem:1485404560292974713> DUEL CHALLENGE <:duelem:1485404560292974713>")
-			.set_description("<@" + challenger_id.str() + "> challenges <@" + std::to_string(opponent_id) + "> to a duel!")
-			.add_field("Wager", std::to_string(wager) + " AURA", true)
-			.add_field("Challenged's Aura", std::to_string(opponent_aura) + " AURA", true)
-			.add_field("Challenger's Aura", std::to_string(challenger_aura) + " AURA", true)
-			.set_footer(dpp::embed_footer()
-					.set_text("Accept or decline the challenge below")
-					.set_icon("https://cdn-icons-png.flaticon.com/512/595/595533.png"));
-
-		dpp::message duel_msg(event.command.channel_id, invite_embed);
-		duel_msg.add_component(
-				dpp::component()
-				.add_component(
-					dpp::component()
-					.set_type(dpp::cot_button)
-					.set_id("duel_accept_" + challenger_id.str() + "_" + opponent_id.str() + "_" + std::to_string(wager))
-					.set_label("✅ Accept")
-					.set_style(dpp::cos_success)
-					)
-				.add_component(
-					dpp::component()
-					.set_type(dpp::cot_button)
-					.set_id("duel_decline_" + challenger_id.str() + "_" + opponent_id.str())
-					.set_label("🛑 Decline")
-					.set_style(dpp::cos_danger)
-					)
-				);
-
-		event.reply(duel_msg);
 	}
 }
