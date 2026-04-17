@@ -68,7 +68,7 @@ namespace events {
 		int xp = 0;
 
 		double xp_base = 75.0;
-		double xp_mult = 1.15;
+		double xp_mult = 1.10;
 		double xp_cap = 7500.0;
 
 		for (int i = 1; i < lvl; ++i) {
