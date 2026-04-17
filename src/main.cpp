@@ -40,6 +40,10 @@ int main() {
 			if (event.msg.author.is_bot()) return;
 			events::handle_message(event, bot);
 			});
+	
+	bot.on_voice_state_update([&bot](const dpp::voice_state_update_t& event) {
+			events::handle_voice(event, bot);	
+			});
 
 //	bot.on_button_click([&bot](const dpp::button_click_t& event) {
 //		buttons::handle_button_click(event, bot);
