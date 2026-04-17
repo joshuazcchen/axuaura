@@ -48,6 +48,7 @@ namespace db {
 	void xp_lvl_set(dpp::snowflake user_id, int xp, int lvl);
 	long xp_time_get(dpp::snowflake user_id);
 	void xp_time_set(dpp::snowflake user_id, long time);
+	std::vector<std::pair<dpp::snowflake, int>> xp_top(int limit);
 
 	long vc_get(dpp::snowflake user_id);
 	void vc_set(dpp::snowflake user_id, long time);
