@@ -31,9 +31,11 @@ namespace commands {
 			}
 			if (target == bot.me.id) {
 				event.reply(dpp::message("how you gonna duel ME and expect to win?"));
+				return;
 			}
 			if (target == 1492320672838582322) {
 				event.reply(dpp::message("dont be stupid. phil wins. you lose."));
+				return;
 			}
 			int u_aura = db::get_aura(user_id);
 			int t_aura = db::get_aura(target);

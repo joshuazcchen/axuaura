@@ -45,7 +45,7 @@ namespace events {
 			bool is_reliable = false;
 			dpp::channel* ch = dpp::find_channel(event.msg.channel_id);
 			if (!ch) return; // i dont know if we'll ever actually need this check but honestly it was there in the original copy so i dont wanna risk it
-			auto perms = ch->get_user_permissions(&(event.msg.author));
+			auto perm = ch->get_user_permissions(&(event.msg.author));
 			for (const auto& p : config::RELIABLE_PROVIDERS) if (url.find(p) != std::string::npos) is_reliable = true;
 			if (!is_reliable || content.find("<" + url + ">") != std::string::npos) return;
 			for (const auto& attachment: event.msg.attachments) {
@@ -65,36 +65,36 @@ namespace events {
 				dpp::snowflake msg_id = event.msg.id;
 				dpp::snowflake ch_id = event.msg.channel_id;
 				dpp::snowflake user_sf = event.msg.author.id;
-				if (!(perms & dpp::p_embed_links)) {
+				if (!(perm & dpp::p_embed_links)) {
 					bot.channel_typing(event.msg.channel_id);
 					bot.start_timer([&bot, msg_id, 	ch_id, user_sf] (dpp::timer t) {
-						db::rmv_aura(user_sf, db::get_setting_int("auralossamt", 100));
-							
-						bot.channel_typing(ch_id);
-						std::string msg = (ch_id == config::NON_ENG_CH) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
-						dpp::message rep(ch_id, msg);
-						rep.set_reference(msg_id);
-						bot.message_create(rep);
-					bot.stop_timer(t);}, 5);
+							db::rmv_aura(user_sf, db::get_setting_int("auralossamt", 100));
+
+							bot.channel_typing(ch_id);
+							std::string msg = (ch_id == config::NON_ENG_CH) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
+							dpp::message rep(ch_id, msg);
+							rep.set_reference(msg_id);
+							bot.message_create(rep);
+							bot.stop_timer(t);}, 3);
 					return;
 				} else {
 					bot.start_timer([&bot, msg_id, ch_id, url, user_sf](dpp::timer t) {
-						bot.message_get(msg_id, ch_id, [&bot, ch_id, msg_id, url, user_sf](const dpp::confirmation_callback_t& res) {
+							bot.message_get(msg_id, ch_id, [&bot, ch_id, msg_id, url, user_sf](const dpp::confirmation_callback_t& res) {
 
-							if (res.is_error()) return;
-							dpp::message m = std::get<dpp::message>(res.value);
-							if (m.embeds.empty() && m.content.find("<" + url + ">") == std::string::npos) {
-								db::rmv_aura(user_sf, db::get_setting_int("auralossamt", 100));
+									if (res.is_error()) return;
+									dpp::message m = std::get<dpp::message>(res.value);
+									if (m.embeds.empty() && m.content.find("<" + url + ">") == std::string::npos) {
+									db::rmv_aura(user_sf, db::get_setting_int("auralossamt", 100));
 
-								std::string msg = (ch_id == config::NON_ENG_CH) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
-								dpp::message rep(ch_id, msg);
-								rep.set_reference(msg_id);
-								bot.message_create(rep);
-								}
-							});
-					bot.stop_timer(t);}, 2);
+									std::string msg = (ch_id == config::NON_ENG_CH) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
+									dpp::message rep(ch_id, msg);
+									rep.set_reference(msg_id);
+									bot.message_create(rep);
+									}
+									});
+							bot.stop_timer(t);}, 2);
 				}
 			}
-			}
+		}
 	}
 }

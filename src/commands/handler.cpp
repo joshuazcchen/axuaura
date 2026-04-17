@@ -11,7 +11,8 @@ namespace commands {
         {"duel2", handle_duel2},
     	{"settings", handle_settings},
     	{"gamble", handle_gamble},
-        {"bet", handle_bet}
+        {"bet", handle_bet},
+        {"smite", handle_smite},
     };
 
     std::map<std::string, ContextHandler> context_map = {
@@ -34,7 +35,6 @@ namespace commands {
         //buttons::register_handler("duel_decline_", handle_duel_buttons);
 
         if (dpp::run_once<struct register_bot_commands>()) {
-            std::cout<<"tryna register commands?"<<std::endl;
             bot.global_bulk_command_create({
                 echo_def(bot),
                 auraboard_def(bot),
@@ -43,6 +43,7 @@ namespace commands {
 		        settings_def(bot),
 		        gamble_def(bot),
                 bet_def(bot),
+                smite_def(bot),
             });
         }
     }
