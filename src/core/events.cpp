@@ -129,7 +129,7 @@ namespace events {
 							db::xp_lvl_set(uid, 650, 5);
 							}
 						}
-						bot.message_create(dpp::message(event.msg.channel_id, "nah." + std::to_string(count)));
+						bot.message_create(dpp::message(event.msg.channel_id, "nah." + std::to_string(count)).set_allowed_mentions(true, false, false, false, {}, {}));
 						});
 				return;
 			}
