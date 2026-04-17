@@ -22,10 +22,10 @@ namespace commands {
 		dpp::slashcommand mkspl_def(dpp::cluster& bot);
 		void handle_mkspl(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
-		dpp::slashcommand auraduel_def(dpp::cluster& bot);
-		void handle_auraduel(const dpp::slashcommand_t& event, dpp::cluster& bot);
-		void handle_duel_buttons(const dpp::button_click_t& event, dpp::cluster& bot);
-		void process_duel_result(dpp::cluster& bot, dpp::snowflake channel_id, dpp::snowflake challenger_id, dpp::snowflake opponent_id, int wager);
+		dpp::slashcommand duel2_def(dpp::cluster& bot);
+		void handle_duel2(const dpp::slashcommand_t& event, dpp::cluster& bot);
+		//void handle_duel_buttons(const dpp::button_click_t& event, dpp::cluster& bot);
+		//void process_duel_result(dpp::cluster& bot, dpp::snowflake channel_id, dpp::snowflake challenger_id, dpp::snowflake opponent_id, int wager);
 
 		dpp::slashcommand settings_def(dpp::cluster& bot);
 		void handle_settings(const dpp::slashcommand_t& event, dpp::cluster&bot);
@@ -42,7 +42,7 @@ namespace commands {
 		dpp::slashcommand bet_def(dpp::cluster& bot);
 		void handle_bet(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
-		// ctxm
+		// ctxm DEPRECATED UNUSED
 		dpp::slashcommand mkshm_def(dpp::cluster& bot);
 		void handle_mkshm(const dpp::message_context_menu_t& event, dpp::cluster& bot);
 

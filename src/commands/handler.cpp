@@ -8,7 +8,7 @@ namespace commands {
         {"echo", handle_echo},
         {"auraboard", handle_auraboard},
         {"movaura", handle_movaura},
-        {"duel", handle_auraduel},
+        {"duel2", handle_duel2},
     	{"settings", handle_settings},
     	{"gamble", handle_gamble},
         {"bet", handle_bet}
@@ -30,15 +30,16 @@ namespace commands {
     }
 
     void register_all(dpp::cluster& bot) {
-        buttons::register_handler("duel_accept_", handle_duel_buttons);
-        buttons::register_handler("duel_decline_", handle_duel_buttons);
+        //buttons::register_handler("duel_accept_", handle_duel_buttons);
+        //buttons::register_handler("duel_decline_", handle_duel_buttons);
 
         if (dpp::run_once<struct register_bot_commands>()) {
+            std::cout<<"tryna register commands?"<<std::endl;
             bot.global_bulk_command_create({
                 echo_def(bot),
                 auraboard_def(bot),
                 movaura_def(bot),
-                auraduel_def(bot),
+                duel2_def(bot),
 		        settings_def(bot),
 		        gamble_def(bot),
                 bet_def(bot),

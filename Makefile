@@ -4,7 +4,6 @@ test:
 	@mkdir -p build_test
 	@cmake -S . -B build_test -DBOT_NAME=axuaxi_test
 	@cmake --build build_test
-	@strip build_test/axuaxibot
 	@echo "BUILT TEST"
 
 prod:

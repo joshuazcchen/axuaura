@@ -17,12 +17,15 @@ int main() {
 	db::init();
 
 	dpp::cluster bot(token, dpp::i_default_intents | dpp::i_message_content | dpp::i_guild_members);
+	bot.on_log(dpp::utility::cout_logger());
 	bot.on_ready([&bot](const dpp::ready_t &event) {
 			bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, "ponderin"));	
+			std::cout<<"MADE HERE"<<std::endl;
 			commands::register_all(bot);
-			bot.start_timer([&bot](dpp::timer t) {
-				roles::role_sync(bot);
-			}, 600);
+			std::cout<<"FINISHED REG"<<std::endl;
+			//bot.start_timer([&bot](dpp::timer t) {
+			//	roles::role_sync(bot);
+			//}, 600);
 	});
 
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
@@ -38,9 +41,9 @@ int main() {
 			events::handle_message(event, bot);
 			});
 
-	bot.on_button_click([&bot](const dpp::button_click_t& event) {
-		buttons::handle_button_click(event, bot);
-	});
+//	bot.on_button_click([&bot](const dpp::button_click_t& event) {
+//		buttons::handle_button_click(event, bot);
+//	});
 
 	bot.start(dpp::st_wait);
 	return 0;

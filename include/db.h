@@ -35,4 +35,10 @@ namespace db {
 	long p_get_op_pot(int p_id, std::string op);
 	std::vector<std::pair<std::string, int>> p_get_op_users(int p_id, std::string op);
 	void p_end_poll(int p_id);
+
+	void d_issue(dpp::snowflake challenger, dpp::snowflake target, int bet);
+	int d_check(dpp::snowflake challenger, dpp::snowflake target);
+	void d_delete(dpp::snowflake challenger);
+	bool d_outgoing(dpp::snowflake challenger);
+	long d_time(dpp::snowflake challenger);
 }

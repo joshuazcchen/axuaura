@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <ctime>
 
 namespace db {
 	sqlite3* db_ptr = nullptr;
@@ -45,17 +46,19 @@ namespace db {
 			"FOREIGN KEY(p_id) REFERENCES polls(p_id)"
 			");";
 
-		//const char* duels_sql =
-		//	"CREATE TABLE IF NOT EXISTS duels ("
-		//	"challenger TEXT PRIMARY KEY, "
-		//	"target TEXT"
-		//	");";
+		const char* duels_sql =
+			"CREATE TABLE IF NOT EXISTS duels ("
+			"challenger TEXT PRIMARY KEY, "
+			"target TEXT, "
+			"bet INTEGER, "
+			"issue_time INTEGER"
+			");";
 
 		sqlite3_exec(db_ptr, sql, nullptr, nullptr, nullptr);
 		sqlite3_exec(db_ptr, setting_sql, nullptr, nullptr, nullptr);
 		sqlite3_exec(db_ptr, poll_sql, nullptr, nullptr, nullptr);
 		sqlite3_exec(db_ptr, bets_sql, nullptr, nullptr, nullptr);
-		//sqlite3_exec(db_ptr, duels_sql, nullptr, nullptr, nullptr);
+		sqlite3_exec(db_ptr, duels_sql, nullptr, nullptr, nullptr);
 	}
 
 	int get_aura(dpp::snowflake user_id) {
@@ -339,6 +342,94 @@ namespace db {
 		return winners;
 	}
 
+	void d_issue(dpp::snowflake challenger, dpp::snowflake target, int bet) {
+		std::string c_str = std::to_string(challenger);
+		std::string t_str = std::to_string(target);
+		long issue_time = std::time(nullptr);
+		const char* sql = "INSERT INTO duels (challenger, target, bet, issue_time) VALUES (?, ?, ?, ?) "
+							"ON CONFLICT(challenger) DO UPDATE SET target = ?, bet = ?, issue_time = ?;";
+		sqlite3_stmt* stmt;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(stmt, 1, c_str.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(stmt, 2, t_str.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(stmt, 3, bet);
+            sqlite3_bind_int64(stmt, 4, issue_time);
+            sqlite3_bind_text(stmt, 5, t_str.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(stmt, 6, bet);
+            sqlite3_bind_int64(stmt, 7, issue_time);
+            sqlite3_step(stmt);
+		}
+		sqlite3_finalize(stmt);
+	}
+
+	int d_check(dpp::snowflake challenger, dpp::snowflake target) {
+		std::string c_str = std::to_string(challenger);
+		std::string t_str = std::to_string(target);
+		const char* sql = "SELECT bet, issue_time FROM duels WHERE challenger = ? AND target = ?;";
+		sqlite3_stmt* stmt;
+		int bet = -1;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(stmt, 1, c_str.c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, t_str.c_str(), -1, SQLITE_TRANSIENT);
+			if (sqlite3_step(stmt) == SQLITE_ROW) {
+				bet = sqlite3_column_int(stmt, 0);
+				long issue_time = sqlite3_column_int64(stmt, 1);
+				if (std::time(nullptr) - issue_time >= 120) {
+					bet = -1;
+				}
+			}
+		}
+		sqlite3_finalize(stmt);
+		if (bet == -1) {
+			d_delete(challenger);
+		}
+		return bet;
+	}
+
+	long d_time(dpp::snowflake challenger) {
+		std::string c_str = std::to_string(challenger);
+		const char* sql = "SELECT issue_time FROM duels WHERE challenger = ?;";
+		sqlite3_stmt* stmt;
+		long time = -1;
+
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(stmt, 1, c_str.c_str(), -1, SQLITE_TRANSIENT);
+			if (sqlite3_step(stmt) == SQLITE_ROW) {
+				time = sqlite3_column_int64(stmt, 0);
+			}
+		}
+		sqlite3_finalize(stmt);
+		return time;
+	}
+
+	void d_delete(dpp::snowflake challenger) {
+		std::string c_str = std::to_string(challenger);
+		const char* sql = "DELETE FROM duels WHERE challenger = ?;";
+		sqlite3_stmt* stmt;
+
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(stmt, 1, c_str.c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_step(stmt);
+		}
+		sqlite3_finalize(stmt);
+	}
+
+	bool d_outgoing(dpp::snowflake challenger) {
+		std::string c_str = std::to_string(challenger);
+		const char* sql = "SELECT 1 FROM duels WHERE challenger = ?;";
+		sqlite3_stmt* stmt;
+		bool yes = false;
+
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(stmt, 1, c_str.c_str(), -1, SQLITE_TRANSIENT);
+			if (sqlite3_step(stmt) == SQLITE_ROW) {
+				yes = true;
+			}
+		}
+		sqlite3_finalize(stmt);
+		return yes;
+	}
+
 //	bool check_duel(const std::string&key, std::string challenger, std::string target) {
 //		const char* sql = "SELECT EXISTS (SELECT 1 FROM duels WHERE target = " + target + ") "
 //	}
@@ -348,7 +439,7 @@ namespace db {
 //				  "ON CONFLICT(challenger) DO NOTHING;";
 //		sqlite3_stmt* stmt*;
 //
-//		if (sqlite3_prepare_v2(db_ptr, sql, -1, *stmt, nullptr) == SQLITE_OK) {
+//		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
 //			
 //		}
 //	}
