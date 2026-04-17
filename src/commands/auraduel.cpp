@@ -4,9 +4,9 @@
 
 namespace commands {
 
-	dpp::slashcommand duel2_def(dpp::cluster& bot) {
+	dpp::slashcommand duel_def(dpp::cluster& bot) {
 		std::cout<<"COMMAND RETURNED"<<std::endl;
-		return dpp::slashcommand("duel2", "duel2", bot.me.id)
+		return dpp::slashcommand("duel", "duel", bot.me.id)
 			.add_option(dpp::command_option(dpp::co_sub_command, "challenge", "threaten someone")
 					.add_option(dpp::command_option(dpp::co_user, "target", "whomst", true))
 					.add_option(dpp::command_option(dpp::co_integer, "bet", "ante", true)))
@@ -17,7 +17,7 @@ namespace commands {
 			.add_option(dpp::command_option(dpp::co_sub_command, "cancel", "retract your duel (what a loser)"));
 	}
 
-	void handle_duel2(const dpp::slashcommand_t& event, dpp::cluster& bot) {
+	void handle_duel(const dpp::slashcommand_t& event, dpp::cluster& bot) {
 		auto sgn = [](int x) { return x >= 0 ? 1 : -1; };
 		auto cmd = event.command.get_command_interaction().options[0];
 		dpp::snowflake user_id = event.command.get_issuing_user().id;
@@ -64,7 +64,7 @@ namespace commands {
 				return;
 			}
 			db::d_issue(user_id, target, bet);
-			event.reply("<@" + std::to_string(target) + ">, hey, <@" + std::to_string(user_id) + "> thinks they're better than you. wanna try to prove them wrong? they're betting **" + std::to_string(bet) + "**.\n\naccept using /duel accept\n-# note that accepting a duel cancels your outgoing duels.");
+			event.reply(dpp::message("<@" + std::to_string(target) + ">, hey, <@" + std::to_string(user_id) + "> thinks they're better than you. wanna try to prove them wrong? they're betting **" + std::to_string(bet) + "**.\n\naccept using /duel accept\n-# note that accepting a duel cancels your outgoing duels.").set_allowed_mentions(true, false, false, false, {}, {}));
 
 			dpp::snowflake ch_id = event.command.channel_id;
 			new dpp::oneshot_timer(&bot, 120, [&bot, user_id, target, ch_id](dpp::timer t) {

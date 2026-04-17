@@ -8,11 +8,14 @@ namespace commands {
         {"echo", handle_echo},
         {"auraboard", handle_auraboard},
         {"movaura", handle_movaura},
-        {"duel2", handle_duel2},
+        {"duel", handle_duel},
     	{"settings", handle_settings},
     	{"gamble", handle_gamble},
         {"bet", handle_bet},
         {"smite", handle_smite},
+        {"level", handle_level},
+        {"fixlevel", handle_fixlevel},
+        {"leaderboard", handle_leaderboard},
     };
 
     std::map<std::string, ContextHandler> context_map = {
@@ -39,11 +42,14 @@ namespace commands {
                 echo_def(bot),
                 auraboard_def(bot),
                 movaura_def(bot),
-                duel2_def(bot),
+                duel_def(bot),
 		        settings_def(bot),
 		        gamble_def(bot),
                 bet_def(bot),
                 smite_def(bot),
+                leaderboard_def(bot),
+                fixlevel_def(bot),
+                level_def(bot),
             });
         }
     }
