@@ -8,51 +8,51 @@
 #include <ctime>
 
 namespace events {
-	void msg_scan(dpp::cluster& bot, dpp::snowflake target_channel, dpp::snowflake before_id, long cutoff_date, std::shared_ptr<std::map<dpp::snowflake, int>> missed_counts, int scanned_so_far, dpp::snowflake report_channel) {
-
-		bot.messages_get(target_channel, 0, before_id, 0, 100, [&bot, target_channel, cutoff_date, missed_counts, scanned_so_far, report_channel](const dpp::confirmation_callback_t& callback) {
-
-				if (callback.is_error()) {
-					int comped = 0;
-					for (auto& [uid, msg_count] : *missed_counts) {
-						db::xp_add(uid, msg_count * 20);
-						db::xp_migrate_set(uid, true);
-						comped++;
-					}
-					bot.message_create(dpp::message(report_channel, "rate limited at " + std::to_string(scanned_so_far) + " messages. partial done " + std::to_string(comped)));
-					return;
-				}
-
-				auto messages = std::get<dpp::message_map>(callback.value);
-
-				dpp::snowflake oldest_id = (uint64_t)-1;
-				bool hit_cutoff = false;
-
-				for (auto& [msg_id, msg] : messages) {
-					if (msg.id < oldest_id) oldest_id = msg.id;
-
-					if (msg.sent < cutoff_date) {
-						hit_cutoff = true;
-					} else if (!msg.author.is_bot() && !db::xp_migrate_get(msg.author.id)) {
-						(*missed_counts)[msg.author.id]++;
-					}
-				}
-
-				int current_total = scanned_so_far + messages.size();
-
-				if (!hit_cutoff && messages.size() >= 99) { 
-					msg_scan(bot, target_channel, oldest_id, cutoff_date, missed_counts, current_total, report_channel);
-				} else {
-					int comped = 0;
-					for (auto& [uid, msg_count] : *missed_counts) {
-						db::xp_add(uid, msg_count * 20); 
-						db::xp_migrate_set(uid, true);
-						comped++;
-					}
-					bot.message_create(dpp::message(report_channel, "done " + std::to_string(current_total) + "** done. done**" + std::to_string(comped) + "** done."));
-				}
-		});
-	}
+//	void msg_scan(dpp::cluster& bot, dpp::snowflake target_channel, dpp::snowflake before_id, long cutoff_date, std::shared_ptr<std::map<dpp::snowflake, int>> missed_counts, int scanned_so_far, dpp::snowflake report_channel) {
+//
+//		bot.messages_get(target_channel, 0, before_id, 0, 100, [&bot, target_channel, cutoff_date, missed_counts, scanned_so_far, report_channel](const dpp::confirmation_callback_t& callback) {
+//
+//				if (callback.is_error()) {
+//					int comped = 0;
+//					for (auto& [uid, msg_count] : *missed_counts) {
+//						db::xp_add(uid, msg_count * 20);
+//						db::xp_migrate_set(uid, true);
+//						comped++;
+//					}
+//					bot.message_create(dpp::message(report_channel, "rate limited at " + std::to_string(scanned_so_far) + " messages. partial done " + std::to_string(comped)));
+//					return;
+//				}
+//
+//				auto messages = std::get<dpp::message_map>(callback.value);
+//
+//				dpp::snowflake oldest_id = (uint64_t)-1;
+//				bool hit_cutoff = false;
+//
+//				for (auto& [msg_id, msg] : messages) {
+//					if (msg.id < oldest_id) oldest_id = msg.id;
+//
+//					if (msg.sent < cutoff_date) {
+//						hit_cutoff = true;
+//					} else if (!msg.author.is_bot() && !db::xp_migrate_get(msg.author.id)) {
+//						(*missed_counts)[msg.author.id]++;
+//					}
+//				}
+//
+//				int current_total = scanned_so_far + messages.size();
+//
+//				if (!hit_cutoff && messages.size() >= 99) { 
+//					msg_scan(bot, target_channel, oldest_id, cutoff_date, missed_counts, current_total, report_channel);
+//				} else {
+//					int comped = 0;
+//					for (auto& [uid, msg_count] : *missed_counts) {
+//						db::xp_add(uid, msg_count * 20); 
+//						db::xp_migrate_set(uid, true);
+//						comped++;
+//					}
+//					bot.message_create(dpp::message(report_channel, "done " + std::to_string(current_total) + "** done. done**" + std::to_string(comped) + "** done."));
+//				}
+//		});
+//	}
 
 
 	std::string resp_msg(const std::vector<std::string>& pool) {
@@ -83,69 +83,69 @@ namespace events {
 	void handle_message(const dpp::message_create_t& event, dpp::cluster& bot) {
 		if (event.msg.author.is_bot()) return;
 
-		// IM NOT USING A FULL PROPER THING FOR THIS SINCE ITS RUN ONCE TO JUST MIGRATE.
-		if (event.msg.author.id == 175422893449150464ULL) {
-			// lowkey aura farm when all this is just a random message check but YK WHAT I GET TO MIGRATE MESSAGES AND LOOK COOL WHILE DOING IT LOL
-			if (event.msg.content == "SQLEVAL<<.read+FUCKYOU+json") {
-				std::ifstream file("oldxp.json");
-				if (!file.is_open()) {
-					std::cout<<"nope";
-					return;
-				}
-				// im pretty sure dpp includes nlohmann tbh i dont know if i ever needed to use nlohmann LMFAO
-				dpp::json j;
-				file >> j;
-				int count = 0;
-				for (auto& user : j["levels"]) {
-					dpp::snowflake uid = std::stoull(user["userId"].get<std::string>());
-					int xp = user["xp"].get<int>();
-					int lvl = user["level"].get<int>();
-					db::xp_lvl_set(uid, xp, lvl);
-					count++;
-				}
-				// if this isnt 100 im gonna lose it.
-				bot.message_create(dpp::message(event.msg.channel_id, "nah." + std::to_string(count)));
-				return;
-			}
-
-			if (event.msg.content == "SQLEVAL<<.read+FUCKYOU+roles") {
-				dpp::snowflake guild = 1469591363770122274ULL;
-				dpp::snowflake lv5role_thing_idk_this_is_temporary = 1482905611535519877ULL;
-
-				bot.guild_get_members(guild, 1000, 0, [&bot, event, lv5role_thing_idk_this_is_temporary](const dpp::confirmation_callback_t& callback) {
-						if (callback.is_error()) return;
-						auto members = std::get<dpp::guild_member_map>(callback.value);
-						int count = 0;
-						for (auto& [uid, member] : members) {
-							if (db::xp_get(uid) > 0) continue;
-							int lv5 = 0;
-							for (auto& role_id : member.get_roles()) {
-								if (role_id == lv5role_thing_idk_this_is_temporary) {
-									lv5 = 1;
-								}
-							}
-						if (lv5 == 1) {
-							count++;
-							db::xp_lvl_set(uid, 650, 5);
-							}
-						}
-						bot.message_create(dpp::message(event.msg.channel_id, "nah." + std::to_string(count)).set_allowed_mentions(true, false, false, false, {}, {}));
-						});
-				return;
-			}
-
-			if (event.msg.content == "SQLEVAL<<.read+FUCKYOU+msgs") {
-				bot.message_create(dpp::message(event.msg.channel_id, "start"));
-				dpp::snowflake target_channel = event.msg.channel_id;
-				long cutoff_date = 1776225600;
-				auto missed_counts = std::make_shared<std::map<dpp::snowflake, int>>();
-
-                msg_scan(bot, target_channel, 0, cutoff_date, missed_counts, 0, event.msg.channel_id);
-                return;
-			}
-		}
-
-
+//		// IM NOT USING A FULL PROPER THING FOR THIS SINCE ITS RUN ONCE TO JUST MIGRATE.
+//		if (event.msg.author.id == 175422893449150464ULL) {
+//			// lowkey aura farm when all this is just a random message check but YK WHAT I GET TO MIGRATE MESSAGES AND LOOK COOL WHILE DOING IT LOL
+//			if (event.msg.content == "SQLEVAL<<.read+FUCKYOU+json") {
+//				std::ifstream file("oldxp.json");
+//				if (!file.is_open()) {
+//					std::cout<<"nope";
+//					return;
+//				}
+//				// im pretty sure dpp includes nlohmann tbh i dont know if i ever needed to use nlohmann LMFAO
+//				dpp::json j;
+//				file >> j;
+//				int count = 0;
+//				for (auto& user : j["levels"]) {
+//					dpp::snowflake uid = std::stoull(user["userId"].get<std::string>());
+//					int xp = user["xp"].get<int>();
+//					int lvl = user["level"].get<int>();
+//					db::xp_lvl_set(uid, xp, lvl);
+//					count++;
+//				}
+//				// if this isnt 100 im gonna lose it.
+//				bot.message_create(dpp::message(event.msg.channel_id, "nah." + std::to_string(count)));
+//				return;
+//			}
+//
+//			if (event.msg.content == "SQLEVAL<<.read+FUCKYOU+roles") {
+//				dpp::snowflake guild = 1469591363770122274ULL;
+//				dpp::snowflake lv5role_thing_idk_this_is_temporary = 1482905611535519877ULL;
+//
+//				bot.guild_get_members(guild, 1000, 0, [&bot, event, lv5role_thing_idk_this_is_temporary](const dpp::confirmation_callback_t& callback) {
+//						if (callback.is_error()) return;
+//						auto members = std::get<dpp::guild_member_map>(callback.value);
+//						int count = 0;
+//						for (auto& [uid, member] : members) {
+//							if (db::xp_get(uid) > 0) continue;
+//							int lv5 = 0;
+//							for (auto& role_id : member.get_roles()) {
+//								if (role_id == lv5role_thing_idk_this_is_temporary) {
+//									lv5 = 1;
+//								}
+//							}
+//						if (lv5 == 1) {
+//							count++;
+//							db::xp_lvl_set(uid, 650, 5);
+//							}
+//						}
+//						bot.message_create(dpp::message(event.msg.channel_id, "nah." + std::to_string(count)).set_allowed_mentions(true, false, false, false, {}, {}));
+//						});
+//				return;
+//			}
+//
+//			if (event.msg.content == "SQLEVAL<<.read+FUCKYOU+msgs") {
+//				bot.message_create(dpp::message(event.msg.channel_id, "start"));
+//				dpp::snowflake target_channel = event.msg.channel_id;
+//				long cutoff_date = 1776225600;
+//				auto missed_counts = std::make_shared<std::map<dpp::snowflake, int>>();
+//
+//                msg_scan(bot, target_channel, 0, cutoff_date, missed_counts, 0, event.msg.channel_id);
+//                return;
+//			}
+//		}
+//
+//
 		// EVERTYTHING ABOVE THIS IS TEMPORARY
 
 
@@ -252,7 +252,7 @@ namespace events {
 									bot.message_create(rep);
 									}
 									});
-							bot.stop_timer(t);}, 2);
+							bot.stop_timer(t);}, 5);
 				}
 			}
 		}

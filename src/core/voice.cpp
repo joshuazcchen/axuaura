@@ -20,7 +20,7 @@ namespace events {
 			long time_old = db::vc_get(user_id);
 			if (time_old > 0) {
 				long time_del = std::time(nullptr) - time_old;
-				int time_m = time_del / 60;
+				int time_m = time_del / 600;
 				if (time_m > 0) {
 					static std::random_device rd;
 					static std::mt19937 gen(rd());

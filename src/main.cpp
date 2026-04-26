@@ -20,12 +20,10 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 	bot.on_ready([&bot](const dpp::ready_t &event) {
 			bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, "ponderin"));	
-			std::cout<<"MADE HERE"<<std::endl;
 			commands::register_all(bot);
-			std::cout<<"FINISHED REG"<<std::endl;
-			//bot.start_timer([&bot](dpp::timer t) {
-			//	roles::role_sync(bot);
-			//}, 600);
+			bot.start_timer([&bot](dpp::timer t) {
+				roles::role_sync(bot);
+			}, 600);
 	});
 
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
