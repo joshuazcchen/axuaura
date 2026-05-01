@@ -37,11 +37,11 @@ namespace commands {
 								return;
 						}
 
-						int aura = db::get_aura(event.command.get_issuing_user().id);
+						int aura = db::get_aura(event.command.guild_id, event.command.get_issuing_user().id);
 						if (aura < amt) {
 								event.reply(dpp::message("too broke for this").set_flags(dpp::m_ephemeral));
 						}
-						db::rmv_aura(event.command.get_issuing_user().id, amt);
+						db::rmv_aura(event.command.guild_id, event.command.get_issuing_user().id, amt);
 						db::p_place_bet(p_id, event.command.get_issuing_user().id, side, amt);
 						event.reply(dpp::message("placed bet of " + std::to_string(amt) + " on " + side).set_flags(dpp::m_ephemeral));
 				} else if (scmd == "list") {
@@ -55,7 +55,7 @@ namespace commands {
 								db::Poll p = db::p_get_poll((int)p_id);
 								if (p.p_id != -1) polls.push_back(p);
 						} else {
-								polls = db::p_get_polls();
+								polls = db::p_get_polls(event.command.guild_id);
 						}
 
 						if (polls.empty()) {
@@ -86,7 +86,7 @@ namespace commands {
 						}
 						std::string title = std::get<std::string>(event.get_parameter("title"));
 						std::string ops = std::get<std::string>(event.get_parameter("options"));
-						int p_id = db::p_set_poll(title, ops);
+						int p_id = db::p_set_poll(event.command.guild_id, title, ops);
 
 						event.reply(dpp::message("poll: " + title + "\nid: " + std::to_string(p_id) + "\noptions: " + ops + "\nplace bets using /bet place"));
 				} else if (scmd == "end") {
@@ -114,7 +114,7 @@ namespace commands {
 								count++;
 								double share = (double)amt / win_pot;
 								int payout = (int)(share * pot);
-								db::add_aura(dpp::snowflake(u_id), payout);
+								db::add_aura(event.command.guild_id, dpp::snowflake(u_id), payout);
 						}
 						db::p_end_poll(p_id);
 						event.reply(win + " won, total of " + std::to_string(pot) + " paid out to " + std::to_string(count) + " winners");

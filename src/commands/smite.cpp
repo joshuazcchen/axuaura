@@ -51,25 +51,25 @@ namespace commands {
 			return;
 		}
 
-		int u_aura = db::get_aura(user_id);
+		int u_aura = db::get_aura(event.command.guild_id, user_id);
 		std::cout<<std::to_string(u_aura)<<std::endl;
 		if (std::abs(u_aura) >= std::abs(sacrifice) && sgn(u_aura) == sgn(sacrifice)) {
 			event.reply(dpp::message("I see... we have a deal."));
-			db::rmv_aura(user_id, sacrifice);
+			db::rmv_aura(event.command.guild_id, user_id, sacrifice);
 		} else {
 			event.reply(dpp::message("show me the money first, then we can talk."));
 			return;
 		}
 
 		new dpp::oneshot_timer(&bot, 3, [event, target, sacrifice, sgn](dpp::timer t) {
-			int t_aura = db::get_aura(target);
+			int t_aura = db::get_aura(event.command.guild_id, target);
 			int smite = std::abs((int)(sacrifice/10));
 			if (smite >= std::abs(t_aura)) {
-				db::set_aura(target, 0);
+				db::set_aura(event.command.guild_id, target, 0);
 				event.edit_original_response(dpp::message("it is done. <@" + std::to_string(target) + "> (" + std::to_string(t_aura) + " -> 0)"));
 				return;
 			} else {
-				db::rmv_aura(target, sgn(t_aura) * smite);
+				db::rmv_aura(event.command.guild_id, target, sgn(t_aura) * smite);
 				event.edit_original_response(dpp::message("it is done. <@" + std::to_string(target) + "> (" + std::to_string(t_aura) + " -> " + std::to_string(t_aura - (sgn(t_aura)*smite)) + ")"));
 				return;
 			}
