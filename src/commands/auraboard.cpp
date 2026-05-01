@@ -19,18 +19,18 @@ namespace commands {
         dpp::snowflake user_id = event.command.get_issuing_user().id;
 
         if (sort_mode == "me") {
-            int aura = db::get_aura(user_id);
+            int aura = db::get_aura(event.command.guild_id, user_id);
             event.reply(dpp::message("You have: " + std::to_string(aura) + " aura").set_flags(dpp::m_ephemeral));
             return;
         }
 
-        auto ab_list = db::get_ab(10, sort_mode == "bottom"); 
+        auto ab_list = db::get_ab(event.command.guild_id, 10, sort_mode == "bottom"); 
 
         dpp::embed embed = dpp::embed()
             .set_color(dpp::colors::white)
             .set_title(sort_mode == "bottom" ? "AURALESS" : "AURAFUL");
 
-        embed.add_field("total aura:", std::to_string(db::get_total_aura()), true);
+        embed.add_field("total aura:", std::to_string(db::get_total_aura(event.command.guild_id)), true);
 
         std::string txt = "";
         for (const auto& row : ab_list) {

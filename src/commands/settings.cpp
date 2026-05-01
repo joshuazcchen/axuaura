@@ -26,12 +26,12 @@ namespace commands {
 		std::string new_val = std::get<std::string>(event.get_parameter("value"));
 
 		if (target_setting == "status") {
-			db::set_setting("status", new_val);
+			db::set_setting(event.command.guild_id, "status", new_val);
 			bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, new_val));
 		} else {
 			try {
 				int rate = std::stoi(new_val);
-				db::set_setting(target_setting, rate);
+				db::set_setting(event.command.guild_id, target_setting, rate);
 			} catch (...) {
 				event.reply(dpp::message("kys").set_flags(dpp::m_ephemeral));
 				return;

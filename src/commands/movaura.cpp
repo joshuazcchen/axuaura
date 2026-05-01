@@ -24,13 +24,13 @@ namespace commands {
         std::string response;
 
         if (mode == "rmv") {
-            db::rmv_aura(target_id, amt);
+            db::rmv_aura(event.command.guild_id, target_id, amt);
             response = "holy aura loss, " + std::to_string(amt) + " from <@" + target_id.str() + ">.";
         } else if (mode == "add") {
-            db::add_aura(target_id, amt);
+            db::add_aura(event.command.guild_id, target_id, amt);
             response = "holy aura gain, " + std::to_string(amt) + " to <@" + target_id.str() + ">.";
         } else if (mode == "set") {
-            db::set_aura(target_id, (int)amt); 
+            db::set_aura(event.command.guild_id, target_id, (int)amt); 
             response = "holy aura, " + std::to_string(amt) + " >> <@" + target_id.str() + ">.";
         }
 
