@@ -24,21 +24,33 @@ namespace commands {
 
 		xp::UserXP stats = xp::xp_getxp(event.command.guild_id, u_id);
 		std::string av_url = u_ser.get_avatar_url(256, dpp::i_png, false);
+		int cexp = xp::xp_req(stats.level);
+		int nexp = xp::xp_req(stats.level + 1);
 
-		bot.request(av_url, dpp::m_get, [event, stats, u_id, u_ser](const dpp::http_request_completion_t& result) {
+		int xp_this = stats.xp - cexp;
+		int xp_next  = nexp - cexp;
+		float p_pct = (xp_next > 0) ? (float) xp_this / xp_next : 0.0f;
+
+		bot.request(av_url, dpp::m_get, [event, stats, u_id, u_ser, p_pct, xp_this, xp_next](const dpp::http_request_completion_t& result) {
 				if (result.status != 200) {
 					event.edit_original_response(dpp::message("Something went wrong"));
 					return;
 				}
 
+				std::string bg = db::get_setting_str(event.command.guild_id, "bg_override_" + std::to_string(u_id), "");
+				std::string artist = db::get_setting_str(event.command.guild_id, "bg_artist_" + std::to_string(u_id), "");
+				bool invert = db::get_setting_bool(event.command.guild_id, "bg_invert_" + std::to_string(u_id), 1);
 				std::string card = image::img_gen_card(
 						result.body,
 						u_ser.username,
 						stats.level,
-						stats.xp,
-						stats.xp_next,
-						stats.progress
-						);
+						xp_this,
+						xp_next,
+						p_pct,
+						bg,
+						artist,
+						invert
+					);
 
 				if (card.empty()) {
 					event.edit_original_response(dpp::message("something went wrong generating preview"));
