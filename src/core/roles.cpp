@@ -7,8 +7,10 @@ namespace roles {
     void role_sync(dpp::cluster &bot) {
         dpp::snowflake g_id = 1469591363770122274;
 
-        auto top3 = db::get_ab(3, false);
-        auto bot3 = db::get_ab(3, true);
+        // TODO: migrate this accordingly
+        // right now its just using my old hard coded id.
+        auto top3 = db::get_ab(g_id, 3, false);
+        auto bot3 = db::get_ab(g_id, 3, true);
 
         std::map<dpp::snowflake, dpp::snowflake> targets;
 

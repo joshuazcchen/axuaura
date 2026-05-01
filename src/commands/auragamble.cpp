@@ -19,7 +19,7 @@ namespace commands {
 		auto cmd = event.command.get_command_interaction().options[0];
 		dpp::snowflake user_id = event.command.get_issuing_user().id;
 		int64_t bet = std::get<int64_t>(event.get_parameter("bet"));
-		int aura = db::get_aura(user_id);
+		int aura = db::get_aura(event.command.guild_id, user_id);
 		if (aura >= 0) {
 			if (bet <= 0) {
 				event.reply(dpp::message("gambling debt?").set_flags(dpp::m_ephemeral));
@@ -39,7 +39,7 @@ namespace commands {
 				return;
 			}
 		}
-		db::rmv_aura(user_id, bet);
+		db::rmv_aura(event.command.guild_id, user_id, bet);
 		if (cmd.name == "slots") {
 			event.reply("<a:slotspin:1485406147430055957> <a:slotspin:1485406147430055957> <a:slotspin:1485406147430055957>");
 			new dpp::oneshot_timer(&bot, 3, [event, bet, user_id, aura](dpp::timer t) {
@@ -100,7 +100,7 @@ namespace commands {
 
 				if (mult > 0) {
 					int del = bet * mult;
-					db::add_aura(user_id, del);
+					db::add_aura(event.command.guild_id, user_id, del);
 					long net = (long) del - bet;
 					rslt = rslt + "\naura went to " + std::to_string((aura - bet) + del);
 				} else { // this is pretty useless of a check but im too lazy to do it properly since i just modified the old aura gambling odds basically lol
@@ -123,7 +123,7 @@ namespace commands {
 
 			if (win) {
 				int rslt = (int)(bet * 1.5);
-				db::add_aura(user_id, rslt);
+				db::add_aura(event.command.guild_id, user_id, rslt);
 				event.reply(dpp::message(op[0] + "\n" + op[1] + " \nyour win! aura went to: " + std::to_string(aura + (int)(bet * 0.5))));
 			} else {
 				event.reply(dpp::message(opp[0] + "\n" + opp[1]  + " \nyour lose! aura went to: " + std::to_string(aura - (int)(bet))));

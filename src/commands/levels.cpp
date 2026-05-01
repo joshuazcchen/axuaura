@@ -16,8 +16,8 @@ namespace commands {
 		if (std::holds_alternative<dpp::snowflake>(param)) {
 			u_id = std::get<dpp::snowflake>(param);
 		}
-		int xp = db::xp_get(u_id);
-		int lvl = db::lvl_get(u_id);
+		int xp = db::xp_get(event.command.guild_id, u_id);
+		int lvl = db::lvl_get(event.command.guild_id, u_id);
 		int nexp = events::xp_req(lvl+1);
 		int cexp = events::xp_req(lvl);
 
