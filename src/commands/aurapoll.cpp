@@ -86,7 +86,7 @@ namespace commands {
 						}
 						std::string title = std::get<std::string>(event.get_parameter("title"));
 						std::string ops = std::get<std::string>(event.get_parameter("options"));
-						int p_id = db::p_set_poll(title, ops);
+						int p_id = db::p_set_poll(event.command.guild_id, title, ops);
 
 						event.reply(dpp::message("poll: " + title + "\nid: " + std::to_string(p_id) + "\noptions: " + ops + "\nplace bets using /bet place"));
 				} else if (scmd == "end") {

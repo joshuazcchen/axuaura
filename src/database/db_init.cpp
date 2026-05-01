@@ -122,7 +122,7 @@ namespace db {
 
         sqlite3_exec(db_ptr, v1_schema, nullptr, nullptr, nullptr);
 
-        if (current_version < 1) {
+        if (cur_version < 1) {
             const char* fallback_guild = std::getenv("GUILD_ID");
             if (!fallback_guild) {
                 std::cerr << "migration failed, need guild id" << std::endl;
