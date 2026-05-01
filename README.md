@@ -1,0 +1,8 @@
+# THE AXUAURA BOT
+---
+
+IT'S REAL, IT'S HERE, AND ITS SHAMING YOU FOR FAILING GIFS.
+
+Roadmap:
+Aura Bazaar
+Web Panel
