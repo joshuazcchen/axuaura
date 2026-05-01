@@ -1,5 +1,7 @@
 #include "commands.h"
 #include "db.h"
+#include "xp.h"
+#include "image.h"
 #include <algorithm>
 #include "events.h"
 
@@ -11,29 +13,41 @@ namespace commands {
 	}
 
 	void handle_level(const dpp::slashcommand_t& event, dpp::cluster& bot) {
+		event.thinking();
 		dpp::snowflake u_id = event.command.get_issuing_user().id;
 		auto param = event.get_parameter("who");
 		if (std::holds_alternative<dpp::snowflake>(param)) {
 			u_id = std::get<dpp::snowflake>(param);
 		}
-		int xp = db::xp_get(event.command.guild_id, u_id);
-		int lvl = db::lvl_get(event.command.guild_id, u_id);
-		int nexp = events::xp_req(lvl+1);
-		int cexp = events::xp_req(lvl);
 
-		int xpx = xp - cexp;
-		int xpy = nexp - cexp;
-		double xpd = (xpy > 0) ? (double)xpx / xpy : 0.0;
+		dpp::user u_ser = *dpp::find_user(u_id);
 
-		int xp_bar = 16;
-		int xp_bar_fl = std::max(0, std::min(xp_bar, (int)(xpd * xp_bar)));
-		int xp_bar_em = xp_bar - xp_bar_fl;
-		std::string bar = ">>";
-		for (int i = 0; i < xp_bar_fl; i++) bar += "<:emoji_5:1488244256765120665>";
-		for (int i = 0; i < xp_bar_em; i++) bar += "<:axuaxi2:1483872588513148990>";
-		bar +="<<";
+		xp::UserXP stats = xp::xp_getxp(event.command.guild_id, u_id);
+		std::string av_url = u_ser.get_avatar_url(256, dpp::i_png, false);
 
-		std::string msg = "<@" + std::to_string(u_id) + "> lvl " + std::to_string(lvl) + "\n" + std::to_string(xpx) + " " + bar + " " + std::to_string(xpy);
-		event.reply(dpp::message(msg).set_allowed_mentions(false, false, false, false, {}, {}));
+		bot.request(av_url, dpp::m_get, [event, stats, u_id, u_ser](const dpp::http_request_completion_t& result) {
+				if (result.status != 200) {
+					event.edit_original_response(dpp::message("Something went wrong"));
+					return;
+				}
+
+				std::string card = image::img_gen_card(
+						result.body,
+						u_ser.username,
+						stats.level,
+						stats.xp,
+						stats.xp_next,
+						stats.progress
+						);
+
+				if (card.empty()) {
+					event.edit_original_response(dpp::message("something went wrong generating preview"));
+					return;
+				}
+
+				dpp::message msg(event.command.channel_id, "");
+				msg.add_file("level.png", card);
+				event.edit_original_response(msg);
+		});
 	}
 }

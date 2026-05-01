@@ -1,6 +1,9 @@
 #pragma once
 #include <dpp/dpp.h>
 #include <string>
+#include <vector>
+
+struct sqlite3;
 
 namespace db {
 	extern sqlite3* db_ptr;
@@ -13,7 +16,7 @@ namespace db {
 	void add_aura(dpp::snowflake guild_id, dpp::snowflake user_id, int amount);
 	void rmv_aura(dpp::snowflake guild_id, dpp::snowflake user_id, int amount);
 	std::vector<std::pair<std::string, int>> get_ab(dpp::snowflake guild_id, int limit, bool bottom);
-	int get_total_aura(dpp::snowflake guild_id, );
+	int get_total_aura(dpp::snowflake guild_id);
 
 	// settings related
 	void set_setting(dpp::snowflake guild_id, const std::string& key, const std::string& val);
