@@ -1,7 +1,6 @@
 #include "commands.h"
 #include <iostream>
 #include "config.h"
-#include "buttons.h"
 
 namespace commands {
     std::map<std::string, SlashHandler> slash_map = {

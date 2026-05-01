@@ -12,7 +12,6 @@ namespace commands {
 					.add_choice(dpp::command_option_choice("aurapassiveamt", std::string("aurapassiveamt")))
 					.add_choice(dpp::command_option_choice("auralbozoamt", std::string("auralbozoamt")))
 					.add_choice(dpp::command_option_choice("auralossamt", std::string("auralbozoamt")))
-					.add_choice(dpp::command_option_choice("duelminwager", std::string("duelminwager")))
 					.add_choice(dpp::command_option_choice("status", std::string("status")))
 					.add_choice(dpp::command_option_choice("XP_MIN", std::string("XP_MIN")))
 					.add_choice(dpp::command_option_choice("XP_MAX", std::string("XP_MAX")))

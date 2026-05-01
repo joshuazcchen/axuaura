@@ -1,12 +1,10 @@
 #include <dpp/dpp.h>
 #include <iostream>
 #include <cstdlib>
-#include <string>
 #include "commands.h"
 #include "db.h"
 #include "roles.h"
 #include "events.h"
-#include "buttons.h"
 
 int main() {
 	const char *token = std::getenv("BOT_TOKEN");
