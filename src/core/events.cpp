@@ -15,21 +15,6 @@ namespace events {
 		return pool[dis(gen)];
 	}
 
-	int xp_req(int lvl) {
-		int xp = 0;
-
-		double xp_base = 75.0;
-		double xp_mult = 1.10;
-		double xp_cap = 7500.0;
-
-		for (int i = 1; i < lvl; ++i) {
-			double xp_del = xp_base * std::pow(xp_mult, i - 1);
-			xp += (int)std::min(xp_del, xp_cap);
-		}
-
-		return xp;
-	}
-
 	void handle_message(const dpp::message_create_t& event, dpp::cluster& bot) {
 		if (event.msg.author.is_bot()) return;
 
