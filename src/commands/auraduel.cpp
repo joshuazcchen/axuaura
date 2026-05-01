@@ -67,10 +67,11 @@ namespace commands {
 			event.reply(dpp::message("<@" + std::to_string(target) + ">, hey, <@" + std::to_string(user_id) + "> thinks they're better than you. wanna try to prove them wrong? they're betting **" + std::to_string(bet) + "**.\n\naccept using /duel accept\n-# note that accepting a duel cancels your outgoing duels.").set_allowed_mentions(true, false, false, false, {}, {}));
 
 			dpp::snowflake ch_id = event.command.channel_id;
-			new dpp::oneshot_timer(&bot, 120, [&bot, user_id, target, ch_id](dpp::timer t) {
-				long issue_time = db::d_time(event.command.guild_id, user_id);
+			dpp::snowflake g_id = event.command.guild_id;
+			new dpp::oneshot_timer(&bot, 120, [&bot, user_id, target, ch_id, g_id](dpp::timer t) {
+				long issue_time = db::d_time(g_id, user_id);
 				if (issue_time != -1 && (std::time(nullptr) - issue_time >= 119)) {
-						db::d_delete(event.command.guild_id, user_id);
+						db::d_delete(g_id, user_id);
 						bot.message_create(dpp::message(ch_id, "<@" + std::to_string(user_id) + ">'s duel to <@" + std::to_string(target) +"> expired"));
 				}
 			});
