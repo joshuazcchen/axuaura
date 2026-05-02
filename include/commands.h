@@ -54,6 +54,12 @@ namespace commands {
 		dpp::slashcommand level_def(dpp::cluster& bot);
 		void handle_level(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
+		dpp::slashcommand bazaar_def(dpp::cluster& bot);
+		void handle_bazaar(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
+		dpp::slashcommand inventory_def(dpp::cluster& bot);
+		void handle_inventory(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
 		// ctxm DEPRECATED UNUSED
 		dpp::slashcommand mkshm_def(dpp::cluster& bot);
 		void handle_mkshm(const dpp::message_context_menu_t& event, dpp::cluster& bot);

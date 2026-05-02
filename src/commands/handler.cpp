@@ -15,6 +15,8 @@ namespace commands {
         {"level", handle_level},
         {"fixlevel", handle_fixlevel},
         {"leaderboard", handle_leaderboard},
+        {"bazaar", handle_bazaar},
+        {"inventory", handle_inventory},
     };
 
     std::map<std::string, ContextHandler> context_map = {
@@ -49,6 +51,8 @@ namespace commands {
                 leaderboard_def(bot),
                 fixlevel_def(bot),
                 level_def(bot),
+                bazaar_def(bot),
+                inventory_def(bot),
             });
         }
     }
