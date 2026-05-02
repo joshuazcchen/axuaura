@@ -74,11 +74,11 @@ namespace image {
             if (invert) {
                 bg.strokeColor("white");
                 bg.strokeWidth(24);
-                bg.draw(Magick::DrawableLine(img_text_x, 230, img_text_x + width + 15, 240));
+                bg.draw(Magick::DrawableLine(img_text_x, 230, img_text_x + width + 15, 230));
             }
             bg.strokeColor(Magick::Color(base));
             bg.strokeWidth(16);
-            bg.draw(Magick::DrawableLine(img_text_x, 230, img_text_x + width + 15, 240));
+            bg.draw(Magick::DrawableLine(img_text_x, 230, img_text_x + width + 15, 230));
             
             // stats
             bg.fontPointsize(64);
