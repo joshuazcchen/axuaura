@@ -34,6 +34,7 @@ namespace db {
             if (sqlite3_step(stmt) == SQLITE_ROW) {
                 cur_version = sqlite3_column_int(stmt, 0);
             }
+	sqlite3_finalize(stmt);
         }
 
         const char* v1_schema =
@@ -111,7 +112,7 @@ namespace db {
                 "ALTER TABLE duels_tmp RENAME TO duels; "
                 "ALTER TABLE voice_tmp RENAME TO voice; "
 
-                "INSERT INTO schema_version (version, updated) VALUES (1, strftime('%s', 'now')); "
+                "INSERT INTO db_version (version, updated) VALUES (1, strftime('%s', 'now')); "
 
                 "COMMIT;";
 
