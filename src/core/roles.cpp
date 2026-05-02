@@ -34,7 +34,23 @@ namespace roles {
         };
         do_rank(top3, false);
         do_rank(bot3, true);
+
+        // TODO: make this not depend on randomly huge numbers.
+        int leader_id = db::shop_ensure_sys(g_id, "Leader Role", config::LEADER, 50000000);
+        int loser_id = db::shop_ensure_sys(g_id, "Loser Role", config::LOSER, -50000000);
         
+        for (auto const& [u_id, r_id] : targets) {
+            // TODO: fix the guild id stuff
+            bot.guild_member_add_role(1469591363770122274, u_id, r_id);
+            if (r_id == config::LEADER && !db::inv_has(g_id, u_id, leader_id)) {
+                db::inv_add(g_id, u_id, leader_id);
+                db::inv_eq(g_id, u_id, leader_id);
+            } else if (r_id == config::LOSER && !db::inv_has(g_id, u_id, loser_id)) {
+                db::inv_add(g_id, u_id, loser_id);
+                db::inv_eq(g_id, u_id, loser_id);
+            }
+        }
+
         for (auto const& r_id : config::STUPID_ROLES) {
             dpp::role *r = dpp::find_role(r_id);
             if (!r) {
@@ -47,12 +63,10 @@ namespace roles {
 
                 if (!is_stupid) {
                     bot.guild_member_remove_role(1469591363770122274, u_id, r_id);
+                    if (r_id == config::LEADER) db::inv_rm(g_id, u_id, leader_id);
+                    if (r_id == config::LOSER) db::inv_rm(g_id, u_id, loser_id);
                 }
             }
         };
-
-        for (auto const& [u_id, r_id] : targets) {
-            bot.guild_member_add_role(1469591363770122274, u_id, r_id);
-        }
     }
 }

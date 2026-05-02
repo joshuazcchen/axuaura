@@ -61,7 +61,8 @@ namespace xp {
         static std::random_device rd;
         static std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(xp_min, xp_max);
-        int xp_del = dis(gen);
+        double xp_mult = db::inv_xp_mult(guild_id, user_id);
+        int xp_del = (int)(dis(gen) * xp_mult);
 
         db::xp_add(guild_id, user_id, xp_del);
         db::xp_time_set(guild_id, user_id, time_now);

@@ -67,7 +67,18 @@ namespace db {
 
             "CREATE TABLE IF NOT EXISTS voice_tmp ("
             "guild_id TEXT NOT NULL, user_id TEXT NOT NULL, join_time INTEGER, "
-            "PRIMARY KEY (guild_id, user_id));";
+            "PRIMARY KEY (guild_id, user_id));"
+
+            "CREATE TABLE IF NOT EXISTS shop_items ("
+            "item_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "
+            "type TEXT NOT NULL, role_id TEXT, name TEXT NOT NULL, desc TEXT, "
+            "cost INTEGER NOT NULL, data TEXT, active INTEGER DEFAULT 1);"
+
+            "CREATE TABLE IF NOT EXISTS inventory ("
+            "inv_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "
+            "user_id TEXT NOT NULL, item_id INTEGER NOT NULL, "
+            "acquired INTEGER NOT NULL, expires INTEGER, equipped INTEGER DEFAULT 0, "
+            "FOREIGN KEY(item_id) REFERENCES shop_items(item_id));";
 
         sqlite3_exec(db_ptr, v1_schema, nullptr, nullptr, nullptr);
 
