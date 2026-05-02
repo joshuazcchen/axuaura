@@ -142,6 +142,9 @@ namespace image {
         } catch (Magick::Exception& error) {
             std::cerr << "image gen error: " << error.what() << std::endl;
             return "";
-        }
+        } catch (...) {
+		std::cerr << "big bad issue!" << std::endl;
+		return "";
+	}
     }
 }
