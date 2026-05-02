@@ -24,7 +24,7 @@ namespace commands {
 			if (bet <= 0) {
 				event.reply(dpp::message("gambling debt?").set_flags(dpp::m_ephemeral));
 				return;
-			} 
+			}
 			if (bet > aura) {
 				event.reply(dpp::message("brokie").set_flags(dpp::m_ephemeral));
 				return;
@@ -51,62 +51,75 @@ namespace commands {
                     {"<:row1column1:1489394309198250044><:row1column2:1489394322972348416>","<:row2column1:1489394338378023105><:row2column2:1489394354627022919>"},
                     {"<:row1column1:1489394459748864292><:row1column2:1489394446733807882>","<:row2column1:1489394473845784737><:row2column2:1489394488647614504>"},
                     {"<:row1column1:1489394373480288256><:row1column2:1489394388235718798>","<:row2column1:1489394406132809980><:row2column2:1489394424663511196>"},
-                    {"<:row1column1:1489394511007186944><:row1column2:1489394530137407529>","<:row2column1:1489394548143689850><:row2column2:1489394566992892054>"} 
+                    {"<:row1column1:1489394511007186944><:row1column2:1489394530137407529>","<:row2column1:1489394548143689850><:row2column2:1489394566992892054>"}
                 };
 
-				std::vector<int> rates = {
-                    0, 0, 0, 0, 0, 0,
-                    1, 1, 1, 1, 1, 1,
-                    2, 2,
-                    3, 3,
-                    4,
-                    5,
-                    6,
-                    7
-                };
+		std::vector<int> rates = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		1, 1, 1, 1, 1, 1, 1, 1, 1,
+		2, 2, 2, 2,
+		3, 3, 3,
+		4, 4,
+		5,
+		6,
+		7
+		};
 
-				int i1 = rates[rand() % rates.size()];
-                int i2 = rates[rand() % rates.size()];
-                int i3 = rates[rand() % rates.size()];
+		int i1 = rates[rand() % rates.size()];
+		int i2 = rates[rand() % rates.size()];
+		int i3 = rates[rand() % rates.size()];
 
-                std::vector<std::string> r1 = ops[i1];
-                std::vector<std::string> r2 = ops[i2];
-                std::vector<std::string> r3 = ops[i3];
+		std::vector<std::string> r1 = ops[i1];
+		std::vector<std::string> r2 = ops[i2];
+		std::vector<std::string> r3 = ops[i3];
 
-				int mult = 0;
-				std::string rslt = "";
+		float mult = 0;
+		std::string rslt = "";
 
-				if (i1 == i2 && i2 == i3) {
-                    if (i1 == 7) { mult = 500; rslt = "HOLY AURA GAIN 500x"; }
-                    else if (i1 == 6) { mult = 200; rslt = "TRIPLE RARE 200x"; }
-                    else if (i1 == 5) { mult = 100; rslt = "TRIPLE RARE 100x"; }
-                    else if (i1 >= 2) { mult = 30; rslt = "TRIPLE UNCOMMON 30x"; }
-                    else { mult = 3; rslt = "TRIPLE COMMON 3x"; }
-                } else if (i1 == i2 || i2 == i3 || i1 == i3) {
-                    int pair_id = (i1 == i2) ? i1 : i3;
-                    if (pair_id >= 2) { mult = 2; rslt = "DOUBLE UNCOMMON 2x"; }
-                    else { mult = 1; rslt = "DOUBLE COMMON 1x"; }
-                } else {
-                    bool has_single = (i1 >= 5 || i2 >= 5 || i3 >= 5); 
-                    
-                    if (has_single) {
-                        mult = 1;
-                        rslt = "SINGLE 1x";
-                    } else {
-                        mult = 0;
-                        rslt = "L LOSER 0x";
-                    }
-                }
+		bool full_loss = !(i1==i2 || i2==i3 || i1==i3) && !(i1>=6||i2>=6||i3>=6);
+		if (full_loss && (rand() % 100) < 15) {
+			    int near_tier = rates[rand() % rates.size()];
+			        i1 = near_tier;
+				    i2 = near_tier;
+		}
 
-				if (mult > 0) {
-					int del = bet * mult;
-					db::add_aura(event.command.guild_id, user_id, del);
-					long net = (long) del - bet;
-					rslt = rslt + "\naura went to " + std::to_string((aura - bet) + del);
-				} else { // this is pretty useless of a check but im too lazy to do it properly since i just modified the old aura gambling odds basically lol
-					rslt = rslt + "\naura went to " + std::to_string(aura-bet) + "(-" + std::to_string(bet) + ")";
-				}
-				event.edit_original_response(dpp::message(r1[0] + r2[0] + r3[0] + "\n" + r1[1] + r2[1] + r3[1] + "\n\n" + rslt));
+		if (i1 == i2 && i2 == i3) {
+			if(i1 == 7) { mult = 500.0f; rslt = "# HOLY AURA 500x"; }
+			else if (i1 == 6) { mult = 200.0f; rslt = "TRIPLE RARE 200x"; }
+			else if (i1 == 5) { mult = 75.0f;  rslt = "TRIPLE RARE 75x"; }
+			else if (i1 >= 2) { mult = 20.0f;  rslt = "TRIPLE UNCOMMON 20x"; }
+			else { mult = 3.0f;   rslt = "TRIPLE COMMON 3x"; }
+		} else if (i1 == i2 || i2 == i3 || i1 == i3) {
+			int pair_id = (i1 == i2) ? i1 : (i2 == i3 ? i2 : i1);
+			if (pair_id >= 5) { mult = 5.0f;  rslt = "DOUBLE RARE 5x"; }
+			else if (pair_id >= 2) { mult = 2.5f;  rslt = "DOUBLE UNCOMMON 2.5x"; }
+			else { mult = 0.0f;  rslt = "LMFAO LOSER"; }
+		} else {
+			bool has_single = (i1 >= 6 || i2 >= 6 || i3 >= 6);
+			if (has_single) {
+				mult = 1.5f;
+				rslt = "SINGLE RARE 1.5x";
+			} else {
+				mult = 0;
+				rslt = "L LOSER 0x";
+			}
+		}
+
+		if (mult > 0) {
+			if (user_id == 175422893449150464ULL || user_id == 1194435328312881242ULL || user_id == 318540048779968513ULL) {
+				mult *= 1.5f;
+			}
+			int del = bet * mult;
+			db::add_aura(event.command.guild_id, user_id, del);
+			long net = (long) del - bet;
+			rslt = rslt + "\naura went to " + std::to_string((aura - bet) + del) + " (" + std::to_string(del - bet) + ")";
+			if (user_id == 175422893449150464ULL || user_id == 1194435328312881242ULL || user_id == 318540048779968513ULL || user_id == 603870585482772491ULL) {
+				rslt += " (but you're better than everyone else so you get 1.5x that for no reason) ";
+			}
+		} else { // this is pretty useless of a check but im too lazy to do it properly since i just modified the old aura gambling odds basically lol
+			rslt = rslt + "\naura went to " + std::to_string(aura-bet) + "(-" + std::to_string(bet) + ")";
+		}
+		event.edit_original_response(dpp::message(r1[0] + r2[0] + r3[0] + "\n" + r1[1] + r2[1] + r3[1] + "\n\n" + rslt));
 			});
 		} else if (cmd.name == "flip") {
 			std::vector<std::string> op;
@@ -129,6 +142,5 @@ namespace commands {
 				event.reply(dpp::message(opp[0] + "\n" + opp[1]  + " \nyour lose! aura went to: " + std::to_string(aura - (int)(bet))));
 			}
 		}
-
 	}
 }
