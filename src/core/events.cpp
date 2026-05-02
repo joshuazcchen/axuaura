@@ -44,10 +44,9 @@ namespace events {
 				if (config::LVL_ROLES.find(lvl_new) != config::LVL_ROLES.end()) {
 					bot.guild_member_add_role(event.msg.guild_id, user_id, config::LVL_ROLES.at(lvl_new));
 				}
-				// also gonna give them aura for it since I can later lol. TODO: that
 			}
-
 		}
+
 		auto& allowed = config::ALLOWED_CHANNELS;
 		if (std::find(allowed.begin(), allowed.end(), event.msg.channel_id) == allowed.end()) return;
 
@@ -62,6 +61,41 @@ namespace events {
 		if (dis(gen) <= db::get_setting_int(event.msg.guild_id, "aurachancegain", 10)) {
 			db::add_aura(event.msg.guild_id, user_id, db::get_setting_int(event.msg.guild_id, "aurapassiveamt", 2));
 		}
+
+		std::uniform_int_distribution<> drop_dis(1, 1000);
+        if (drop_dis(gen) == 1) {
+            int u_aura = db::get_aura(event.msg.guild_id, user_id);
+            int sign = (u_aura >= 0) ? 1 : -1;
+            auto items = db::shop_get_sign(event.msg.guild_id, sign);
+
+            if (!items.empty()) {
+                double total_weight = 0;
+                for (auto& item : items) total_weight += 1.0 / (std::abs(item.cost) + 1);
+
+                std::uniform_real_distribution<> weight_dis(0, total_weight);
+                double roll = weight_dis(gen);
+                int picked_id = items.front().item_id;
+                db::ShopItem* picked = &items.front();
+
+                for (auto& item : items) {
+                    roll -= 1.0 / (std::abs(item.cost) + 1);
+                    if (roll <= 0) {
+                        picked_id = item.item_id;
+                        picked = &item;
+                        break;
+                    }
+                }
+
+                if (db::inv_has(event.msg.guild_id, user_id, picked_id)) {
+                    int refund = picked->cost / 10;
+                    db::add_aura(event.msg.guild_id, user_id, refund);
+                    bot.message_create(dpp::message(event.msg.channel_id, "<@" + std::to_string(user_id) + "> found **" + picked->name + "** but they already owned it so its been converted to " + std::to_string(refund) + "** aura instead"));
+                } else {
+                    db::inv_add(event.msg.guild_id, user_id, picked_id);
+                    bot.message_create(dpp::message(event.msg.channel_id, "<@" + std::to_string(user_id) + "> is lucky as hell and stumbled across a **" + picked->name + "**! access with `/inventory view`."));
+                }
+            }
+        }
 
 		std::regex url_r(R"(https?://[^\s]+)");
 		std::smatch match;

@@ -20,57 +20,6 @@ namespace db {
 
         sqlite3_exec(db_ptr, "PRAGMA journal_mode=WAL;", nullptr, nullptr, nullptr);
 
-        const char* sql =
-            "CREATE TABLE IF NOT EXISTS users ("
-            "user_id TEXT PRIMARY KEY, "
-            "aura INTEGER DEFAULT 0, "
-            "xp INTEGER DEFAULT 0, "
-            "level INTEGER DEFAULT 0, "
-            "xp_time INTEGER DEFAULT 0, "
-            "migrated INTEGER DEFAULT 0"
-            ");";
-
-        const char* setting_sql =
-            "CREATE TABLE IF NOT EXISTS settings ("
-            "key TEXT PRIMARY KEY, "
-            "value TEXT"
-            ");";
-
-        const char* poll_sql =
-            "CREATE TABLE IF NOT EXISTS polls ("
-            "p_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "title TEXT, "
-            "ops TEXT, "
-            "active INTEGER DEFAULT 1"
-            ");";
-
-
-        const char* bets_sql =
-            "CREATE TABLE IF NOT EXISTS bets ("
-            "p_id INTEGER, "
-            "u_id TEXT, "
-            "op TEXT, "
-            "amt INTEGER, "
-            "FOREIGN KEY(p_id) REFERENCES polls(p_id)"
-            ");";
-
-        const char* duels_sql =
-            "CREATE TABLE IF NOT EXISTS duels ("
-            "challenger TEXT PRIMARY KEY, "
-            "target TEXT, "
-            "bet INTEGER, "
-            "issue_time INTEGER"
-            ");";
-
-        const char* vc_sql =
-            "CREATE TABLE IF NOT EXISTS voice ("
-            "user_id TEXT PRIMARY KEY, "
-            "join_time INTEGER"
-            ");";
-
-
-
-
         const char* db_version = 
             "CREATE TABLE IF NOT EXISTS db_version ("
             "version INTEGER PRIMARY KEY, "
@@ -118,7 +67,18 @@ namespace db {
 
             "CREATE TABLE IF NOT EXISTS voice_tmp ("
             "guild_id TEXT NOT NULL, user_id TEXT NOT NULL, join_time INTEGER, "
-            "PRIMARY KEY (guild_id, user_id));";
+            "PRIMARY KEY (guild_id, user_id));"
+
+            "CREATE TABLE IF NOT EXISTS shop_items ("
+            "item_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "
+            "type TEXT NOT NULL, role_id TEXT, name TEXT NOT NULL, desc TEXT, "
+            "cost INTEGER NOT NULL, data TEXT, active INTEGER DEFAULT 1);"
+
+            "CREATE TABLE IF NOT EXISTS inventory ("
+            "inv_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "
+            "user_id TEXT NOT NULL, item_id INTEGER NOT NULL, "
+            "acquired INTEGER NOT NULL, expires INTEGER, equipped INTEGER DEFAULT 0, "
+            "FOREIGN KEY(item_id) REFERENCES shop_items(item_id));";
 
         sqlite3_exec(db_ptr, v1_schema, nullptr, nullptr, nullptr);
 
