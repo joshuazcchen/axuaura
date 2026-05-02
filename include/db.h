@@ -64,4 +64,44 @@ namespace db {
 	long vc_get(dpp::snowflake guild_id, dpp::snowflake user_id);
 	void vc_set(dpp::snowflake guild_id, dpp::snowflake user_id, long time);
 	void vc_clr(dpp::snowflake guild_id, dpp::snowflake user_id);
+
+	// bazaar and inventory stuff
+    struct ShopItem {
+        int item_id;
+        dpp::snowflake role_id;
+        std::string type;
+        std::string name;
+        std::string desc;
+        int cost;
+        std::string data;
+        bool active;
+    };
+
+    struct InvItem {
+        int inv_id;
+        int item_id;
+        std::string name;
+        std::string type;
+        dpp::snowflake role_id;
+        bool equipped;
+        long acquired;
+        long expires;
+    };
+
+    int shop_add(dpp::snowflake g_id, const std::string& type, dpp::snowflake r_id, const std::string& name, const std::string& desc, int cost, const std::string& data);
+    void shop_rmv(dpp::snowflake g_id, int item_id);
+    ShopItem shop_get(dpp::snowflake g_id, int item_id);
+    std::vector<ShopItem> shop_get_all(dpp::snowflake g_id);
+    std::vector<ShopItem> shop_get_sign(dpp::snowflake g_id, int sign);
+
+    void inv_add(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
+    void inv_rm(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
+    bool inv_has(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
+    std::vector<InvItem> inv_get_user(dpp::snowflake g_id, dpp::snowflake u_id);
+    void inv_eq(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
+    void inv_uneq(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
+    double inv_xp_mult(dpp::snowflake g_id, dpp::snowflake u_id);
+
+	// stupid thing to ensure that things sync
+    int shop_ensure_sys(dpp::snowflake g_id, const std::string& name, dpp::snowflake r_id, int cost);
 }
