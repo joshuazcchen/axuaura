@@ -8,7 +8,10 @@ namespace image {
         int level,
         int xp_now,
         int xp_next,
-        float progress
+        float progress,
+        const std::string& bg_c = "",
+        const std::string& credit = "",
+        bool invert = false
     );
 
     std::string img_affect(

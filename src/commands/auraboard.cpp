@@ -24,21 +24,20 @@ namespace commands {
             return;
         }
 
-        auto ab_list = db::get_ab(event.command.guild_id, 10, sort_mode == "bottom"); 
+        auto ab_list = db::get_ab(event.command.guild_id, 15, sort_mode == "bottom");
 
-        dpp::embed embed = dpp::embed()
-            .set_color(dpp::colors::white)
-            .set_title(sort_mode == "bottom" ? "AURALESS" : "AURAFUL");
-
-        embed.add_field("total aura:", std::to_string(db::get_total_aura(event.command.guild_id)), true);
+        std::string embed = sort_mode == "bottom" ? "# AURALESS\n" : "**# AURAFUL\n**";
+        int count = 1;
 
         std::string txt = "";
         for (const auto& row : ab_list) {
             std::string aura_val = std::to_string(row.second) + "AURA";
-            txt += "<@" + row.first + ">: " + aura_val + "\n";
+            txt += "**" + std::to_string(count) + "** <@" + row.first + ">: " + aura_val + "\n";
+            count++;
         }
 
-        embed.set_description(txt);
+        embed += txt;
+        embed += "**total aura:** " + std::to_string(db::get_total_aura(event.command.guild_id));
         event.reply(dpp::message(event.command.channel_id, embed));
     }
 }
