@@ -82,7 +82,7 @@ namespace image {
             
             // stats
             bg.fontPointsize(64);
-            std::string stats_text = "LEVEL: " + std::to_string(level) + " XP: " + std::to_string(xp_now) + " / " + std::to_string(xp_next);
+            std::string stats_text = "LEVEL: " + std::to_string(level) + " " + std::to_string(xp_now) + " / " + std::to_string(xp_next) + " XP";
             if (invert) {
                 bg.strokeColor("white");
                 bg.strokeWidth(16);
