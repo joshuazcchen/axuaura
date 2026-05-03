@@ -4,7 +4,6 @@
 namespace commands {
 	dpp::slashcommand credits_def(dpp::cluster& bot) {
 		dpp::slashcommand cmd("credits", "bot credits", bot.me.id);
-		cmd.add_option(dpp::command_option(dpp::co_string, "content", "msg", true));
 		return cmd;
 	}
 
