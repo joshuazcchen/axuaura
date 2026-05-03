@@ -17,6 +17,7 @@ namespace commands {
         {"leaderboard", handle_leaderboard},
         {"bazaar", handle_bazaar},
         {"inventory", handle_inventory},
+	{"credits", handle_credits},
     };
 
     std::map<std::string, ContextHandler> context_map = {
@@ -44,8 +45,8 @@ namespace commands {
                 auraboard_def(bot),
                 movaura_def(bot),
                 duel_def(bot),
-		        settings_def(bot),
-		        gamble_def(bot),
+		settings_def(bot),
+		gamble_def(bot),
                 bet_def(bot),
                 smite_def(bot),
                 leaderboard_def(bot),
@@ -53,6 +54,7 @@ namespace commands {
                 level_def(bot),
                 bazaar_def(bot),
                 inventory_def(bot),
+		credits_def(bot),
             });
         }
     }
