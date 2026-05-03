@@ -20,57 +20,6 @@ namespace db {
 
         sqlite3_exec(db_ptr, "PRAGMA journal_mode=WAL;", nullptr, nullptr, nullptr);
 
-        const char* sql =
-            "CREATE TABLE IF NOT EXISTS users ("
-            "user_id TEXT PRIMARY KEY, "
-            "aura INTEGER DEFAULT 0, "
-            "xp INTEGER DEFAULT 0, "
-            "level INTEGER DEFAULT 0, "
-            "xp_time INTEGER DEFAULT 0, "
-            "migrated INTEGER DEFAULT 0"
-            ");";
-
-        const char* setting_sql =
-            "CREATE TABLE IF NOT EXISTS settings ("
-            "key TEXT PRIMARY KEY, "
-            "value TEXT"
-            ");";
-
-        const char* poll_sql =
-            "CREATE TABLE IF NOT EXISTS polls ("
-            "p_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "title TEXT, "
-            "ops TEXT, "
-            "active INTEGER DEFAULT 1"
-            ");";
-
-
-        const char* bets_sql =
-            "CREATE TABLE IF NOT EXISTS bets ("
-            "p_id INTEGER, "
-            "u_id TEXT, "
-            "op TEXT, "
-            "amt INTEGER, "
-            "FOREIGN KEY(p_id) REFERENCES polls(p_id)"
-            ");";
-
-        const char* duels_sql =
-            "CREATE TABLE IF NOT EXISTS duels ("
-            "challenger TEXT PRIMARY KEY, "
-            "target TEXT, "
-            "bet INTEGER, "
-            "issue_time INTEGER"
-            ");";
-
-        const char* vc_sql =
-            "CREATE TABLE IF NOT EXISTS voice ("
-            "user_id TEXT PRIMARY KEY, "
-            "join_time INTEGER"
-            ");";
-
-
-
-
         const char* db_version = 
             "CREATE TABLE IF NOT EXISTS db_version ("
             "version INTEGER PRIMARY KEY, "
@@ -121,48 +70,5 @@ namespace db {
             "PRIMARY KEY (guild_id, user_id));";
 
         sqlite3_exec(db_ptr, v1_schema, nullptr, nullptr, nullptr);
-
-        if (cur_version < 1) {
-            const char* fallback_guild = std::getenv("GUILD_ID");
-            if (!fallback_guild) {
-                std::cerr << "migration failed, need guild id" << std::endl;
-                return;
-            }
-            std::string default_guild = fallback_guild;
-
-            std::string migration_sql =
-                "BEGIN TRANSACTION; "
-                "INSERT INTO aura (guild_id, user_id, amount) SELECT '" + default_guild + "', user_id, aura FROM users; "
-                "INSERT INTO xp (guild_id, user_id, xp, level, xp_time) SELECT '" + default_guild + "', user_id, xp, level, xp_time FROM users; "
-
-                "INSERT INTO guild_settings (guild_id, key, value) SELECT '" + default_guild + "', key, value FROM settings; "
-
-                "INSERT INTO polls_tmp (p_id, guild_id, title, ops, active) SELECT p_id, '" + default_guild + "', title, ops, active FROM polls; "
-                "INSERT INTO duels_tmp (guild_id, challenger, target, bet, issue_time) SELECT '" + default_guild + "', challenger, target, bet, issue_time FROM duels; "
-                "INSERT INTO voice_tmp (guild_id, user_id, join_time) SELECT '" + default_guild + "', user_id, join_time FROM voice; "
-
-                "DROP TABLE IF EXISTS users; "
-                "DROP TABLE IF EXISTS settings; "
-                "DROP TABLE IF EXISTS polls; "
-                "DROP TABLE IF EXISTS duels; "
-                "DROP TABLE IF EXISTS voice; "
-
-                "ALTER TABLE polls_tmp RENAME TO polls; "
-                "ALTER TABLE duels_tmp RENAME TO duels; "
-                "ALTER TABLE voice_tmp RENAME TO voice; "
-
-                "INSERT INTO schema_version (version, updated) VALUES (1, strftime('%s', 'now')); "
-
-                "COMMIT;";
-
-            char* err_msg = nullptr;
-            if (sqlite3_exec(db_ptr, migration_sql.c_str(), nullptr, nullptr, &err_msg) != SQLITE_OK) {
-                std::cerr << "db migration failed: " << err_msg << std::endl;
-                sqlite3_free(err_msg);
-                sqlite3_exec(db_ptr, "ROLLBACK;", nullptr, nullptr, nullptr);
-            } else {
-                std::cerr << "success" << std::endl;
-            }
-        }
     }
 }
