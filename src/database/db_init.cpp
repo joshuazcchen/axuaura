@@ -82,48 +82,5 @@ namespace db {
             "FOREIGN KEY(item_id) REFERENCES shop_items(item_id));";
 
         sqlite3_exec(db_ptr, v1_schema, nullptr, nullptr, nullptr);
-
-        if (cur_version < 1) {
-            const char* fallback_guild = std::getenv("GUILD_ID");
-            if (!fallback_guild) {
-                std::cerr << "migration failed, need guild id" << std::endl;
-                return;
-            }
-            std::string default_guild = fallback_guild;
-
-            std::string migration_sql =
-                "BEGIN TRANSACTION; "
-                "INSERT INTO aura (guild_id, user_id, amount) SELECT '" + default_guild + "', user_id, aura FROM users; "
-                "INSERT INTO xp (guild_id, user_id, xp, level, xp_time) SELECT '" + default_guild + "', user_id, xp, level, xp_time FROM users; "
-
-                "INSERT INTO guild_settings (guild_id, key, value) SELECT '" + default_guild + "', key, value FROM settings; "
-
-                "INSERT INTO polls_tmp (p_id, guild_id, title, ops, active) SELECT p_id, '" + default_guild + "', title, ops, active FROM polls; "
-                "INSERT INTO duels_tmp (guild_id, challenger, target, bet, issue_time) SELECT '" + default_guild + "', challenger, target, bet, issue_time FROM duels; "
-                "INSERT INTO voice_tmp (guild_id, user_id, join_time) SELECT '" + default_guild + "', user_id, join_time FROM voice; "
-
-                "DROP TABLE IF EXISTS users; "
-                "DROP TABLE IF EXISTS settings; "
-                "DROP TABLE IF EXISTS polls; "
-                "DROP TABLE IF EXISTS duels; "
-                "DROP TABLE IF EXISTS voice; "
-
-                "ALTER TABLE polls_tmp RENAME TO polls; "
-                "ALTER TABLE duels_tmp RENAME TO duels; "
-                "ALTER TABLE voice_tmp RENAME TO voice; "
-
-                "INSERT INTO db_version (version, updated) VALUES (1, strftime('%s', 'now')); "
-
-                "COMMIT;";
-
-            char* err_msg = nullptr;
-            if (sqlite3_exec(db_ptr, migration_sql.c_str(), nullptr, nullptr, &err_msg) != SQLITE_OK) {
-                std::cerr << "db migration failed: " << err_msg << std::endl;
-                sqlite3_free(err_msg);
-                sqlite3_exec(db_ptr, "ROLLBACK;", nullptr, nullptr, nullptr);
-            } else {
-                std::cerr << "success" << std::endl;
-            }
-        }
     }
 }
