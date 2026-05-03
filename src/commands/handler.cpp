@@ -1,7 +1,6 @@
 #include "commands.h"
 #include <iostream>
 #include "config.h"
-#include "buttons.h"
 
 namespace commands {
     std::map<std::string, SlashHandler> slash_map = {
@@ -16,6 +15,9 @@ namespace commands {
         {"level", handle_level},
         {"fixlevel", handle_fixlevel},
         {"leaderboard", handle_leaderboard},
+        {"bazaar", handle_bazaar},
+        {"inventory", handle_inventory},
+	{"credits", handle_credits},
     };
 
     std::map<std::string, ContextHandler> context_map = {
@@ -43,13 +45,16 @@ namespace commands {
                 auraboard_def(bot),
                 movaura_def(bot),
                 duel_def(bot),
-		        settings_def(bot),
-		        gamble_def(bot),
+		settings_def(bot),
+		gamble_def(bot),
                 bet_def(bot),
                 smite_def(bot),
                 leaderboard_def(bot),
                 fixlevel_def(bot),
                 level_def(bot),
+                bazaar_def(bot),
+                inventory_def(bot),
+		credits_def(bot),
             });
         }
     }

@@ -1,0 +1,13 @@
+axuaxibot
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+cmake_build/
+build/
+build_prod/
+build_test/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db

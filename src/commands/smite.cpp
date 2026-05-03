@@ -63,7 +63,7 @@ namespace commands {
 
 		new dpp::oneshot_timer(&bot, 3, [event, target, sacrifice, sgn](dpp::timer t) {
 			int t_aura = db::get_aura(event.command.guild_id, target);
-			int smite = std::abs((int)(sacrifice/10));
+			int smite = std::abs((int)(sacrifice/3));
 			if (smite >= std::abs(t_aura)) {
 				db::set_aura(event.command.guild_id, target, 0);
 				event.edit_original_response(dpp::message("it is done. <@" + std::to_string(target) + "> (" + std::to_string(t_aura) + " -> 0)"));
