@@ -10,3 +10,4 @@ build_test/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+*.db
