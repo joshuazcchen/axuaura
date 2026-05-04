@@ -1,62 +1,68 @@
 #include "config.h"
-
+#include "db.h"
+#include <sstream>
+#include <iostream>
+#include <sqlite3.h>
 
 namespace config {
-    std::vector<dpp::snowflake> SPECIALS = { 
-        802736184546689045ULL // this is not really necessary since this is just neat's id + 1, technically I should fix this but im too lazy to. 
-    };
+    
+    std::unordered_map<dpp::snowflake, GuildConfig> guild_configs;
 
-    // TODO: find the solution to not need to wrap everything with an unsignedlonglong tag because for some stupid reason Alpine thinks differently and it runs on deb13 but not alpine??? musl is gonna give me an aneurysm.
-    std::vector<dpp::snowflake> ALLOWED_CHANNELS = { 
-        1482901206018822296ULL, 1469591365645111478ULL, 1480102566871433317ULL, 1480688308811071732ULL, 1482523765308002314ULL, 1482653036861067396ULL,
-        1482634709526904975ULL, 1482470065415786628ULL, 1469597924596912188ULL, 1482470983813300465ULL, 1469593150858465394ULL, 1170145267224428635ULL
-    };
+    static std::vector<dpp::snowflake> parse_sf(const std::string& in) {
+        std::vector<dpp::snowflake> result;
+        std::stringstream ss(in);
+        std::string token;
 
-    dpp::snowflake NON_ENG_CH = 1482901206018822296ULL; 
-    dpp::snowflake LOG_CH = 1485390883841904740ULL; 
+        while (std::getline(ss, token, ',')) {
+            if (!token.empty()) {
+                try {
+                    result.push_back(std::stoull(token));
+                } catch (...) {};
+            }
+        }
+        return result;
+    }
 
-    dpp::snowflake LEADER = 1489380735482728688ULL;
-    dpp::snowflake NUM2 = 1489380736363532408ULL;
-    dpp::snowflake NUM3 = 1489380734467838073ULL;
-    dpp::snowflake LOSER = 1489380737361776640ULL;
-    dpp::snowflake BOT2 = 1489380733137977424ULL;
-    dpp::snowflake BOT3 = 1489380730013220974ULL;
+    void config_load() {
+        // maybe i find a way to do this without the sql in the config but honestly its nbd
+        const char* sql = "SELECT guild_id, key, value FROM guild_settings;";
+        sqlite3_stmt* stmt;
+        if (sqlite3_prepare_v2(db::db_ptr, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+            return;
+        }
 
-    std::vector<dpp::snowflake> STUPID_ROLES = {
-        LEADER, NUM2, NUM3, LOSER, BOT2, BOT3
-    };
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            std::string guild_id_str = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            std::string key = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+            std::string value = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
 
-    int XP_COOLDOWN = 60;
-    int XP_MIN = 15;
-    int XP_MAX = 30;
+            dpp::snowflake guild_id = std::stoull(guild_id_str);
+            GuildConfig& current_guild = guild_configs[guild_id];
 
-    const std::map<int, dpp::snowflake> LVL_ROLES = {
-        {5, 1482905611535519877ULL},
-        {10, 1482903838443835452ULL},
-        {15, 1482903879686426876ULL},
-        {20, 1482904022355673231ULL},
-        {25, 1482904091083673763ULL},
-        {30, 1482475514022330470ULL},
-        {35, 1482904194838036530ULL},
-        {40, 1482904249749737583ULL},
-        {50, 1485095100236304464ULL},
-        {60, 1485095100236304464ULL},
-        {70, 1485095358626529280ULL},
-        {80, 1485095456488034325ULL},
-        {90, 1485095668124094616ULL}
-    };
+            if (key == "non_eng_ch") current_guild.non_eng_ch = std::stoull(value);
+            else if (key == "log_ch") current_guild.log_ch = std::stoull(value);
+            else if (key == "lvl_ch") current_guild.lvl_ch = std::stoull(value);
+            else if (key == "leader_role") current_guild.leader_role = std::stoull(value);
+            else if (key == "num2_role") current_guild.num2_role = std::stoull(value);
+            else if (key == "num3_role") current_guild.num3_role = std::stoull(value);
+            else if (key == "loser_role") current_guild.loser_role = std::stoull(value);
+            else if (key == "bot2_role") current_guild.bot2_role = std::stoull(value);
+            else if (key == "bot3_role") current_guild.bot3_role = std::stoull(value);
+            else if (key == "specials") {
+                current_guild.specials = parse_sf(value);
+            }
+            else if (key == "allowed_channels") {
+                current_guild.allowed_channels = parse_sf(value);
+            }
+            else if (key == "XP_MIN") current_guild.xp_min = std::stoi(value);
+            else if (key == "XP_MAX") current_guild.xp_max = std::stoi(value);
+            else if (key == "XP_COOLDOWN") current_guild.xp_cooldown = std::stoi(value);
+        }
+        sqlite3_finalize(stmt);
+        for (auto& pair : guild_configs) {
+            pair.second.update_stupid();
+        }
 
-    dpp::snowflake LVL_CH = 1482858189035667628ULL;
-
-    const std::vector<std::string> RELIABLE_PROVIDERS = {
-        "tenor.com", "giphy.com", "youtube.com", "youtu.be", "klipy.com", "twitter.com", "x.com", "instagram.com", "tiktok.com"
-    };
-
-    const std::vector<std::string> AURA_LOSSES = {
-        "**HOLY AURA LOSS <:heartem:1485404606480515172>**", "aura loss <:heartem:1485404606480515172>", "<:heartem:1485404606480515172> <:skem:1485404723501863085> aura loss <:downvote:1485404530924589228>", "Aura loss <:heartem:1485404606480515172>", "damn you got less aura than axuaxi after that <:heartem:1485404606480515172>", "holy aura loss <:heartem:1485404606480515172>"
-    };
-
-    const std::vector<std::string> SPANISH_LOSS = {
-        "adios aura <:heartem:1485404606480515172>", "au rev'aura <:heartem:1485404606480515172>", "AURA ⬇️  ", "你的aura减少。", "Aura berkurang <:heartem:1485404606480515172>"
-    };
+        std::cout<<"configs loaded"<<std::endl;
+    }
 }

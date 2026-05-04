@@ -19,6 +19,8 @@ namespace message {
 	void handle(const dpp::message_create_t& event, dpp::cluster& bot) {
 		// TODO: make proper helpers and consolidate this code properly.
 		if (event.msg.author.is_bot()) return;
+		dpp::snowflake g_id = event.msg.guild_id;
+		auto conf = config::get_config(g_id);
 
 		static std::random_device rd;
 		static std::mt19937 gen(rd());
@@ -28,8 +30,8 @@ namespace message {
 		long time_now = std::time(nullptr);
 		long time_prev = db::xp_time_get(event.msg.guild_id, user_id);
 
-		if (time_now - time_prev >= config::XP_COOLDOWN) {
-			std::uniform_int_distribution<> xp_dis(config::XP_MIN, config::XP_MAX);
+		if (time_now - time_prev >= conf.xp_cooldown) {
+			std::uniform_int_distribution<> xp_dis(conf.xp_min, conf.xp_max);
 
 			int xp_del = xp_dis(gen);
 			db::xp_add(event.msg.guild_id, user_id, xp_del);
@@ -41,19 +43,19 @@ namespace message {
 			if (xp_now >= xp_requ) {
 				int lvl_new = lvl_now + 1;
 				db::xp_lvl_set(event.msg.guild_id, user_id, xp_now, lvl_new);
-				bot.message_create(dpp::message(config::LVL_CH, "<@" + std::to_string(user_id) + "> reached **level " + std::to_string(lvl_new) + "**, nice."));
-				if (config::LVL_ROLES.find(lvl_new) != config::LVL_ROLES.end()) {
-					bot.guild_member_add_role(event.msg.guild_id, user_id, config::LVL_ROLES.at(lvl_new));
+				bot.message_create(dpp::message(conf.lvl_ch, "<@" + std::to_string(user_id) + "> reached **level " + std::to_string(lvl_new) + "**, nice."));
+				if (conf.lvl_roles.find(lvl_new) != conf.lvl_roles.end()) {
+					bot.guild_member_add_role(event.msg.guild_id, user_id, conf.lvl_roles.at(lvl_new));
 				}
 			}
 		}
 
-		auto& allowed = config::ALLOWED_CHANNELS;
+		auto& allowed = conf.allowed_channels;
 		if (std::find(allowed.begin(), allowed.end(), event.msg.channel_id) == allowed.end()) return;
 
 		std::uniform_int_distribution<> dis(1, 100);
-		auto is_special = std::find(config::SPECIALS.begin(), config::SPECIALS.end(), user_id);
-		if (is_special != config::SPECIALS.end() && dis(gen) == 1) {
+		auto is_special = std::find(conf.specials.begin(), conf.specials.end(), user_id);
+		if (is_special != conf.specials.end() && dis(gen) == 1) {
 			db::rmv_aura(event.msg.guild_id, user_id, 100);
 			bot.message_create(dpp::message(event.msg.channel_id, "\"" + event.msg.content + "\" HOLY AURA LOSS 💔"));
 			return;
@@ -115,7 +117,7 @@ namespace message {
 					if (ch) {
 						db::rmv_aura(event.msg.guild_id, event.msg.author.id, db::get_setting_int(event.msg.guild_id, "auralossamt", 100));
 						bot.channel_typing(event.msg.channel_id);
-						std::string msg = (event.msg.channel_id == config::NON_ENG_CH) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
+						std::string msg = (event.msg.channel_id == conf.non_eng_ch) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
 						dpp::message rep(event.msg.channel_id, msg);
 						rep.set_reference(event.msg.id);
 						bot.message_create(rep);
@@ -130,26 +132,26 @@ namespace message {
 				dpp::snowflake g_id = event.msg.guild_id;
 				if (!(perm & dpp::p_embed_links)) {
 					bot.channel_typing(event.msg.channel_id);
-					bot.start_timer([&bot, msg_id, 	ch_id, user_sf, g_id] (dpp::timer t) {
+					bot.start_timer([&bot, msg_id, 	ch_id, user_sf, g_id, conf] (dpp::timer t) {
 							db::rmv_aura(g_id, user_sf, db::get_setting_int(g_id, "auralossamt", 100));
 
 							bot.channel_typing(ch_id);
-							std::string msg = (ch_id == config::NON_ENG_CH) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
+							std::string msg = (ch_id == conf.non_eng_ch) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
 							dpp::message rep(ch_id, msg);
 							rep.set_reference(msg_id);
 							bot.message_create(rep);
 							bot.stop_timer(t);}, 3);
 					return;
 				} else {
-					bot.start_timer([&bot, msg_id, ch_id, url, user_sf, g_id](dpp::timer t) {
-							bot.message_get(msg_id, ch_id, [&bot, ch_id, msg_id, url, user_sf, g_id](const dpp::confirmation_callback_t& res) {
+					bot.start_timer([&bot, msg_id, ch_id, url, user_sf, g_id, conf](dpp::timer t) {
+							bot.message_get(msg_id, ch_id, [&bot, ch_id, msg_id, url, user_sf, g_id, conf](const dpp::confirmation_callback_t& res) {
 
 									if (res.is_error()) return;
 									dpp::message m = std::get<dpp::message>(res.value);
 									if (m.embeds.empty() && m.content.find("<" + url + ">") == std::string::npos) {
 									db::rmv_aura(g_id, user_sf, db::get_setting_int(g_id, "auralossamt", 100));
 
-									std::string msg = (ch_id == config::NON_ENG_CH) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
+									std::string msg = (ch_id == conf.non_eng_ch) ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);  
 									dpp::message rep(ch_id, msg);
 									rep.set_reference(msg_id);
 									bot.message_create(rep);

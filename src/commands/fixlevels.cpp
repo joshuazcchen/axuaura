@@ -13,13 +13,14 @@ namespace commands {
 		dpp::guild_member member = event.command.member;
 		dpp::snowflake u_id = event.command.get_issuing_user().id;
 		dpp::snowflake g_id = event.command.guild_id;
+		auto conf = config::get_config(g_id);
 
 		int c_lvl = db::lvl_get(event.command.guild_id, u_id);
 
 		int high = 0;
 		dpp::snowflake hid = 0;
 
-		for (const auto& [lv, rid] : config::LVL_ROLES) {
+		for (const auto& [lv, rid] : conf.lvl_roles) {
 			if (c_lvl >= lv && lv > high) {
 				high = lv;
 				hid = rid;
@@ -28,7 +29,7 @@ namespace commands {
 
 		bool changed = false;
 		std::vector<dpp::snowflake> c_roles = member.get_roles();
-		for (const auto& [lv, rid] : config::LVL_ROLES) {
+		for (const auto& [lv, rid] : conf.lvl_roles) {
 			if (rid != hid && std::find(c_roles.begin(), c_roles.end(), rid) != c_roles.end()) {
 				bot.guild_member_remove_role(g_id, u_id, rid);
 				changed = true;
