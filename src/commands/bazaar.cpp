@@ -52,11 +52,11 @@ namespace commands {
             int page = std::get<int64_t>(event.get_parameter("page"));
             page--;
             auto items_full = db::shop_get_all(g_id, true);
-            size_t start_idx = static_cast<size_t>(page) * config::PAGE_SIZE;
+            size_t start_idx = static_cast<size_t>(page) * config::BAZAAR_PGSZ;
             if (start_idx > items_full.size()) {
                 start_idx = items_full.size();
             }
-            size_t count = std::min(static_cast<size_t>(config::PAGE_SIZE), items_full.size() - start_idx);
+            size_t count = std::min(static_cast<size_t>(config::BAZAAR_PGSZ), items_full.size() - start_idx);
 
             auto items = std::span{items_full}.subspan(start_idx, count);
             if (items.empty()) {
@@ -69,7 +69,7 @@ namespace commands {
                 out += "**id: " + std::to_string(i.item_id) + "**, " + display + ", **price (tax inclusive): ** " + std::to_string(i.cost) + " aura\n";
                 if (!i.desc.empty()) out += "> *" + i.desc + "*\n";
             }
-            out += "\n\n-# page " + std::to_string(++page) + " of " + std::to_string((items_full.size() + config::PAGE_SIZE) / config::PAGE_SIZE);
+            out += "\n\n-# page " + std::to_string(++page) + " of " + std::to_string((items_full.size() + config::BAZAAR_PGSZ) / config::BAZAAR_PGSZ);
             event.reply(dpp::message(out).set_allowed_mentions(false, false, false, false, {}, {}));
 
         } else if (sub == "buy") {
@@ -139,11 +139,11 @@ namespace commands {
                 int page = std::get<int64_t>(event.get_parameter("page"));
                 page--;
                 auto items_full = db::shop_get_all(g_id, true);
-                size_t start_idx = static_cast<size_t>(page) * config::PAGE_SIZE;
+                size_t start_idx = static_cast<size_t>(page) * config::BAZAAR_PGSZ;
                 if (start_idx > items_full.size()) {
                     start_idx = items_full.size();
                 }
-                size_t count = std::min(static_cast<size_t>(config::PAGE_SIZE), items_full.size() - start_idx);
+                size_t count = std::min(static_cast<size_t>(config::BAZAAR_PGSZ), items_full.size() - start_idx);
 
                 auto items = std::span{items_full}.subspan(start_idx, count);
                 if (items.empty()) {
