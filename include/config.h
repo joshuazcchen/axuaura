@@ -18,6 +18,8 @@ namespace config {
         "adios aura <:heartem:1485404606480515172>", "au rev'aura <:heartem:1485404606480515172>", "AURA ⬇️  ", "你的aura减少。", "Aura berkurang <:heartem:1485404606480515172>"
     };
 
+    inline const int PAGE_SIZE = 10;
+
     struct GuildConfig {
         std::vector<dpp::snowflake> allowed_channels;
         dpp::snowflake non_eng_ch = 0; // TODO: move this to a vec

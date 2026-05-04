@@ -1,5 +1,6 @@
 #include "commands.h"
 #include "db.h"
+#include "config.h"
 #include <algorithm>
 #include "utils.h"
 
@@ -7,7 +8,9 @@ namespace commands {
 
     dpp::slashcommand bazaar_def(dpp::cluster& bot) {
         return dpp::slashcommand("bazaar", "IT'S HERE!", bot.me.id)
-            .add_option(dpp::command_option(dpp::co_sub_command, "list", "browse the wares"))
+            .add_option(dpp::command_option(dpp::co_sub_command, "list", "browse the wares")
+                .add_option(dpp::command_option(dpp::co_integer, "page", "page number", true))
+            )
             .add_option(dpp::command_option(dpp::co_sub_command, "buy", "buy item")
                 .add_option(dpp::command_option(dpp::co_integer, "id", "item id", true))
             )
@@ -23,6 +26,19 @@ namespace commands {
                 .add_option(dpp::command_option(dpp::co_sub_command, "remove", "rmv")
                     .add_option(dpp::command_option(dpp::co_integer, "id", "item id", true))
                 )
+                .add_option(dpp::command_option(dpp::co_sub_command, "listall", "list")
+                    .add_option(dpp::command_option(dpp::co_integer, "page", "page number", true))
+                )
+                .add_option(dpp::command_option(dpp::co_sub_command, "toggle", "toggle item")
+                    .add_option(dpp::command_option(dpp::co_integer, "id", "item id", true))
+                )
+                .add_option(dpp::command_option(dpp::co_sub_command, "obt", "toggle item obtain")
+                    .add_option(dpp::command_option(dpp::co_integer, "id", "item id", true))
+                )
+                .add_option(dpp::command_option(dpp::co_sub_command, "price", "price item")
+                    .add_option(dpp::command_option(dpp::co_integer, "id", "item id", true))
+                    .add_option(dpp::command_option(dpp::co_integer, "price", "item id", true))
+                )
             );
     }
 
@@ -33,19 +49,33 @@ namespace commands {
         dpp::snowflake u_id = event.command.get_issuing_user().id;
 
         if (sub == "list") {
-            auto items = db::shop_get_all(g_id);
+            int page = std::get<int64_t>(event.get_parameter("page"));
+            page--;
+            auto items_full = db::shop_get_all(g_id, true);
+            size_t start_idx = static_cast<size_t>(page) * config::PAGE_SIZE;
+            if (start_idx > items_full.size()) {
+                start_idx = items_full.size();
+            }
+            size_t count = std::min(static_cast<size_t>(config::PAGE_SIZE), items_full.size() - start_idx);
+
+            auto items = std::span{items_full}.subspan(start_idx, count);
+            if (items.empty()) {
+                event.reply("no");
+                return;
+            }
             std::string out = "# the bazaar\n\n";
             for (auto& i : items) {
                 std::string display = (i.type == "role") ? "<@&" + std::to_string(i.role_id) + ">" : i.name;
                 out += "**id: " + std::to_string(i.item_id) + "**, " + display + ", **price (tax inclusive): ** " + std::to_string(i.cost) + " aura\n";
                 if (!i.desc.empty()) out += "> *" + i.desc + "*\n";
             }
+            out += "\n\n-# page " + std::to_string(++page) + " of " + std::to_string((items_full.size() + config::PAGE_SIZE) / config::PAGE_SIZE);
             event.reply(dpp::message(out).set_allowed_mentions(false, false, false, false, {}, {}));
-            
+
         } else if (sub == "buy") {
             int id = std::get<int64_t>(event.get_parameter("id"));
             auto item = db::shop_get(g_id, id);
-            
+
             if (item.item_id == -1 || !item.active) {
                 event.reply(dpp::message("what?").set_flags(dpp::m_ephemeral));
                 return;
@@ -74,7 +104,7 @@ namespace commands {
 
             auto item = db::shop_get(g_id, id);
             int refund = item.cost / 10;
-            
+
             if (item.type == "role") {
                 bot.guild_member_remove_role(g_id, u_id, item.role_id);
             }
@@ -94,10 +124,10 @@ namespace commands {
                 dpp::snowflake r_id = std::get<dpp::snowflake>(event.get_parameter("role"));
                 int cost = std::get<int64_t>(event.get_parameter("cost"));
                 std::string desc = "";
-                
+
                 auto param = event.get_parameter("desc");
                 if (std::holds_alternative<std::string>(param)) desc = std::get<std::string>(param);
-                
+
                 int i_id = db::shop_add(g_id, "role", r_id, "<@&" + std::to_string(r_id) + ">", desc, cost, "{}");
                 event.reply(dpp::message("added to shop. id: " + std::to_string(i_id)).set_flags(dpp::m_ephemeral));
 
@@ -105,6 +135,44 @@ namespace commands {
                 int id = std::get<int64_t>(event.get_parameter("id"));
                 db::shop_rmv(g_id, id);
                 event.reply(dpp::message("item reoved.").set_flags(dpp::m_ephemeral));
+            } else if (subcmd.name == "listall") {
+                int page = std::get<int64_t>(event.get_parameter("page"));
+                page--;
+                auto items_full = db::shop_get_all(g_id, true);
+                size_t start_idx = static_cast<size_t>(page) * config::PAGE_SIZE;
+                if (start_idx > items_full.size()) {
+                    start_idx = items_full.size();
+                }
+                size_t count = std::min(static_cast<size_t>(config::PAGE_SIZE), items_full.size() - start_idx);
+
+                auto items = std::span{items_full}.subspan(start_idx, count);
+                if (items.empty()) {
+                    event.reply("no");
+                    return;
+                }
+                std::string out = "";
+                for (auto& i : items) {
+                    std::string display = (i.type == "role") ? "<@&" + std::to_string(i.role_id) + ">" : i.name;
+                    out += std::to_string(i.item_id) + " " + display + " " + std::to_string(i.cost) + " aura\n" + (db::shop_state(g_id, i.item_id, "active") == 1 ? "(ACTIVE) " : "(INACTIVE) " ) + 
+                        (db::shop_state(g_id, i.item_id, "obtainable") == 1 ? "(OBTAINABLE)" : "(UNOBTAINABLE)");
+                    if (!i.desc.empty()) out += " " + i.desc + "*";
+                }
+                event.reply(dpp::message(out).set_allowed_mentions(false, false, false, false, {}, {}));
+            } else if (subcmd.name == "toggle") {
+                int id = std::get<int64_t>(event.get_parameter("id"));
+                int curr = db::shop_state(g_id, id, "active");
+                db::shop_set_int(g_id, id, "active", (curr == 1 ? 0 : 1));
+                event.reply(dpp::message("done").set_allowed_mentions(false, false, false, false, {}, {}));
+            } else if (subcmd.name == "obt") {
+                int id = std::get<int64_t>(event.get_parameter("id"));
+                int curr = db::shop_state(g_id, id, "obtainable");
+                db::shop_set_int(g_id, id, "obtainable", (curr == 1 ? 0 : 1));
+                event.reply(dpp::message("done"));
+            } else if (subcmd.name == "price") {
+                int id = std::get<int64_t>(event.get_parameter("id"));
+                int cost = std::get<int64_t>(event.get_parameter("price"));
+                db::shop_set_int(g_id, id, "cost", cost);
+                event.reply(dpp::message("done"));
             }
         }
     }
