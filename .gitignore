@@ -11,3 +11,4 @@ build_test/
 *.sqlite-shm
 *.sqlite-wal
 *.db
+.env
