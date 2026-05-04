@@ -1,6 +1,7 @@
 #include "commands.h"
 #include "db.h"
 #include <algorithm>
+#include "utils.h"
 
 namespace commands {
 
@@ -82,6 +83,10 @@ namespace commands {
             event.reply(dpp::message("sold **" + item.name + "** for " + std::to_string(refund) + " aura."));
 
         } else if (sub == "admin") {
+            if (!utils::is_admin(event)) {
+                event.reply(dpp::message("no.").set_flags(dpp::m_ephemeral));
+                return;
+            }
             auto subcmd = cmd.options[0].options[0];
             if (subcmd.name == "add") {
                 dpp::snowflake r_id = std::get<dpp::snowflake>(event.get_parameter("role"));
