@@ -59,7 +59,8 @@ namespace commands {
             if ((item.cost >= 0 && aura >= item.cost) || (item.cost < 0 && aura <= item.cost)) {
                 db::rmv_aura(g_id, u_id, item.cost);
                 db::inv_add(g_id, u_id, id);
-                event.reply(dpp::message("purchased **" + item.name + "**.").set_allowed_mentions(false, false, false, false, {}, {}));
+                db::inv_eq(g_id, u_id, id);
+                event.reply(dpp::message("purchased and equipped **" + item.name + "**. manage your inventory using `/inventory`.").set_allowed_mentions(false, false, false, false, {}, {}));
             } else {
                 event.reply(dpp::message("not enough money.").set_flags(dpp::m_ephemeral));
             }
@@ -80,6 +81,7 @@ namespace commands {
 
             db::add_aura(g_id, u_id, refund);
             db::inv_rm(g_id, u_id, id);
+            db::inv_uneq(g_id, u_id, id);
             event.reply(dpp::message("sold **" + item.name + "** for " + std::to_string(refund) + " aura."));
 
         } else if (sub == "admin") {
@@ -96,7 +98,7 @@ namespace commands {
                 auto param = event.get_parameter("desc");
                 if (std::holds_alternative<std::string>(param)) desc = std::get<std::string>(param);
                 
-                int i_id = db::shop_add(g_id, "role", r_id, "<@" + std::to_string(r_id) + ">", desc, cost, "{}");
+                int i_id = db::shop_add(g_id, "role", r_id, "<@&" + std::to_string(r_id) + ">", desc, cost, "{}");
                 event.reply(dpp::message("added to shop. id: " + std::to_string(i_id)).set_flags(dpp::m_ephemeral));
 
             } else if (subcmd.name == "remove") {
