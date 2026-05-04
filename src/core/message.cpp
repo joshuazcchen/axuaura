@@ -1,4 +1,4 @@
-#include <events.h>
+#include "message.h"
 #include "db.h"
 #include "xp.h"
 #include "config.h"
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <ctime>
 
-namespace events {
+namespace message {
 	std::string resp_msg(const std::vector<std::string>& pool) {
 		static std::random_device rd;
 		static std::mt19937 gen(rd());
