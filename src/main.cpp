@@ -6,8 +6,11 @@
 #include "db.h"
 #include "roles.h"
 #include "events.h"
+#include "dotenv.h"
 
 int main(int argc, char **argv) {
+	dotenv::init();
+
 	const char *token = std::getenv("BOT_TOKEN");
 	setenv("MAGICK_OCL_DEVICE", "OFF", 1); 
 	setenv("MAGICK_OPENCL", "OFF", 1);
@@ -48,10 +51,6 @@ int main(int argc, char **argv) {
 	bot.on_voice_state_update([&bot](const dpp::voice_state_update_t& event) {
 			events::handle_voice(event, bot);	
 			});
-
-//	bot.on_button_click([&bot](const dpp::button_click_t& event) {
-//		buttons::handle_button_click(event, bot);
-//	});
 
 	bot.start(dpp::st_wait);
 	return 0;

@@ -1,12 +1,12 @@
-#include "events.h"
+#include "voice.h"
 #include "db.h"
 #include "config.h"
 #include <cmath>
 #include <ctime>
 #include <random>
 
-namespace events {
-	void handle_voice(const dpp::voice_state_update_t& event, dpp::cluster& bot) {
+namespace voice {
+	void handle(const dpp::voice_state_update_t& event, dpp::cluster& bot) {
 		dpp::snowflake user_id = event.state.user_id;
 		dpp::user* u = dpp::find_user(user_id);
 		if (u && u->is_bot()) return;
