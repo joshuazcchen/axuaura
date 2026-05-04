@@ -24,7 +24,9 @@ namespace voice {
 				if (time_m > 0) {
 					static std::random_device rd;
 					static std::mt19937 gen(rd());
-					std::uniform_int_distribution<> dis(config::XP_MIN, config::XP_MAX);
+					dpp::snowflake g_id = event.state.guild_id;
+					auto conf = config::get_config(g_id);
+					std::uniform_int_distribution<> dis(conf.xp_min, conf.xp_max);
 
 					int xp_del = 0;
 					for (int i = 0; i < time_m; i++) {

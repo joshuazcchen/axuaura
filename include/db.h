@@ -91,8 +91,10 @@ namespace db {
     int shop_add(dpp::snowflake g_id, const std::string& type, dpp::snowflake r_id, const std::string& name, const std::string& desc, int cost, const std::string& data);
     void shop_rmv(dpp::snowflake g_id, int item_id);
     ShopItem shop_get(dpp::snowflake g_id, int item_id);
-    std::vector<ShopItem> shop_get_all(dpp::snowflake g_id);
+    std::vector<ShopItem> shop_get_all(dpp::snowflake g_id, bool active);
     std::vector<ShopItem> shop_get_sign(dpp::snowflake g_id, int sign);
+	int shop_state(dpp::snowflake g_id, int item_id, const std::string& key);
+	void shop_set_int(dpp::snowflake g_id, int item_id, const std::string& key, int value);
 
     void inv_add(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
     void inv_rm(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);

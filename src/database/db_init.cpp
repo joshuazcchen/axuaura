@@ -73,7 +73,8 @@ namespace db {
             "CREATE TABLE IF NOT EXISTS shop_items ("
             "item_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "
             "type TEXT NOT NULL, role_id TEXT, name TEXT NOT NULL, desc TEXT, "
-            "cost INTEGER NOT NULL, data TEXT, active INTEGER DEFAULT 1);"
+            "cost INTEGER NOT NULL, data TEXT, active INTEGER DEFAULT 1, "
+            "obtainable INTEGER DEFAULT 1 );"
 
             "CREATE TABLE IF NOT EXISTS inventory ("
             "inv_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "

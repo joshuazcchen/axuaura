@@ -1,11 +1,13 @@
 #include "commands.h"
 #include "db.h"
+#include "config.h"
 
 namespace commands {
 
 	dpp::slashcommand settings_def(dpp::cluster& bot) {
 		return dpp::slashcommand("settings", "set ings", bot.me.id)
 			.set_default_permissions(dpp::p_administrator)
+			// TODO: make better
 			.add_option(
 					dpp::command_option(dpp::co_string, "setting", "which one", true)
 					.add_choice(dpp::command_option_choice("aurachancegain", std::string("aurachancegain")))
@@ -23,6 +25,7 @@ namespace commands {
 	void handle_settings(const dpp::slashcommand_t& event, dpp::cluster& bot) {
 		std::string target_setting = std::get<std::string>(event.get_parameter("setting"));
 		std::string new_val = std::get<std::string>(event.get_parameter("value"));
+		dpp::snowflake g_id = event.command.guild_id;
 
 		if (target_setting == "status") {
 			db::set_setting(event.command.guild_id, "status", new_val);
@@ -30,7 +33,15 @@ namespace commands {
 		} else {
 			try {
 				int rate = std::stoi(new_val);
-				db::set_setting(event.command.guild_id, target_setting, rate);
+				db::set_setting(g_id, target_setting, rate);
+
+				if (target_setting == "XP_MIN") {
+					config::guild_configs[g_id].xp_min = rate;
+				} else if (target_setting == "XP_MAX") {
+					config::guild_configs[g_id].xp_max = rate;
+				} else if (target_setting == "XP_COOLDOWN") {
+					config::guild_configs[g_id].xp_cooldown = rate;
+				}
 			} catch (...) {
 				event.reply(dpp::message("kys").set_flags(dpp::m_ephemeral));
 				return;
