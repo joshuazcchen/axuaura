@@ -187,11 +187,13 @@ namespace commands {
                 int id = std::get<int64_t>(event.get_parameter("id"));
 
                 db::inv_add(g_id, std::get<dpp::snowflake>(user), id);
+		event.reply(dpp::message("done"));
             } else if (subcmd.name == "take") {
                 auto user = event.get_parameter("user");
                 int id = std::get<int64_t>(event.get_parameter("id"));
 
                 db::inv_rm(g_id, std::get<dpp::snowflake>(user), id);
+		event.reply(dpp::message("done"));
             }
         }
     }
