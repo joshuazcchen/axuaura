@@ -41,7 +41,7 @@ namespace commands {
 		}
 		db::rmv_aura(event.command.guild_id, user_id, bet);
 		if (cmd.name == "slots") {
-			event.reply("<a:Untitled:1501020601010094221> <a:offset2:1501024438601125938> <a:offset1:1501024416656654398>");
+			event.reply("<a:gamble1:1501132151788142723><a:gamble2:1501132167093289001><a:gamble3:1501132182498840596>");
 			new dpp::oneshot_timer(&bot, 3, [event, bet, user_id, aura](dpp::timer t) {
 				std::vector<std::vector<std::string>> ops = {
                     {"<:hem1:1485432681176105030><:hem2:1485432706400780510>","<:hem3:1485432730169905312><:hem4:1485432750982037595>"},
@@ -126,11 +126,11 @@ namespace commands {
 			std::vector<std::string> opp;
 			std::string choice = std::get<std::string>(event.get_parameter("choice"));
 			if (choice == "heads") {
-				op = {"<a:heads2:1501027488829149204>", "<:row1column1:1489394459748864292><:row1column2:1489394446733807882>","<:row2column1:1489394473845784737><:row2column2:1489394488647614504>"};
-				opp = {"<a:tails:1501027713648033983>", "<:row1column1:1489394309198250044><:row1column2:1489394322972348416>","<:row2column1:1489394338378023105><:row2column2:1489394354627022919>"};
+				op = {"<a:heads4:1501132228946559006>", "<:row1column1:1489394459748864292><:row1column2:1489394446733807882>","<:row2column1:1489394473845784737><:row2column2:1489394488647614504>"};
+				opp = {"<a:tails4:1501132214577139733>", "<:row1column1:1489394309198250044><:row1column2:1489394322972348416>","<:row2column1:1489394338378023105><:row2column2:1489394354627022919>"};
 			} else {
-				opp = {"<a:tails:1501027713648033983>", "<:row1column1:1489394459748864292><:row1column2:1489394446733807882>","<:row2column1:1489394473845784737><:row2column2:1489394488647614504>"};
-				op = {"<a:heads2:1501027488829149204>", "<:row1column1:1489394309198250044><:row1column2:1489394322972348416>","<:row2column1:1489394338378023105><:row2column2:1489394354627022919>"};
+				opp = {"<a:heads4:1501132228946559006>", "<:row1column1:1489394459748864292><:row1column2:1489394446733807882>","<:row2column1:1489394473845784737><:row2column2:1489394488647614504>"};
+				op = {"<a:tails4:1501132214577139733>", "<:row1column1:1489394309198250044><:row1column2:1489394322972348416>","<:row2column1:1489394338378023105><:row2column2:1489394354627022919>"};
 			}
 			bool win = (rand() % 2 == 0);
 
