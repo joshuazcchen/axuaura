@@ -77,7 +77,7 @@ namespace commands {
                 out += "**id: " + std::to_string(i.item_id) + "**, " + display + ", **price (tax inclusive): ** " + std::to_string(i.cost) + " aura\n";
                 if (!i.desc.empty()) out += "> *" + i.desc + "*\n";
             }
-            out += "\n\n-# page " + std::to_string(++page) + " of " + std::to_string((items_full.size() + config::BAZAAR_PGSZ) / config::BAZAAR_PGSZ);
+            out += "\n-# page " + std::to_string(++page) + " of " + std::to_string((items_full.size() + config::BAZAAR_PGSZ) / config::BAZAAR_PGSZ);
             event.reply(dpp::message(out).set_allowed_mentions(false, false, false, false, {}, {}));
 
         } else if (sub == "buy") {
@@ -146,7 +146,7 @@ namespace commands {
             } else if (subcmd.name == "listall") {
                 int page = std::get<int64_t>(event.get_parameter("page"));
                 page--;
-                auto items_full = db::shop_get_all(g_id, true);
+                auto items_full = db::shop_get_all(g_id, false);
                 size_t start_idx = static_cast<size_t>(page) * config::BAZAAR_PGSZ;
                 if (start_idx > items_full.size()) {
                     start_idx = items_full.size();
@@ -161,9 +161,10 @@ namespace commands {
                 std::string out = "";
                 for (auto& i : items) {
                     std::string display = (i.type == "role") ? "<@&" + std::to_string(i.role_id) + ">" : i.name;
-                    out += std::to_string(i.item_id) + " " + display + " " + std::to_string(i.cost) + " aura\n" + (db::shop_state(g_id, i.item_id, "active") == 1 ? "(ACTIVE) " : "(INACTIVE) " ) + 
+                    out += std::to_string(i.item_id) + " " + display + " " + std::to_string(i.cost) + " aura" + (db::shop_state(g_id, i.item_id, "active") == 1 ? "(ACTIVE) " : "(INACTIVE) " ) + 
                         (db::shop_state(g_id, i.item_id, "obtainable") == 1 ? "(OBTAINABLE)" : "(UNOBTAINABLE)");
                     if (!i.desc.empty()) out += " " + i.desc + "*";
+		    out += "\n";
                 }
                 event.reply(dpp::message(out).set_allowed_mentions(false, false, false, false, {}, {}));
             } else if (subcmd.name == "toggle") {
@@ -186,11 +187,13 @@ namespace commands {
                 int id = std::get<int64_t>(event.get_parameter("id"));
 
                 db::inv_add(g_id, std::get<dpp::snowflake>(user), id);
+		event.reply(dpp::message("done"));
             } else if (subcmd.name == "take") {
                 auto user = event.get_parameter("user");
                 int id = std::get<int64_t>(event.get_parameter("id"));
 
                 db::inv_rm(g_id, std::get<dpp::snowflake>(user), id);
+		event.reply(dpp::message("done"));
             }
         }
     }
