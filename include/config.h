@@ -40,6 +40,9 @@ namespace config {
         int xp_min = 15;
         int xp_max = 30;
 
+        int aurachancegain = 10;
+        int aurapassiveamt = 5;
+
         std::vector<dpp::snowflake> specials;
 
         std::map<int, dpp::snowflake> lvl_roles = {

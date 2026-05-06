@@ -57,6 +57,8 @@ namespace config {
             else if (key == "XP_MIN") current_guild.xp_min = std::stoi(value);
             else if (key == "XP_MAX") current_guild.xp_max = std::stoi(value);
             else if (key == "XP_COOLDOWN") current_guild.xp_cooldown = std::stoi(value);
+            else if (key == "aurachancegain") current_guild.aurachancegain = std::stoi(value);
+            else if (key == "aurapassiveamt") current_guild.aurapassiveamt = std::stoi(value);
         }
         sqlite3_finalize(stmt);
         for (auto& pair : guild_configs) {

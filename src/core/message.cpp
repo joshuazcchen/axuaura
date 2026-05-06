@@ -61,8 +61,8 @@ namespace message {
 			return;
 		}
 
-		if (dis(gen) <= db::get_setting_int(event.msg.guild_id, "aurachancegain", 10)) {
-			db::add_aura(event.msg.guild_id, user_id, db::get_setting_int(event.msg.guild_id, "aurapassiveamt", 2));
+		if (dis(gen) <= conf.aurachancegain) {
+			db::add_aura(event.msg.guild_id, user_id, conf.aurapassiveamt);
 		}
 
 		std::uniform_int_distribution<> drop_dis(1, 1000);

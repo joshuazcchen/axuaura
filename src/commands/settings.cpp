@@ -41,7 +41,7 @@ namespace commands {
 					config::guild_configs[g_id].xp_max = rate;
 				} else if (target_setting == "XP_COOLDOWN") {
 					config::guild_configs[g_id].xp_cooldown = rate;
-				}
+				} 
 			} catch (...) {
 				event.reply(dpp::message("kys").set_flags(dpp::m_ephemeral));
 				return;
