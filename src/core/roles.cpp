@@ -50,6 +50,10 @@ namespace roles {
             if (db::inv_has(g_id, u_id, r_id)) continue;
             db::inv_add(g_id, u_id, r_id);
             db::inv_eq(g_id, u_id, r_id);
+            auto item = db::shop_get(g_id, r_id);
+            if (item.type == "role") {
+                bot.guild_member_add_role(g_id, u_id, item.role_id);
+            }
         }
 
         for (auto const& r_id : conf.stupid_roles) {
