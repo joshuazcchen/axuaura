@@ -47,6 +47,7 @@ namespace roles {
         
         // TODO: make this work with the other roles i deadass looked at this yesterday and somehow forgot that there were 6 people with special aura roles.
         for (auto const& [u_id, r_id] : targets) {
+            if (db::inv_has(g_id, u_id, r_id)) continue;
             db::inv_add(g_id, u_id, r_id);
             db::inv_eq(g_id, u_id, r_id);
         }

@@ -8,6 +8,7 @@ namespace commands {
         return dpp::slashcommand("inventory", "view/manage your items", bot.me.id)
             .add_option(dpp::command_option(dpp::co_sub_command, "view", "view your items")
                 .add_option(dpp::command_option(dpp::co_integer, "page", "page", true))
+                .add_option(dpp::command_option(dpp::co_user, "who", "whomst", false))
             )
             .add_option(dpp::command_option(dpp::co_sub_command, "unequip", "unequip an item")
                 .add_option(dpp::command_option(dpp::co_integer, "id", "item to unequip", true)))
@@ -20,6 +21,9 @@ namespace commands {
         std::string sub = cmd.options[0].name;
         dpp::snowflake g_id = event.command.guild_id;
         dpp::snowflake u_id = event.command.get_issuing_user().id;
+        if (std::holds_alternative<dpp::snowflake>(event.get_parameter("who"))) {
+            u_id = std::get<dpp::snowflake>(event.get_parameter("who"));
+        }
 
         if (sub == "view") {
             int page = std::get<int64_t>(event.get_parameter("page"));
