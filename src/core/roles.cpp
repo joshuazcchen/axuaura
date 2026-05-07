@@ -27,7 +27,7 @@ namespace roles {
                 dpp::snowflake u_id(list[i].first);
                 int role_id = 0;
 
-                if (bot) {
+                if (!bot) {
                     if (rank == 3) role_id = num3_id;
                     else if (rank == 2) role_id = num2_id;
                     else if (rank == 1) role_id = leader_id;
