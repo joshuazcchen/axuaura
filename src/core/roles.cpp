@@ -13,7 +13,7 @@ namespace roles {
         auto top3 = db::get_ab(g_id, 3, false);
         auto bot3 = db::get_ab(g_id, 3, true);
 
-        std::map<dpp::snowflake, dpp::snowflake> targets;
+        std::map<dpp::snowflake, int> targets;
         int leader_id = db::shop_ensure_sys(g_id, "most aura", conf.leader_role, 50000);
         int loser_id = db::shop_ensure_sys(g_id, "least aura", conf.loser_role, -50000);
         int bot3_id = db::shop_ensure_sys(g_id, "3nd least", conf.bot3_role, -50000);
@@ -60,7 +60,8 @@ namespace roles {
             dpp::role *r = dpp::find_role(r_id);
             auto hold = r->get_members();
             for (auto const& [u_id, memb] : hold) {
-                bool is_stupid = (targets.count(u_id) && targets.at(u_id) == r_id);
+                if (!targets.count(u_id)) continue;
+                bool is_stupid = db::shop_get(g_id, targets.at(u_id)).role_id == r_id;
 
                 if (!is_stupid) {
                     bot.guild_member_remove_role(1469591363770122274, u_id, r_id);
