@@ -184,6 +184,11 @@ namespace commands {
                 int curr = db::shop_state(g_id, id, "obtainable");
                 db::shop_set_int(g_id, id, "obtainable", (curr == 1 ? 0 : 1));
                 event.reply(dpp::message("done"));
+            } else if (subcmd.name == "obt") {
+                int id = std::get<int64_t>(event.get_parameter("id"));
+                int curr = db::shop_state(g_id, id, "sellability");
+                db::shop_set_int(g_id, id, "sellability", (curr == 1 ? 0 : 1));
+                event.reply(dpp::message("done"));
             } else if (subcmd.name == "price") {
                 int id = std::get<int64_t>(event.get_parameter("id"));
                 int cost = std::get<int64_t>(event.get_parameter("price"));
