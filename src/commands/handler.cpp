@@ -18,6 +18,7 @@ namespace commands {
         {"bazaar", handle_bazaar},
         {"inventory", handle_inventory},
 	{"credits", handle_credits},
+	{"coinflip", handle_coinflip},
     };
 
     std::map<std::string, ContextHandler> context_map = {
@@ -55,6 +56,7 @@ namespace commands {
                 bazaar_def(bot),
                 inventory_def(bot),
 		credits_def(bot),
+		coinflip_def(bot),
             });
         }
     }

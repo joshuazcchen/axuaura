@@ -63,6 +63,9 @@ namespace commands {
 		dpp::slashcommand credits_def(dpp::cluster& bot);
 		void handle_credits(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
+		dpp::slashcommand coinflip_def(dpp::cluster& bot);
+		void handle_coinflip(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
 		// ctxm DEPRECATED UNUSED
 		dpp::slashcommand mkshm_def(dpp::cluster& bot);
 		void handle_mkshm(const dpp::message_context_menu_t& event, dpp::cluster& bot);

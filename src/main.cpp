@@ -7,6 +7,7 @@
 #include "roles.h"
 #include "events.h"
 #include "dotenv.h"
+#include "config.h"
 
 int main(int argc, char **argv) {
 	dotenv::init();
@@ -30,6 +31,7 @@ int main(int argc, char **argv) {
 	bot.on_ready([&bot](const dpp::ready_t &event) {
 			bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, "ponderin"));	
 			commands::register_all(bot);
+			config::config_load();
 			bot.start_timer([&bot](dpp::timer t) {
 				roles::role_sync(bot);
 			}, 600);
