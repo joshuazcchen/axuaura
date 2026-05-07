@@ -35,6 +35,9 @@ namespace commands {
                 .add_option(dpp::command_option(dpp::co_sub_command, "obt", "toggle item obtain")
                     .add_option(dpp::command_option(dpp::co_integer, "id", "item id", true))
                 )
+                .add_option(dpp::command_option(dpp::co_sub_command, "sellable", "toggle item sellability")
+                    .add_option(dpp::command_option(dpp::co_integer, "id", "item id", true))
+                )
                 .add_option(dpp::command_option(dpp::co_sub_command, "price", "price item")
                     .add_option(dpp::command_option(dpp::co_integer, "id", "item id", true))
                     .add_option(dpp::command_option(dpp::co_integer, "price", "item id", true))
@@ -108,6 +111,10 @@ namespace commands {
             if (!db::inv_has(g_id, u_id, id)) { 
                 event.reply(dpp::message("you dont even have one").set_flags(dpp::m_ephemeral)); 
                 return; 
+            }
+            if (db::shop_state(g_id, id, "sellability") == 0) {
+                event.reply(dpp::message("cant sell that one").set_flags(dpp::m_ephemeral)); 
+                return;
             }
 
             auto item = db::shop_get(g_id, id);

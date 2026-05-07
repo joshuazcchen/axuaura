@@ -1,11 +1,14 @@
 #include "commands.h"
 #include "db.h"
+#include "config.h"
 
 namespace commands {
 
     dpp::slashcommand inventory_def(dpp::cluster& bot) {
         return dpp::slashcommand("inventory", "view/manage your items", bot.me.id)
-            .add_option(dpp::command_option(dpp::co_sub_command, "view", "view your items"))
+            .add_option(dpp::command_option(dpp::co_sub_command, "view", "view your items")
+                .add_option(dpp::command_option(dpp::co_integer, "page", "page", true))
+            )
             .add_option(dpp::command_option(dpp::co_sub_command, "unequip", "unequip an item")
                 .add_option(dpp::command_option(dpp::co_integer, "id", "item to unequip", true)))
             .add_option(dpp::command_option(dpp::co_sub_command, "equip", "equip item")
@@ -19,8 +22,16 @@ namespace commands {
         dpp::snowflake u_id = event.command.get_issuing_user().id;
 
         if (sub == "view") {
-            auto items = db::inv_get_user(g_id, u_id);
-            
+            int page = std::get<int64_t>(event.get_parameter("page"));
+            page--;
+            auto items_full = db::inv_get_user(g_id, u_id);
+            size_t start_idx = static_cast<size_t>(page) * config::BAZAAR_PGSZ;
+            if (start_idx > items_full.size()) {
+                start_idx = items_full.size();
+            }
+            size_t count = std::min(static_cast<size_t>(config::BAZAAR_PGSZ), items_full.size() - start_idx);
+
+            auto items = std::span{items_full}.subspan(start_idx, count);
             std::string out = "# your inventory:\n\n";
             if (items.empty()) {
                 out += "*nothing here*";
@@ -30,6 +41,7 @@ namespace commands {
                     out += "**" + std::to_string(i.item_id) + "**. " + display + (i.equipped ? " `(equipped)`\n" : "\n");
                 }
             }
+            out += "\n-# page " + std::to_string(++page) + " of " + std::to_string((items_full.size() + config::BAZAAR_PGSZ) / config::BAZAAR_PGSZ);
             
             event.reply(dpp::message(out).set_allowed_mentions(false, false, false, false, {}, {}));
             
