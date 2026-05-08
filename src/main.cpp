@@ -13,16 +13,15 @@ int main(int argc, char **argv) {
 	dotenv::init();
 
 	const char *token = std::getenv("BOT_TOKEN");
-	setenv("MAGICK_OCL_DEVICE", "OFF", 1); 
-	setenv("MAGICK_OPENCL", "OFF", 1);
-	Magick::InitializeMagick(*argv);
-	Magick::ResourceLimits::thread(1);
-	setenv("MAGICK_TEMPORARY_PATH", "/dev/shm", 1);
-	Magick::ResourceLimits::memory(4096ull * 1024 * 1024);
-	Magick::ResourceLimits::area(4096ull * 1024 * 1024);
-	if (!token) {
-		exit(1);
-	}
+        setenv("MAGICK_OCL_DEVICE", "ON", 1);
+        setenv("MAGICK_OPENCL", "ON", 1);
+        setenv("MAGICK_DEBUG", "Accelerate", 1);
+
+        Magick::InitializeMagick(*argv);
+
+        if (!token) {
+                exit(1);
+        }
 
 	db::init();
 

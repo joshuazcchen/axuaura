@@ -29,6 +29,9 @@ namespace image {
             Magick::Image avatar(av_blob);
             avatar.resize("256x256!");
 
+	    avatar.backgroundColor("none");
+            avatar.alphaChannel(Magick::SetAlphaChannel);
+
             Magick::Image mask("256x256", "none");
             mask.fillColor("white");
             mask.draw(Magick::DrawableCircle(128, 128, 128, 256));
