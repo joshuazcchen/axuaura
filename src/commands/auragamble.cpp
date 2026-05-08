@@ -12,11 +12,15 @@ namespace commands {
 			.add_option(dpp::command_option(dpp::co_integer, "bet", "ante", true))
 			.add_option(dpp::command_option(dpp::co_string, "choice", "axuaxi or lamexuaxi", true)
 			.add_choice(dpp::command_option_choice("heads", std::string("heads")))
-			.add_choice(dpp::command_option_choice("tails", std::string("tails")))));
+			.add_choice(dpp::command_option_choice("tails", std::string("tails")))))
+			.add_option(dpp::command_option(dpp::co_sub_command, "help", "im confused"));
 	}
 
 	void handle_gamble(const dpp::slashcommand_t& event, dpp::cluster& bot) {
 		auto cmd = event.command.get_command_interaction().options[0];
+		if (cmd.name == "help") {
+			event.reply(dpp::message("there are things called numbers, we use them to count. you have a thing called aura, this is like money.\nimagine you have $100, and you go to the casino, and put a $100 bill into a slot machine.\nwhile the slot machine is spinning, you currently have $0 in your pocket.\nHowever, once the slot machine finishes spinning, it decides whether or not you earned money!\n-# earning money is generally considered good.\nthe machines on this bot refer to the amount you win (the number of money that you get back from the machine) using a thing called multiplication.\nthis might seem like a big word, but it's actually really simple!\nokay i cant keep up this act. basically just if you win 1.5x, you win back your original amount (1x) and everything else is considered winnings.\nif you have any further questions spam ping axuaxi not me - corgi\n\nTODO: make this display rates"));
+		}
 		dpp::snowflake user_id = event.command.get_issuing_user().id;
 		int64_t bet = std::get<int64_t>(event.get_parameter("bet"));
 		int aura = db::get_aura(event.command.guild_id, user_id);
@@ -76,13 +80,6 @@ namespace commands {
 					float mult = 0;
 					std::string rslt = "";
 
-					bool full_loss = !(i1==i2 || i2==i3 || i1==i3) && !(i1>=6||i2>=6||i3>=6);
-					if (full_loss && (rand() % 100) < 15) {
-						int near_tier = rates[rand() % rates.size()];
-						i1 = near_tier;
-						i2 = near_tier;
-					}
-
 					if (i1 == i2 && i2 == i3) {
 						if(i1 == 7) { mult = 500.0f; rslt = "# HOLY AURA 500x"; }
 						else if (i1 == 6) { mult = 200.0f; rslt = "TRIPLE RARE 200x"; }
@@ -93,12 +90,12 @@ namespace commands {
 						int pair_id = (i1 == i2) ? i1 : (i2 == i3 ? i2 : i1);
 						if (pair_id >= 5) { mult = 5.0f;  rslt = "DOUBLE RARE 5x"; }
 						else if (pair_id >= 2) { mult = 2.5f;  rslt = "DOUBLE UNCOMMON 2.5x"; }
-						else { mult = 0.0f;  rslt = "LMFAO LOSER"; }
+						else { mult = 1.5f;  rslt = "DOUBLE COMMON 1.5x"; }
 					} else {
 						bool has_single = (i1 >= 6 || i2 >= 6 || i3 >= 6);
 						if (has_single) {
-							mult = 1.5f;
-							rslt = "SINGLE RARE 1.5x";
+							mult = 0;
+							rslt = "no";
 						} else {
 							mult = 0;
 							rslt = "L LOSER 0x";
@@ -112,12 +109,12 @@ namespace commands {
 						int del = bet * mult;
 						db::add_aura(event.command.guild_id, user_id, del);
 						long net = (long) del - bet;
-						rslt = rslt + "\naura went to " + std::to_string((aura - bet) + del) + " (" + std::to_string(del - bet) + ")";
+						rslt = rslt + "\n"+ std::to_string(aura) + "->" + std::to_string((aura - bet) + del) + " (" + std::to_string(del - bet) + ")";
 						if (user_id == 175422893449150464ULL || user_id == 1194435328312881242ULL || user_id == 318540048779968513ULL || user_id == 603870585482772491ULL) {
 							rslt += " (but you're better than everyone else so you get 1.5x that for no reason) ";
 						}
 					} else { // this is pretty useless of a check but im too lazy to do it properly since i just modified the old aura gambling odds basically lol
-						rslt = rslt + "\naura went to " + std::to_string(aura-bet) + "(-" + std::to_string(bet) + ")";
+						rslt = rslt + "\n" + std::to_string(aura) + "->" + std::to_string(aura-bet) + " (-" + std::to_string(bet) + ")";
 					}
 					event.edit_original_response(dpp::message(r1[0] + r2[0] + r3[0] + "\n" + r1[1] + r2[1] + r3[1] + "\n\n" + rslt));
 			});
@@ -139,12 +136,12 @@ namespace commands {
 				db::add_aura(event.command.guild_id, user_id, rslt);
 				event.reply(dpp::message(op[0]));	
 				new dpp::oneshot_timer(&bot, 2, [event, bet, user_id, aura, op](dpp::timer t) {
-					event.edit_original_response(dpp::message(op[1] + "\n" + op[2] + " \nyour win! aura went to: " + std::to_string(aura + (int)(bet * 0.5))));
+					event.edit_original_response(dpp::message(op[1] + "\n" + op[2] + " \nyour win!\n" + std::to_string(aura) + "->" + std::to_string(aura + (int)(bet * 0.5)) + " (+" + std::to_string(bet/2) + ")"));
 				});
 			} else {
 				event.reply(dpp::message(opp[0]));	
 				new dpp::oneshot_timer(&bot, 2, [event, bet, user_id, aura, opp](dpp::timer t) {
-					event.edit_original_response(dpp::message(opp[1] + "\n" + opp[2]  + " \nyour lose! aura went to: " + std::to_string(aura - (int)(bet))));
+					event.edit_original_response(dpp::message(opp[1] + "\n" + opp[2]  + " \nyour lose!\n" + std::to_string(aura) + "->" + std::to_string(aura - (int)(bet)) + " (-" + std::to_string(bet) + ")"));
 				});
 			}
 		}
