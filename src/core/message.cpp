@@ -95,7 +95,7 @@ namespace message {
                     bot.message_create(dpp::message(event.msg.channel_id, "<@" + std::to_string(user_id) + "> found **" + picked->name + "** but they already owned it so its been converted to " + std::to_string(refund) + "** aura instead"));
                 } else {
                     db::inv_add(event.msg.guild_id, user_id, picked_id);
-                    bot.message_create(dpp::message(event.msg.channel_id, "<@" + std::to_string(user_id) + "> is lucky as hell and stumbled across a **" + picked->name + "**! access with `/inventory view`."));
+                    bot.message_create(dpp::message(event.msg.channel_id, "<@" + std::to_string(user_id) + "> is lucky as hell and stumbled across a **" + picked->name + "** (1/" + std::to_string(2*std::abs(picked->cost)) + ") ! access with `/inventory view`."));
                 }
             }
         }
