@@ -72,8 +72,13 @@ namespace message {
             auto items = db::shop_get_sign(event.msg.guild_id, sign);
 
             if (!items.empty()) {
+				auto weight_get = [](int cost) -> double {
+					double cost_scaled = std::abs(cost) / 1000.0;
+					return 1.0 / std::pow(cost_scaled + 1.0, 2.0);
+				};
+
                 double total_weight = 0;
-                for (auto& item : items) total_weight += 1.0 / (std::abs(item.cost) + 1);
+                for (auto& item : items) total_weight += weight_get(item.cost);
 
                 std::uniform_real_distribution<> weight_dis(0, total_weight);
                 double roll = weight_dis(gen);
@@ -95,7 +100,11 @@ namespace message {
                     bot.message_create(dpp::message(event.msg.channel_id, "<@" + std::to_string(user_id) + "> found **" + picked->name + "** but they already owned it so its been converted to " + std::to_string(refund) + "** aura instead"));
                 } else {
                     db::inv_add(event.msg.guild_id, user_id, picked_id);
-                    bot.message_create(dpp::message(event.msg.channel_id, "<@" + std::to_string(user_id) + "> is lucky as hell and stumbled across a **" + picked->name + "** (1/" + std::to_string(2*std::abs(picked->cost)) + ") ! access with `/inventory view`."));
+					double weight = weight_get(picked->cost);
+					double pool = total_weight / weight;
+					long long odds = static_cast<long long>(pool * 1000.0);
+
+                    bot.message_create(dpp::message(event.msg.channel_id, "<@" + std::to_string(user_id) + "> is lucky as hell and stumbled across a **" + picked->name + "** (1/" + std::to_string(odds) + ") ! access with `/inventory view`."));
                 }
             }
         }
