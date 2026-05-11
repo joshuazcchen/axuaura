@@ -1,46 +1,50 @@
 #include "voice.h"
-#include "db.h"
-#include "config.h"
+
 #include <cmath>
 #include <ctime>
 #include <random>
 
+#include "config.h"
+#include "db.h"
+
 namespace voice {
-	void handle(const dpp::voice_state_update_t& event, dpp::cluster& bot) {
-		dpp::snowflake user_id = event.state.user_id;
-		dpp::user* u = dpp::find_user(user_id);
-		if (u && u->is_bot()) return;
-		bool u_left = (event.state.channel_id == 0);
+void handle(const dpp::voice_state_update_t& event, dpp::cluster& bot)
+{
+    dpp::snowflake user_id = event.state.user_id;
+    dpp::user* u = dpp::find_user(user_id);
+    if (u && u->is_bot())
+        return;
+    bool u_left = (event.state.channel_id == 0);
 
-		// prevents people from afking in vc but i should probs exclude an afk channel?
-		// nvm we dont even have one
-		bool u_afk = (event.state.is_self_deaf() || event.state.is_deaf());
+    // prevents people from afking in vc but i should probs exclude an afk channel?
+    // nvm we dont even have one
+    bool u_afk = (event.state.is_self_deaf() || event.state.is_deaf());
 
-		if (u_left || u_afk) {
-			long time_old = db::vc_get(event.state.guild_id, user_id);
-			if (time_old > 0) {
-				long time_del = std::time(nullptr) - time_old;
-				int time_m = time_del / 600;
-				if (time_m > 0) {
-					static std::random_device rd;
-					static std::mt19937 gen(rd());
-					dpp::snowflake g_id = event.state.guild_id;
-					auto conf = config::get_config(g_id);
-					std::uniform_int_distribution<> dis(conf.xp_min, conf.xp_max);
+    if (u_left || u_afk) {
+        long time_old = db::vc_get(event.state.guild_id, user_id);
+        if (time_old > 0) {
+            long time_del = std::time(nullptr) - time_old;
+            int time_m = time_del / 600;
+            if (time_m > 0) {
+                static std::random_device rd;
+                static std::mt19937 gen(rd());
+                dpp::snowflake g_id = event.state.guild_id;
+                auto conf = config::get_config(g_id);
+                std::uniform_int_distribution<> dis(conf.xp_min, conf.xp_max);
 
-					int xp_del = 0;
-					for (int i = 0; i < time_m; i++) {
-						xp_del += dis(gen);
-					}
-					db::xp_add(event.state.guild_id, user_id, xp_del);
-					// TODO: make this handle it but rn itll just work with a message.
-				}
-				db::vc_clr(event.state.guild_id, user_id);
-			}
-		} else if (!u_afk) {
-			if (db::vc_get(event.state.guild_id, user_id) == 0) {
-				db::vc_set(event.state.guild_id, user_id, std::time(nullptr));
-			}
-		}
-	}
+                int xp_del = 0;
+                for (int i = 0; i < time_m; i++) {
+                    xp_del += dis(gen);
+                }
+                db::xp_add(event.state.guild_id, user_id, xp_del);
+                // TODO: make this handle it but rn itll just work with a message.
+            }
+            db::vc_clr(event.state.guild_id, user_id);
+        }
+    } else if (!u_afk) {
+        if (db::vc_get(event.state.guild_id, user_id) == 0) {
+            db::vc_set(event.state.guild_id, user_id, std::time(nullptr));
+        }
+    }
 }
+} // namespace voice

@@ -1,0 +1,10 @@
+---
+Language: Cpp
+BasedOnStyle: WebKit
+
+PointerAlignment: Left
+ColumnLimit: 0
+SortIncludes: true
+
+MaxEmptyLinesToKeep: 1
+...

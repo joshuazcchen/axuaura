@@ -1,0 +1,51 @@
+name: build test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: debian:testing
+
+    steps:
+    - name: get git
+      run: |
+        apt-get update
+        apt-get install -y git
+    - name: Checkout Repository
+      uses: actions/checkout@v6
+      with:
+        submodules: recursive
+    - name: get d++
+      run: |
+        apt-get install -y \
+          build-essential \
+          pkg-config \
+          cmake \
+          wget \
+          libsqlite3-dev \
+          libmagick++-7.q16hdri-dev \
+          nlohmann-json3-dev \
+          libsodium-dev \
+          libssl-dev \
+          zlib1g-dev \
+          ocl-icd-opencl-dev \
+          opencl-headers \
+          libopus0 \
+          libopus-dev
+
+        wget -O dpp.deb https://github.com/brainboxdotcc/DPP/releases/download/v10.1.4/libdpp-10.1.4-linux-x64.deb
+        dpkg -i dpp.deb || apt-get install -f -y
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
