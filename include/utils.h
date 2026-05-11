@@ -4,5 +4,5 @@
 #include <string>
 
 namespace utils {
-bool is_admin(const dpp::slashcommand_t& event);
+	bool is_admin(const dpp::slashcommand_t& event);
 }
