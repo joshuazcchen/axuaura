@@ -86,7 +86,7 @@ namespace message {
                 db::ShopItem* picked = &items.front();
 
                 for (auto& item : items) {
-                    roll -= 1.0 / (std::abs(item.cost) + 1);
+                    roll -= weight_get(item.cost);
                     if (roll <= 0) {
                         picked_id = item.item_id;
                         picked = &item;
