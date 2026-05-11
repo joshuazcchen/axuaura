@@ -41,6 +41,25 @@ namespace db {
         return has;
     }
 
+    std::vector<dpp::snowflake> inv_list(dpp::snowflake g_id, int item_id) {
+        sqlite3_stmt* s;
+        std::vector<dpp::snowflake> users;
+        std::string sql = "SELECT user_id FROM inventory WHERE guild_id = ? AND item_id = ?";
+        if (sqlite3_prepare_v2(db_ptr, sql.c_str(), -1, &s, nullptr) == SQLITE_OK) {
+            sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_int(s, 2, item_id);
+
+            while (sqlite3_step(s) == SQLITE_ROW) {
+                const char* u_id_str = reinterpret_cast<const char*>(sqlite3_column_text(s, 0));
+                if (u_id_str) {
+                    users.push_back(std::stoull(u_id_str));
+                }
+            }
+            sqlite3_finalize(s);
+        }
+        return users;
+    }
+
     std::vector<InvItem> inv_get_user(dpp::snowflake g_id, dpp::snowflake u_id) {
         std::vector<InvItem> items;
         sqlite3_stmt* s;

@@ -96,6 +96,7 @@ namespace db {
 	int shop_state(dpp::snowflake g_id, int item_id, const std::string& key);
 	void shop_set_int(dpp::snowflake g_id, int item_id, const std::string& key, int value);
 
+	std::vector<dpp::snowflake> inv_list(dpp::snowflake g_id, int item_id);
     void inv_add(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
     void inv_rm(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
     bool inv_has(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
