@@ -15,10 +15,9 @@ int main(int argc, char** argv) {
 	dotenv::init();
 
 	const char* token = std::getenv("BOT_TOKEN");
-	setenv("MAGICK_OCL_DEVICE", "ON", 1);
-	setenv("MAGICK_OPENCL", "ON", 1);
-	setenv("MAGICK_DEBUG", "Accelerate", 1);
 
+	Magick::ResourceLimits::memory(50 * 1024 * 1024);
+	Magick::ResourceLimits::map(50 * 1024 * 1024);
 	Magick::InitializeMagick(*argv);
 
 	if (!token) { exit(1); }

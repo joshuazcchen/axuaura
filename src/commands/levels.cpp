@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <atomic>
+#include <malloc.h>
 
 #include "commands.h"
 #include "db.h"
@@ -85,15 +86,18 @@ namespace commands {
 				is_rendering = true;
 				std::string card;
 
-				try {
-					card = image::img_gen_card(task_data.av_png, task_data.user, task_data.level,
-							task_data.xp_now, task_data.xp_next, task_data.progress,
-							task_data.bg_c, task_data.artist, task_data.invert);
+				{
+					try {
+						card = image::img_gen_card(task_data.av_png, task_data.user, task_data.level,
+								task_data.xp_now, task_data.xp_next, task_data.progress,
+								task_data.bg_c, task_data.artist, task_data.invert);
+					}
+					catch (const std::exception& e) {
+						std::cout << "ImageMagick Error: " << e.what() << "\n";
+						card = "";
+					}
 				}
-				catch (const std::exception& e) {
-					std::cout << "ImageMagick Error: " << e.what() << "\n";
-					card = "";
-				}
+				malloc_trim(0);
 
 				is_rendering = false;
 				if (card.empty()) {

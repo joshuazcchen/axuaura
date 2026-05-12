@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <malloc.h>
 
 namespace commands {
 	static std::chrono::steady_clock::time_point boot_time;
@@ -23,7 +24,11 @@ namespace commands {
 
 	static int64_t img_latency_ms() {
 		auto t0 = std::chrono::high_resolution_clock::now();
-		image::img_gen_card("", "diagnostics", 1, 0, 100, 0.0f);
+		{
+			image::img_gen_card("", "diagnostics", 1, 0, 100, 0.0f);
+		}
+
+		malloc_trim(0);
 		auto t1 = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 	}
@@ -109,6 +114,8 @@ namespace commands {
 	void handle_diagnostics(const dpp::slashcommand_t& event, dpp::cluster& bot) {
 		event.thinking(false);
 
+		long mem = rss_kb();
+
 		int64_t db_us = -1;
 		{
 			auto t0 = std::chrono::high_resolution_clock::now();
@@ -121,14 +128,13 @@ namespace commands {
 		uint64_t img_ms = img_latency_ms();
 		auto rest_t0 = std::chrono::steady_clock::now();
 
-		bot.current_user_get([event, ws_ms, db_us, rest_t0, img_ms](const dpp::confirmation_callback_t&) {
+		bot.current_user_get([event, ws_ms, db_us, rest_t0, img_ms, mem](const dpp::confirmation_callback_t&) {
 			auto rest_t1 = std::chrono::steady_clock::now();
 			int64_t rest_ms = std::chrono::duration_cast<std::chrono::milliseconds>(rest_t1 - rest_t0).count();
 
 			int64_t up_secs =
 				std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - boot_time).count();
 
-			long mem = rss_kb();
 			std::string cpu_t = cpu_temp();
 			std::string gpu_t = gpu_temp();
 
