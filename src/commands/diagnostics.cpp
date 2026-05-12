@@ -79,7 +79,7 @@ namespace commands {
 		pclose(p);
 		std::string val(buf);
 		val.erase(val.find_last_not_of(" \n\r") + 1);
-		return val.empty() ? "unavailable" : val + "°C";
+		return val.empty() ? "unavailable" : val + ".0°C";
 	}
 
 	static std::string fmt_mem(long kb) {
