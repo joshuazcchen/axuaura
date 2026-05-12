@@ -49,6 +49,38 @@ namespace commands {
 		return -1;
 	}
 
+	static std::string cpu_temp() {
+		FILE* p = popen("sensors -j 2>/dev/null", "r");
+		if (!p) return "unavailable";
+		std::string out;
+		char buf[256];
+		while (fgets(buf, sizeof(buf), p)) out += buf;
+		pclose(p);
+		auto pos = out.find("CPUTIN");
+		if (pos == std::string::npos) return "unavailable";
+		auto inp = out.find("temp1_input", pos);
+		if (inp == std::string::npos) return "unavailable";
+		auto colon = out.find(':', inp);
+		if (colon == std::string::npos) return "unavailable";
+		double val = std::stod(out.substr(colon + 1));
+		std::ostringstream ss;
+		ss << std::fixed;
+		ss.precision(1);
+		ss << val << "°C";
+		return ss.str();
+	}
+
+	static std::string gpu_temp() {
+		FILE* p = popen("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader 2>/dev/null", "r");
+		if (!p) return "unavailable";
+		char buf[64] = {};
+		fgets(buf, sizeof(buf), p);
+		pclose(p);
+		std::string val(buf);
+		val.erase(val.find_last_not_of(" \n\r") + 1);
+		return val.empty() ? "unavailable" : val + "°C";
+	}
+
 	static std::string fmt_mem(long kb) {
 		if (kb < 0) return "unavailable";
 		if (kb < 1024) return std::to_string(kb) + " KB";
@@ -66,6 +98,8 @@ namespace commands {
 	}
 
 	void handle_diagnostics(const dpp::slashcommand_t& event, dpp::cluster& bot) {
+		event.thinking(false);
+
 		int64_t db_us = -1;
 		{
 			auto t0 = std::chrono::high_resolution_clock::now();
@@ -79,37 +113,39 @@ namespace commands {
 		auto rest_t0 = std::chrono::steady_clock::now();
 
 		bot.current_user_get([event, ws_ms, db_us, rest_t0](const dpp::confirmation_callback_t&) {
-			auto rest_t1 = std::chrono::steady_clock::now();
-			int64_t rest_ms = std::chrono::duration_cast<std::chrono::milliseconds>(rest_t1 - rest_t0).count();
+				auto rest_t1 = std::chrono::steady_clock::now();
+				int64_t rest_ms = std::chrono::duration_cast<std::chrono::milliseconds>(rest_t1 - rest_t0).count();
 
-			int64_t up_secs =
-				std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - boot_time).count();
+				int64_t up_secs = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - boot_time).count();
 
-			long mem = rss_kb();
+				long mem = rss_kb();
+				std::string cpu_t = cpu_temp();
+				std::string gpu_t = gpu_temp();
 
-			size_t guild_count = dpp::get_guild_count();
-			size_t user_count = dpp::get_user_count();
-			size_t role_count = dpp::get_role_count();
+				size_t guild_count = dpp::get_guild_count();
+				size_t user_count = dpp::get_user_count();
+				size_t role_count = dpp::get_role_count();
 
-			std::string build_ts = std::string(__DATE__) + " " + std::string(__TIME__);
+				std::string build_ts = std::string(__DATE__) + " " + std::string(__TIME__);
 
-			std::string ws_dot = ws_ms < 100 ? "🟢" : (ws_ms < 200 ? "🟡" : "🔴");
-			std::string db_dot = db_us >= 0 ? "🟢" : "🔴";
-			std::string rest_dot = rest_ms < 300 ? "🟢" : "🟡";
+				std::string ws_dot = ws_ms < 100 ? "🟢" : (ws_ms < 200 ? "🟡" : "🔴");
+				std::string db_dot = db_us >= 0 ? "🟢" : "🔴";
+				std::string rest_dot = rest_ms < 300 ? "🟢" : "🟡";
 
-			std::string content;
-			content += "## diagnostics\n";
-			content += ws_dot + " **ws** " + std::to_string(ws_ms) + "ms" + "  ●  " + rest_dot + " **rest** " +
-					   std::to_string(rest_ms) + "ms" + "  ●  " + db_dot + " **db** " + fmt_db(db_us) + "\n";
-			content += "\n";
-			content += "**uptime** " + uptime_str(up_secs) + "  ●  **memory** " + fmt_mem(mem) + "\n";
-			content += "\n";
-			content += "**guilds** " + std::to_string(guild_count) + "  ●  **roles** " + std::to_string(role_count) +
-					   "  ●  **users** " + std::to_string(user_count) + "\n";
-			content += "\n";
-			content += "**build " + build_ts + "**";
+				std::string content;
+				content += "## diagnostics\n";
+				content += ws_dot + " **ws** " + std::to_string(ws_ms) + "ms" + "  ●  " + rest_dot + " **rest** " +
+					std::to_string(rest_ms) + "ms" + "  ●  " + db_dot + " **db** " + fmt_db(db_us) + "\n";
+				content += "\n";
+				content += "**uptime** " + uptime_str(up_secs) + "  ●  **memory** " + fmt_mem(mem) + "\n";
+				content += "\n";
+				content += "**guilds** " + std::to_string(guild_count) + "  ●  **roles** " + std::to_string(role_count) +
+					"  ●  **users** " + std::to_string(user_count) + "\n";
+				content += "**cpu** " + cpu_t + "  ●  **gpu** " + gpu_t + "\n";
+				content += "\n";
+				content += "-# **build " + build_ts + "**";
 
-			event.edit_original_response(dpp::message(content));
+				event.edit_original_response(dpp::message(content));
 		});
 	}
 
