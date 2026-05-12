@@ -8,7 +8,7 @@
 namespace image {
 
 	std::string img_gen_card(const std::string& av_png, const std::string& user, int level, int xp_now, int xp_next,
-			float progress, const std::string& bg_c, const std::string& artist, bool invert) {
+							 float progress, const std::string& bg_c, const std::string& artist, bool invert) {
 		try {
 			std::string bg_file;
 			if (!bg_c.empty()) {

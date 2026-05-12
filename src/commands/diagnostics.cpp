@@ -7,9 +7,9 @@
 #include <ctime>
 #include <dpp/dpp.h>
 #include <fstream>
+#include <malloc.h>
 #include <sstream>
 #include <string>
-#include <malloc.h>
 
 namespace commands {
 	static std::chrono::steady_clock::time_point boot_time;
@@ -24,9 +24,7 @@ namespace commands {
 
 	static int64_t img_latency_ms() {
 		auto t0 = std::chrono::high_resolution_clock::now();
-		{
-			image::img_gen_card("", "diagnostics", 1, 0, 100, 0.0f);
-		}
+		{ image::img_gen_card("", "diagnostics", 1, 0, 100, 0.0f); }
 
 		malloc_trim(0);
 		auto t1 = std::chrono::high_resolution_clock::now();
