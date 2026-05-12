@@ -1,6 +1,7 @@
 #include "commands.h"
 
 #include "db.h"
+#include "image.h"
 
 #include <chrono>
 #include <ctime>
@@ -18,6 +19,13 @@ namespace commands {
 		std::string padded = label;
 		padded.resize(width, ' ');
 		return "  " + padded + val + "\n";
+	}
+
+	static int64_t img_latency_ms() {
+		auto t0 = std::chrono::high_resolution_clock::now();
+		image::img_gen_card("", "diagnostics", 1, 0, 100, 0.0f);
+		auto t1 = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 	}
 
 	static std::string uptime_str(int64_t seconds) {
@@ -109,11 +117,11 @@ namespace commands {
 			if (ok) db_us = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
 		}
 
-		uint64_t ws_ms = bot.get_shard(0)->websocket_ping;
-
+		uint64_t ws_ms = (uint64_t)(bot.rest_ping * 1000.0);
+		uint64_t img_ms = img_latency_ms();
 		auto rest_t0 = std::chrono::steady_clock::now();
 
-		bot.current_user_get([event, ws_ms, db_us, rest_t0](const dpp::confirmation_callback_t&) {
+		bot.current_user_get([event, ws_ms, db_us, rest_t0, img_ms](const dpp::confirmation_callback_t&) {
 			auto rest_t1 = std::chrono::steady_clock::now();
 			int64_t rest_ms = std::chrono::duration_cast<std::chrono::milliseconds>(rest_t1 - rest_t0).count();
 
@@ -130,14 +138,16 @@ namespace commands {
 
 			std::string build_ts = std::string(__DATE__) + " " + std::string(__TIME__);
 
-			std::string ws_dot = ws_ms < 100 ? "🟢" : (ws_ms < 200 ? "🟡" : "🔴");
 			std::string db_dot = db_us >= 0 ? "🟢" : "🔴";
 			std::string rest_dot = rest_ms < 300 ? "🟢" : "🟡";
+			std::string img_dot = img_ms < 300 ? "🟢" : "🔴";
 
 			std::string content;
 			content += "## diagnostics\n";
-			content += ws_dot + " **ws** " + std::to_string(ws_ms) + "ms" + "  ●  " + rest_dot + " **rest** " +
-					   std::to_string(rest_ms) + "ms" + "  ●  " + db_dot + " **db** " + fmt_db(db_us) + "\n";
+			content += rest_dot + " **rest** " + std::to_string(rest_ms) + "ms" + "  ●  " + db_dot + " **db** " +
+					   fmt_db(db_us) + "\n";
+			content += "\n";
+			content += img_dot + " **img gen** " + std::to_string(img_ms) + "ms\n";
 			content += "\n";
 			content += "**uptime** " + uptime_str(up_secs) + "  ●  **memory** " + fmt_mem(mem) + "\n";
 			content += "\n";
