@@ -8,7 +8,7 @@
 namespace image {
 
 	std::string img_gen_card(const std::string& av_png, const std::string& user, int level, int xp_now, int xp_next,
-							 float progress, const std::string& bg_c, const std::string& artist, bool invert) {
+			float progress, const std::string& bg_c, const std::string& artist, bool invert) {
 		try {
 			std::string bg_file;
 			if (!bg_c.empty()) {
@@ -31,20 +31,23 @@ namespace image {
 
 			double img_left = 100;
 
-			Magick::Blob av_blob(av_png.data(), av_png.length());
-			Magick::Image avatar(av_blob);
-			avatar.resize("256x256!");
+			if (!av_png.empty()) {
+				Magick::Blob av_blob(av_png.data(), av_png.length());
+				Magick::Image avatar(av_blob);
+				avatar.resize("256x256!");
 
-			avatar.backgroundColor("none");
-			avatar.alphaChannel(Magick::SetAlphaChannel);
+				avatar.backgroundColor("none");
+				avatar.alphaChannel(Magick::SetAlphaChannel);
 
-			Magick::Image mask("256x256", "none");
-			mask.fillColor("white");
-			mask.draw(Magick::DrawableCircle(128, 128, 128, 256));
+				Magick::Image mask("256x256", "none");
+				mask.fillColor("white");
+				mask.draw(Magick::DrawableCircle(128, 128, 128, 256));
 
-			// avatar
-			avatar.composite(mask, 0, 0, Magick::DstInCompositeOp);
-			bg.composite(avatar, img_left, 100, Magick::OverCompositeOp);
+				// avatar
+				avatar.composite(mask, 0, 0, Magick::DstInCompositeOp);
+				bg.composite(avatar, img_left, 100, Magick::OverCompositeOp);
+			}
+
 			if (invert) {
 				bg.strokeAntiAlias(true);
 				bg.strokeColor("white");

@@ -1,5 +1,3 @@
-#include <pthread.h>
-
 #include <algorithm>
 #include <atomic>
 
@@ -32,7 +30,7 @@ namespace commands {
 	void* generate_image_worker(void* arg) {
 		ImgTaskData* data = static_cast<ImgTaskData*>(arg);
 		data->result = image::img_gen_card(data->av_png, data->user, data->level, data->xp_now, data->xp_next,
-										   data->progress, data->bg_c, data->artist, data->invert);
+				data->progress, data->bg_c, data->artist, data->invert);
 		return nullptr;
 	}
 
@@ -64,53 +62,48 @@ namespace commands {
 		float p_pct = (xp_next > 0) ? (float)xp_this / xp_next : 0.0f;
 
 		bot.request(av_url, dpp::m_get,
-					[event, stats, u_id, u_ser, p_pct, xp_this, xp_next](const dpp::http_request_completion_t& result) {
-						if (result.status != 200) {
-							event.edit_original_response(dpp::message("Something went wrong"));
-							return;
-						}
+				[event, stats, u_id, u_ser, p_pct, xp_this, xp_next](const dpp::http_request_completion_t& result) {
+				if (result.status != 200) {
+				event.edit_original_response(dpp::message("Something went wrong"));
+				return;
+				}
 
-						if (result.body.empty()) {
-							event.edit_original_response(dpp::message("Something went wrong!"));
-							return;
-						}
+				if (result.body.empty()) {
+				event.edit_original_response(dpp::message("Something went wrong!"));
+				return;
+				}
 
-						std::string bg =
-							db::get_setting_str(event.command.guild_id, "bg_override_" + std::to_string(u_id), "");
-						std::string artist =
-							db::get_setting_str(event.command.guild_id, "bg_artist_" + std::to_string(u_id), "");
-						bool invert =
-							db::get_setting_bool(event.command.guild_id, "bg_invert_" + std::to_string(u_id), 1);
-						ImgTaskData task_data{result.body, u_ser.username, stats.level, xp_this, xp_next, p_pct,
-											  bg,		   artist,		   invert,		""};
+				std::string bg =
+				db::get_setting_str(event.command.guild_id, "bg_override_" + std::to_string(u_id), "");
+				std::string artist =
+				db::get_setting_str(event.command.guild_id, "bg_artist_" + std::to_string(u_id), "");
+				bool invert =
+				db::get_setting_bool(event.command.guild_id, "bg_invert_" + std::to_string(u_id), 1);
+				ImgTaskData task_data{result.body, u_ser.username, stats.level, xp_this, xp_next, p_pct,
+				bg,		   artist,		   invert,		""};
 
-						pthread_t thread;
-						pthread_attr_t attr;
+				is_rendering = true;
+				std::string card;
 
-						pthread_attr_init(&attr);
-						pthread_attr_setstacksize(&attr, 32 * 1024 * 1024);
+				try {
+					card = image::img_gen_card(task_data.av_png, task_data.user, task_data.level,
+							task_data.xp_now, task_data.xp_next, task_data.progress,
+							task_data.bg_c, task_data.artist, task_data.invert);
+				}
+				catch (const std::exception& e) {
+					std::cout << "ImageMagick Error: " << e.what() << "\n";
+					card = "";
+				}
 
-						is_rendering = true;
-						if (pthread_create(&thread, &attr, generate_image_worker, &task_data) == 0) {
-							pthread_join(thread, nullptr);
-						} else {
-							is_rendering = false;
-							event.edit_original_response(dpp::message("thread fail"));
-							pthread_attr_destroy(&attr);
-							return;
-						}
+				is_rendering = false;
+				if (card.empty()) {
+					event.edit_original_response(dpp::message("something went wrong generating preview"));
+					return;
+				}
 
-						is_rendering = false;
-						pthread_attr_destroy(&attr);
-						std::string card = task_data.result;
-						if (card.empty()) {
-							event.edit_original_response(dpp::message("something went wrong generating preview"));
-							return;
-						}
-
-						dpp::message msg(event.command.channel_id, "");
-						msg.add_file("level.png", card);
-						event.edit_original_response(msg);
-					});
+				dpp::message msg(event.command.channel_id, "");
+				msg.add_file("level.png", card);
+				event.edit_original_response(msg);
+				});
 	}
 } // namespace commands
