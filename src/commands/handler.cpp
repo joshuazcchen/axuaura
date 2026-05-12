@@ -5,13 +5,21 @@
 
 namespace commands {
 	std::map<std::string, SlashHandler> slash_map = {
-		{"auraboard", handle_auraboard}, {"movaura", handle_movaura},
-		{"duel", handle_duel},			 {"settings", handle_settings},
-		{"gamble", handle_gamble},		 {"bet", handle_bet},
-		{"smite", handle_smite},		 {"level", handle_level},
-		{"fixlevel", handle_fixlevel},	 {"leaderboard", handle_leaderboard},
-		{"bazaar", handle_bazaar},		 {"inventory", handle_inventory},
-		{"credits", handle_credits},	 {"coinflip", handle_coinflip},
+		{"auraboard", handle_auraboard},
+		{"movaura", handle_movaura},
+		{"duel", handle_duel},
+		{"settings", handle_settings},
+		{"gamble", handle_gamble},
+		{"bet", handle_bet},
+		{"smite", handle_smite},
+		{"level", handle_level},
+		{"fixlevel", handle_fixlevel},
+		{"leaderboard", handle_leaderboard},
+		{"bazaar", handle_bazaar},
+		{"inventory", handle_inventory},
+		{"credits", handle_credits},
+		{"coinflip", handle_coinflip},
+		{"diagnostics", handle_diagnostics},
 	};
 
 	std::map<std::string, ContextHandler> context_map = {};
@@ -51,6 +59,7 @@ namespace commands {
 				inventory_def(bot),
 				credits_def(bot),
 				coinflip_def(bot),
+				diagnostics_def(bot),
 			});
 		}
 	}

@@ -23,6 +23,7 @@ int main(int argc, char** argv) {
 
 	if (!token) { exit(1); }
 
+	commands::diagnostics_set_boot();
 	db::init();
 
 	dpp::cluster bot(token, dpp::i_default_intents | dpp::i_message_content | dpp::i_guild_members);

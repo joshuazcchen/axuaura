@@ -11,6 +11,8 @@ namespace db {
 
 	void init();
 
+	bool ping();
+
 	// aura related
 	int get_aura(dpp::snowflake guild_id, dpp::snowflake user_id);
 	void set_aura(dpp::snowflake guild_id, dpp::snowflake user_id, int amount);
