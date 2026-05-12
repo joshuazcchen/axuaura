@@ -145,9 +145,7 @@ namespace commands {
 			std::string content;
 			content += "## diagnostics\n";
 			content += rest_dot + " **rest** " + std::to_string(rest_ms) + "ms" + "  ●  " + db_dot + " **db** " +
-					   fmt_db(db_us) + "\n";
-			content += "\n";
-			content += img_dot + " **img gen** " + std::to_string(img_ms) + "ms\n";
+					   fmt_db(db_us) + "  ●  " + img_dot + " **img gen** " + std::to_string(img_ms) + "ms\n";
 			content += "\n";
 			content += "**uptime** " + uptime_str(up_secs) + "  ●  **memory** " + fmt_mem(mem) + "\n";
 			content += "\n";
