@@ -7,9 +7,8 @@
 #include <vector>
 
 namespace config {
-	inline const std::vector<std::string> RELIABLE_PROVIDERS = {"tenor.com", "giphy.com",	  "youtube.com",
-																"youtu.be",	 "klipy.com",	  "twitter.com",
-																"x.com",	 "instagram.com", "tiktok.com"};
+	inline const std::vector<std::string> RELIABLE_PROVIDERS = {"tenor.com", "giphy.com",	"youtube.com", "youtu.be",
+																"klipy.com", "twitter.com", "tiktok.com"};
 
 	inline const std::vector<std::string> AURA_LOSSES = {
 		"**HOLY AURA LOSS <:heartem:1485404606480515172>**",
