@@ -54,7 +54,8 @@ namespace commands {
 		if (!p) return "unavailable";
 		std::string out;
 		char buf[256];
-		while (fgets(buf, sizeof(buf), p)) out += buf;
+		while (fgets(buf, sizeof(buf), p))
+			out += buf;
 		pclose(p);
 		auto pos = out.find("CPUTIN");
 		if (pos == std::string::npos) return "unavailable";
@@ -113,39 +114,40 @@ namespace commands {
 		auto rest_t0 = std::chrono::steady_clock::now();
 
 		bot.current_user_get([event, ws_ms, db_us, rest_t0](const dpp::confirmation_callback_t&) {
-				auto rest_t1 = std::chrono::steady_clock::now();
-				int64_t rest_ms = std::chrono::duration_cast<std::chrono::milliseconds>(rest_t1 - rest_t0).count();
+			auto rest_t1 = std::chrono::steady_clock::now();
+			int64_t rest_ms = std::chrono::duration_cast<std::chrono::milliseconds>(rest_t1 - rest_t0).count();
 
-				int64_t up_secs = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - boot_time).count();
+			int64_t up_secs =
+				std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - boot_time).count();
 
-				long mem = rss_kb();
-				std::string cpu_t = cpu_temp();
-				std::string gpu_t = gpu_temp();
+			long mem = rss_kb();
+			std::string cpu_t = cpu_temp();
+			std::string gpu_t = gpu_temp();
 
-				size_t guild_count = dpp::get_guild_count();
-				size_t user_count = dpp::get_user_count();
-				size_t role_count = dpp::get_role_count();
+			size_t guild_count = dpp::get_guild_count();
+			size_t user_count = dpp::get_user_count();
+			size_t role_count = dpp::get_role_count();
 
-				std::string build_ts = std::string(__DATE__) + " " + std::string(__TIME__);
+			std::string build_ts = std::string(__DATE__) + " " + std::string(__TIME__);
 
-				std::string ws_dot = ws_ms < 100 ? "🟢" : (ws_ms < 200 ? "🟡" : "🔴");
-				std::string db_dot = db_us >= 0 ? "🟢" : "🔴";
-				std::string rest_dot = rest_ms < 300 ? "🟢" : "🟡";
+			std::string ws_dot = ws_ms < 100 ? "🟢" : (ws_ms < 200 ? "🟡" : "🔴");
+			std::string db_dot = db_us >= 0 ? "🟢" : "🔴";
+			std::string rest_dot = rest_ms < 300 ? "🟢" : "🟡";
 
-				std::string content;
-				content += "## diagnostics\n";
-				content += ws_dot + " **ws** " + std::to_string(ws_ms) + "ms" + "  ●  " + rest_dot + " **rest** " +
-					std::to_string(rest_ms) + "ms" + "  ●  " + db_dot + " **db** " + fmt_db(db_us) + "\n";
-				content += "\n";
-				content += "**uptime** " + uptime_str(up_secs) + "  ●  **memory** " + fmt_mem(mem) + "\n";
-				content += "\n";
-				content += "**guilds** " + std::to_string(guild_count) + "  ●  **roles** " + std::to_string(role_count) +
-					"  ●  **users** " + std::to_string(user_count) + "\n";
-				content += "**cpu** " + cpu_t + "  ●  **gpu** " + gpu_t + "\n";
-				content += "\n";
-				content += "-# **build " + build_ts + "**";
+			std::string content;
+			content += "## diagnostics\n";
+			content += ws_dot + " **ws** " + std::to_string(ws_ms) + "ms" + "  ●  " + rest_dot + " **rest** " +
+					   std::to_string(rest_ms) + "ms" + "  ●  " + db_dot + " **db** " + fmt_db(db_us) + "\n";
+			content += "\n";
+			content += "**uptime** " + uptime_str(up_secs) + "  ●  **memory** " + fmt_mem(mem) + "\n";
+			content += "\n";
+			content += "**guilds** " + std::to_string(guild_count) + "  ●  **roles** " + std::to_string(role_count) +
+					   "  ●  **users** " + std::to_string(user_count) + "\n";
+			content += "**cpu** " + cpu_t + "  ●  **gpu** " + gpu_t + "\n";
+			content += "\n";
+			content += "-# **build " + build_ts + "**";
 
-				event.edit_original_response(dpp::message(content));
+			event.edit_original_response(dpp::message(content));
 		});
 	}
 
