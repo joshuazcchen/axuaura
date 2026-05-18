@@ -25,6 +25,10 @@ namespace commands {
 
 	std::map<std::string, ContextHandler> context_map = {};
 
+	std::map<std::string, ButtonHandler> button_map = {
+		{"bzr_buy_", handle_bazaar_button},
+	};
+
 	void route_slash_command(dpp::cluster& bot, const dpp::slashcommand_t& event) {
 		auto it = slash_map.find(event.command.get_command_name());
 		if (it != slash_map.end()) it->second(event, bot);
@@ -37,7 +41,12 @@ namespace commands {
 
 	void route_button_click(dpp::cluster& bot, const dpp::button_click_t& event) {
 		const std::string& id = event.custom_id;
-		if (id.rfind("bzr_buy_", 0) == 0) { handle_bazaar_button(event, bot); }
+		for (const auto& [prefix, handler] : button_map) {
+            if (id.rfind(prefix, 0) == 0) {
+                handler(event, bot);
+                return;
+            }
+        }
 	}
 
 	void register_all(dpp::cluster& bot) {
