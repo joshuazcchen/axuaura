@@ -42,11 +42,11 @@ namespace commands {
 	void route_button_click(dpp::cluster& bot, const dpp::button_click_t& event) {
 		const std::string& id = event.custom_id;
 		for (const auto& [prefix, handler] : button_map) {
-            if (id.rfind(prefix, 0) == 0) {
-                handler(event, bot);
-                return;
-            }
-        }
+			if (id.rfind(prefix, 0) == 0) {
+				handler(event, bot);
+				return;
+			}
+		}
 	}
 
 	void register_all(dpp::cluster& bot) {
