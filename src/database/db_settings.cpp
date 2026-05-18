@@ -57,4 +57,19 @@ namespace db {
 		std::string val = get_setting_str(guild_id, key, "false");
 		return (val == "true");
 	}
+
+	std::vector<dpp::snowflake> settings_get_guilds_with(const std::string& key) {
+		std::vector<dpp::snowflake> guilds;
+		const char* sql = "SELECT DISTINCT guild_id FROM guild_settings WHERE key = ?;";
+		sqlite3_stmt* stmt;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_TRANSIENT);
+			while (sqlite3_step(stmt) == SQLITE_ROW) {
+				const unsigned char* raw = sqlite3_column_text(stmt, 0);
+				if (raw) guilds.push_back(std::stoull(reinterpret_cast<const char*>(raw)));
+			}
+		}
+		sqlite3_finalize(stmt);
+		return guilds;
+	}
 } // namespace db

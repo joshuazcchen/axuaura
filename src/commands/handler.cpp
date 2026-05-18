@@ -4,6 +4,7 @@
 #include "config.h"
 
 namespace commands {
+
 	std::map<std::string, SlashHandler> slash_map = {
 		{"auraboard", handle_auraboard},
 		{"movaura", handle_movaura},
@@ -26,23 +27,20 @@ namespace commands {
 
 	void route_slash_command(dpp::cluster& bot, const dpp::slashcommand_t& event) {
 		auto it = slash_map.find(event.command.get_command_name());
-		//	bot.message_create(dpp::message(config::LOG_CH, "<@" + std::to_string(event.command.usr.id) + "> slashcmd: "
-		//+
-		// event.command.get_command_name()));
 		if (it != slash_map.end()) it->second(event, bot);
 	}
 
 	void route_context_menu(dpp::cluster& bot, const dpp::message_context_menu_t& event) {
 		auto it = context_map.find(event.command.get_command_name());
-		//	bot.message_create(dpp::message(config::LOG_CH, "<@" + std::to_string(event.command.usr.id) + "> ctxm: " +
-		// event.command.get_command_name()));
 		if (it != context_map.end()) it->second(event, bot);
 	}
 
-	void register_all(dpp::cluster& bot) {
-		// buttons::register_handler("duel_accept_", handle_duel_buttons);
-		// buttons::register_handler("duel_decline_", handle_duel_buttons);
+	void route_button_click(dpp::cluster& bot, const dpp::button_click_t& event) {
+		const std::string& id = event.custom_id;
+		if (id.rfind("bzr_buy_", 0) == 0) { handle_bazaar_button(event, bot); }
+	}
 
+	void register_all(dpp::cluster& bot) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			bot.global_bulk_command_create({
 				auraboard_def(bot),
@@ -63,4 +61,5 @@ namespace commands {
 			});
 		}
 	}
+
 } // namespace commands

@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "bazaar.h"
 #include "commands.h"
 #include "config.h"
 #include "db.h"
@@ -27,17 +28,25 @@ int main(int argc, char** argv) {
 
 	dpp::cluster bot(token, dpp::i_default_intents | dpp::i_message_content | dpp::i_guild_members);
 	bot.on_log(dpp::utility::cout_logger());
+
 	bot.on_ready([&bot](const dpp::ready_t& event) {
 		bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, "ponderin"));
 		commands::register_all(bot);
 		config::config_load();
-		bot.start_timer([&bot](dpp::timer t) { roles::role_sync(bot); }, 600);
+
+		bot.start_timer([&bot](dpp::timer) { roles::role_sync(bot); }, 600);
+
+		bot.start_timer([&bot](dpp::timer) { bazaar::b_refresh_all(bot); }, 3600);
+
+		bazaar::b_refresh_all(bot);
 	});
 
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) { commands::route_slash_command(bot, event); });
 
 	bot.on_message_context_menu(
 		[&bot](const dpp::message_context_menu_t& event) { commands::route_context_menu(bot, event); });
+
+	bot.on_button_click([&bot](const dpp::button_click_t& event) { commands::route_button_click(bot, event); });
 
 	bot.on_message_create([&bot](const dpp::message_create_t& event) {
 		if (event.msg.author.is_bot()) return;

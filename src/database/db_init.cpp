@@ -33,11 +33,29 @@ namespace db {
 		int cur_version = 0;
 		sqlite3_stmt* stmt;
 		if (sqlite3_prepare_v2(db_ptr, "SELECT MAX(version) FROM db_version;", -1, &stmt, nullptr) == SQLITE_OK) {
-			if (sqlite3_step(stmt) == SQLITE_ROW) { cur_version = sqlite3_column_int(stmt, 0); }
+			if (sqlite3_step(stmt) == SQLITE_ROW) {
+				cur_version = sqlite3_column_int(stmt, 0);
+			} else {
+				sqlite3_exec(db_ptr, "INSERT INTO db_version (version, updated) VALUES (0, 0)", nullptr, nullptr,
+							 nullptr);
+			}
 			sqlite3_finalize(stmt);
 		}
 
-		const char* v1_schema = "CREATE TABLE IF NOT EXISTS aura ("
+		if (cur_version < 2) {
+			char* err_msg = nullptr;
+			sqlite3_exec(db_ptr, "ALTER TABLE shop_items ADD COLUMN pinned INTEGER DEFAULT 0;", nullptr, nullptr,
+						 &err_msg);
+			sqlite3_exec(db_ptr, "ALTER TABLE shop_items ADD COLUMN global INTEGER DEFAULT 0;", nullptr, nullptr,
+						 &err_msg);
+			sqlite3_exec(db_ptr, "UPDATE db_version SET version=2, updated=170526;", nullptr, nullptr, &err_msg);
+			if (err_msg) {
+				std::cerr << "error: " << err_msg << "\n";
+				sqlite3_free(err_msg);
+			}
+		}
+
+		const char* v2_schema = "CREATE TABLE IF NOT EXISTS aura ("
 								"guild_id TEXT NOT NULL, "
 								"user_id TEXT NOT NULL, "
 								"amount INTEGER DEFAULT 0, "
@@ -52,7 +70,7 @@ namespace db {
 								"guild_id TEXT NOT NULL, key TEXT NOT NULL, value TEXT, "
 								"PRIMARY KEY (guild_id, key));"
 
-								"CREATE TABLE IF NOT EXISTS polls_tmp ("
+								"CREATE TABLE IF NOT EXISTS polls ("
 								"p_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "
 								"title TEXT, ops TEXT, active INTEGER DEFAULT 1);"
 
@@ -60,12 +78,12 @@ namespace db {
 								"p_id INTEGER, u_id TEXT, op TEXT, amt INTEGER, "
 								"FOREIGN KEY(p_id) REFERENCES polls(p_id));"
 
-								"CREATE TABLE IF NOT EXISTS duels_tmp ("
+								"CREATE TABLE IF NOT EXISTS duels ("
 								"guild_id TEXT NOT NULL, challenger TEXT NOT NULL, target TEXT, "
 								"bet INTEGER, issue_time INTEGER, "
 								"PRIMARY KEY (guild_id, challenger));"
 
-								"CREATE TABLE IF NOT EXISTS voice_tmp ("
+								"CREATE TABLE IF NOT EXISTS voice ("
 								"guild_id TEXT NOT NULL, user_id TEXT NOT NULL, join_time INTEGER, "
 								"PRIMARY KEY (guild_id, user_id));"
 
@@ -73,14 +91,20 @@ namespace db {
 								"item_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "
 								"type TEXT NOT NULL, role_id TEXT, name TEXT NOT NULL, desc TEXT, "
 								"cost INTEGER NOT NULL, data TEXT, active INTEGER DEFAULT 1, "
-								"obtainable INTEGER DEFAULT 1, sellability INTEGER DEFAULT 1 );"
+								"obtainable INTEGER DEFAULT 1, sellability INTEGER DEFAULT 1, "
+								"pinned INTEGER DEFAULT 0, global INTEGER DEFAULT 0);"
 
 								"CREATE TABLE IF NOT EXISTS inventory ("
 								"inv_id INTEGER PRIMARY KEY AUTOINCREMENT, guild_id TEXT NOT NULL, "
 								"user_id TEXT NOT NULL, item_id INTEGER NOT NULL, "
 								"acquired INTEGER NOT NULL, expires INTEGER, equipped INTEGER DEFAULT 0, "
-								"FOREIGN KEY(item_id) REFERENCES shop_items(item_id));";
+								"FOREIGN KEY(item_id) REFERENCES shop_items(item_id));"
 
-		sqlite3_exec(db_ptr, v1_schema, nullptr, nullptr, nullptr);
+								"CREATE TABLE IF NOT EXISTS bazaar_rotation ("
+								"guild_id TEXT NOT NULL, slot INTEGER NOT NULL, "
+								"item_id INTEGER NOT NULL, refreshed_at INTEGER NOT NULL,"
+								"PRIMARY KEY (guild_id, slot));";
+
+		sqlite3_exec(db_ptr, v2_schema, nullptr, nullptr, nullptr);
 	}
 } // namespace db
