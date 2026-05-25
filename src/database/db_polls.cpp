@@ -27,7 +27,7 @@ namespace db {
 		return list;
 	}
 
-	Poll p_get_poll(int p_id) { // Guild ID not strictly needed for fetch-by-ID if ID is global AI/PK
+	Poll p_get_poll(int p_id) {
 		const char* sql = "SELECT p_id, title, ops FROM polls WHERE p_id = ?;";
 		sqlite3_stmt* stmt;
 		Poll p = {-1, "", ""};
