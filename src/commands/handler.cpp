@@ -20,6 +20,7 @@ namespace commands {
 		{"credits", handle_credits},
 		{"coinflip", handle_coinflip},
 		{"diagnostics", handle_diagnostics},
+		{"echo", handle_echo},
 	};
 
 	std::map<std::string, ContextHandler> context_map = {};
@@ -60,6 +61,7 @@ namespace commands {
 				credits_def(bot),
 				coinflip_def(bot),
 				diagnostics_def(bot),
+				echo_def(bot),
 			});
 		}
 	}
