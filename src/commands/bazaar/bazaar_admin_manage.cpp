@@ -83,10 +83,13 @@ namespace commands {
 							.set_flags(dpp::m_ephemeral));
 
 		} else if (sub == "setrotation") {
-			auto p_rot = event.get_parameter("rotating");
+			auto p_pos = event.get_parameter("positive");
+			auto p_neg = event.get_parameter("negative");
 			auto p_hrs = event.get_parameter("refresh_hours");
-			if (std::holds_alternative<int64_t>(p_rot))
-				db::set_setting(g_id, "bazaar_rotating_cnt", (int)std::get<int64_t>(p_rot));
+			if (std::holds_alternative<int64_t>(p_pos))
+				db::set_setting(g_id, "bazaar_positive_cnt", (int)std::get<int64_t>(p_pos));
+			if (std::holds_alternative<int64_t>(p_neg))
+				db::set_setting(g_id, "bazaar_negative_cnt", (int)std::get<int64_t>(p_neg));
 			if (std::holds_alternative<int64_t>(p_hrs))
 				db::set_setting(g_id, "bazaar_refresh_hours", (int)std::get<int64_t>(p_hrs));
 			adm_ok();

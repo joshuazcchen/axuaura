@@ -54,10 +54,13 @@ namespace commands {
 								.add_option(dpp::command_option(dpp::co_integer, "slot", "slot number", true)))
 				.add_option(dpp::command_option(dpp::co_sub_command, "setchannel", "set bazaar UI channel")
 								.add_option(dpp::command_option(dpp::co_channel, "channel", "channel", true)))
-				.add_option(
-					dpp::command_option(dpp::co_sub_command, "setrotation", "configure rotation counts")
-						.add_option(dpp::command_option(dpp::co_integer, "rotating", "rotating slot count", false))
-						.add_option(dpp::command_option(dpp::co_integer, "refresh_hours", "hours per rotation", false)))
+				.add_option(dpp::command_option(dpp::co_sub_command, "setrotation", "configure rotation counts")
+								.add_option(dpp::command_option(dpp::co_integer, "positive",
+																"# of rotating positive items (left)", false))
+								.add_option(dpp::command_option(dpp::co_integer, "negative",
+																"# of rotating negative items (right)", false))
+								.add_option(dpp::command_option(dpp::co_integer, "refresh_hours",
+																"hours between rotations", false)))
 				.add_option(dpp::command_option(dpp::co_sub_command, "refresh", "force refresh bazaar"));
 
 		return dpp::slashcommand("bazaar", "The Bazaar!", bot.me.id)
