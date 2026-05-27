@@ -1,4 +1,5 @@
 #include <ctime>
+#include <dppp/dppp.h>
 
 #include "bazaar.h"
 #include "commands.h"
@@ -92,7 +93,10 @@ namespace bazaar {
 		std::string u = std::to_string(u_id);
 		std::string fn = utils::json_str(item.data, "file");
 		std::string artist = utils::json_str(item.data, "artist");
-		bool invert = utils::json_bool(item.data, "invert", false);
+		bool invert_val = utils::json_bool(item.data, "invert", false);
+		std::string invert = invert_val ? "true" : "false";
+
+		// why did i put this in settings instead of making it its own thing???
 		db::set_setting(g_id, "bg_override_" + u, fn);
 		db::set_setting(g_id, "bg_artist_" + u, artist);
 		db::set_setting(g_id, "bg_invert_" + u, invert);
@@ -102,7 +106,7 @@ namespace bazaar {
 		std::string u = std::to_string(u_id);
 		db::set_setting(g_id, "bg_override_" + u, "");
 		db::set_setting(g_id, "bg_artist_" + u, "");
-		db::set_setting(g_id, "bg_invert_" + u, true);
+		db::set_setting(g_id, "bg_invert_" + u, std::string("false"));
 	}
 
 	static dpp::component_style parse_btn_style(const std::string& data, dpp::component_style def) {
@@ -134,77 +138,139 @@ namespace bazaar {
 			}
 		}
 
-		auto pages = image::img_gen_bazaar(pos, neg, next_restock);
-		if (pages.empty()) return;
+		if (pos.empty() && neg.empty()) return;
 
-		dpp::component pos_row, neg_row;
-		pos_row.set_type(dpp::cot_action_row);
-		neg_row.set_type(dpp::cot_action_row);
-		auto get_safe_name = [](const auto& item, size_t max_len = 18) -> std::string {
-			if (item.type == "role" && !item.name.empty() && item.name[0] == '<') {
-				std::string id_str;
-				for (char c : item.name) {
-					if (std::isdigit(c)) { id_str += c; }
+		dppp::get_enhanced_roles(
+				bot, g_id, [=, &bot](const dppp::result<std::vector<dppp::enhanced_role>>& res) mutable {
+				if (res.success) {
+				std::unordered_map<dpp::snowflake, dppp::enhanced_role> role_map;
+				for (const auto& r : res.value) {
+				role_map[r.id] = r;
 				}
 
-				if (!id_str.empty()) {
-					try {
-						dpp::snowflake role_id = std::stoull(id_str);
-						dpp::role* cached_role = dpp::find_role(role_id);
-						if (cached_role) {
-							std::string c_name = cached_role->name;
-							std::erase_if(c_name, [](unsigned char c) { return !(std::isalnum(c) || c == ' '); });
-							return c_name.size() <= max_len ? c_name : c_name.substr(0, max_len - 3) + "...";
+				auto inject_colors = [&](std::vector<db::ShopItem>& items) {
+				for (auto& item : items) {
+				if (item.type == "role" && role_map.contains(item.role_id)) {
+				const auto& r = role_map[item.role_id];
+
+				std::string c1 = r.colours.primary_hex_colour();
+				std::string c2 = r.colours.secondary_hex_colour().value_or("");
+				std::string c3 = r.colours.tertiary_colour.has_value()
+					? dppp::to_hex_colour(r.colours.tertiary_colour.value())
+					: "";
+
+				std::string new_keys = "";
+				if (!c1.empty()) new_keys += "\"colour1\":\"" + c1 + "\",";
+				if (!c2.empty()) new_keys += "\"colour2\":\"" + c2 + "\",";
+				if (!c3.empty()) new_keys += "\"colour3\":\"" + c3 + "\",";
+
+				if (!new_keys.empty()) {
+					new_keys.pop_back();
+					if (item.data.empty() || item.data == "{}") {
+						item.data = "{" + new_keys + "}";
+					} else {
+						size_t brace_pos = item.data.find_last_of('}');
+						if (brace_pos != std::string::npos) {
+							item.data.insert(brace_pos, "," + new_keys);
 						}
-					} catch (...) {}
+					}
 				}
-				return "Role";
-			}
+				}
+				}
+				};
 
-			return item.name.size() <= max_len ? item.name : item.name.substr(0, max_len - 3) + "...";
-		};
-		for (auto& i : pos) {
-			auto style = parse_btn_style(i.data, dpp::cos_success);
+				inject_colors(pos);
+				inject_colors(neg);
+				}
 
-			std::string lbl = get_safe_name(i) + " (" + std::to_string(i.cost) + "a)";
+				auto pages = image::img_gen_bazaar(pos, neg, next_restock);
+				if (pages.empty()) return;
 
-			dpp::component btn;
-			btn.set_type(dpp::cot_button)
-				.set_style(style)
-				.set_label(lbl)
-				.set_id("bzr_buy_" + std::to_string(i.item_id));
-			pos_row.add_component(btn);
-		}
+				dpp::component pos_row, neg_row;
+				pos_row.set_type(dpp::cot_action_row);
+				neg_row.set_type(dpp::cot_action_row);
 
-		for (auto& i : neg) {
-			auto style = parse_btn_style(i.data, dpp::cos_danger);
+				auto get_safe_name = [](const auto& item, size_t max_len = 18) -> std::string {
+					if (item.type == "role" && !item.name.empty() && item.name[0] == '<') {
+						std::string id_str;
+						for (char c : item.name) {
+							if (std::isdigit(c)) { id_str += c; }
+						}
 
-			std::string lbl = get_safe_name(i) + " (" + std::to_string(std::abs(i.cost)) + "a)";
+						if (!id_str.empty()) {
+							try {
+								dpp::snowflake role_id = std::stoull(id_str);
+								dpp::role* cached_role = dpp::find_role(role_id);
+								if (cached_role) {
+									std::string c_name = cached_role->name;
+									std::erase_if(c_name,
+											[](unsigned char c) { return !(std::isalnum(c) || c == ' '); });
+									return c_name.size() <= max_len ? c_name : c_name.substr(0, max_len - 3) + "...";
+								}
+							} catch (...) {}
+						}
+						return "Role";
+					}
+					return item.name.size() <= max_len ? item.name : item.name.substr(0, max_len - 3) + "...";
+				};
 
-			dpp::component btn;
-			btn.set_type(dpp::cot_button)
-				.set_style(style)
-				.set_label(lbl)
-				.set_id("bzr_buy_" + std::to_string(i.item_id));
-			neg_row.add_component(btn);
-		}
+				auto build_rows = [&](std::vector<db::ShopItem>& items, bool is_pos) {
+					std::vector<dpp::component> rows;
+					if (items.empty()) return rows;
 
-		dpp::message msg(ch_id, "");
-		msg.set_allowed_mentions(false, false, false, false, {}, {});
-		for (size_t i = 0; i < pages.size(); ++i)
-			msg.add_file("bazaar_p" + std::to_string(i + 1) + ".png", pages[i], "image/png");
-		if (!pos.empty()) msg.add_component(pos_row);
-		if (!neg.empty()) msg.add_component(neg_row);
+					dpp::component current_row;
+					current_row.set_type(dpp::cot_action_row);
 
-		std::string old_id_str = db::get_setting_str(g_id, "bazaar_msg_id", std::string("0"));
-		dpp::snowflake old_id = std::stoull(old_id_str);
-		if (old_id != 0) bot.message_delete(old_id, ch_id);
+					for (size_t i = 0; i < items.size(); ++i) {
+						if (i > 0 && i % 5 == 0) {
+							rows.push_back(current_row);
+							current_row = dpp::component().set_type(dpp::cot_action_row);
+						}
 
-		db::set_setting(g_id, "bazaar_msg_id", std::string("0"));
-		bot.message_create(msg, [g_id](const dpp::confirmation_callback_t& cb) {
-			if (!cb.is_error())
-				db::set_setting(g_id, "bazaar_msg_id", std::to_string(std::get<dpp::message>(cb.value).id));
-		});
+						dpp::component_style def_style = is_pos ? dpp::cos_success : dpp::cos_danger;
+						auto style = parse_btn_style(items[i].data, def_style);
+
+						std::string lbl =
+							get_safe_name(items[i]) + " (" + std::to_string(std::abs(items[i].cost)) + "a)";
+
+						dpp::component btn;
+						btn.set_type(dpp::cot_button)
+							.set_style(style)
+							.set_label(lbl)
+							.set_id("bzr_buy_" + std::to_string(items[i].item_id));
+
+						current_row.add_component(btn);
+					}
+					rows.push_back(current_row);
+					return rows;
+				};
+
+				auto pos_rows = build_rows(pos, true);
+				auto neg_rows = build_rows(neg, false);
+
+				auto msg = std::make_shared<dpp::message>(ch_id, "");
+				msg->set_allowed_mentions(false, false, false, false, {}, {});
+
+				for (size_t i = 0; i < pages.size(); ++i) {
+					msg->add_file("bazaar_p" + std::to_string(i + 1) + ".png", pages[i]);
+				}
+
+				for (auto& row : pos_rows)
+					msg->add_component(row);
+				for (auto& row : neg_rows)
+					msg->add_component(row);
+
+				std::string old_id_str = db::get_setting_str(g_id, "bazaar_msg_id", std::string("0"));
+				dpp::snowflake old_id = std::stoull(old_id_str);
+
+				if (old_id != 0) { bot.message_delete(old_id, ch_id); }
+
+				bot.message_create(*msg, [g_id, msg, &bot](const dpp::confirmation_callback_t& cb) {
+						if (!cb.is_error()) {
+						db::set_setting(g_id, "bazaar_msg_id", std::to_string(std::get<dpp::message>(cb.value).id));
+						}
+						});
+				});
 	}
 
 } // namespace bazaar

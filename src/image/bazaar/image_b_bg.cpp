@@ -63,12 +63,12 @@ namespace image {
 		}
 
 		if (total_pages > 1) {
-			std::string pg = "Page " + std::to_string(page) + " / " + std::to_string(total_pages);
-			bg.fontPointsize(20);
+			std::string pg = "" + std::to_string(page) + " / " + std::to_string(total_pages);
+			bg.fontPointsize(30);
 			bg.fillColor("rgba(255,255,255,0.85)");
 			Magick::TypeMetric m;
 			bg.fontTypeMetrics(pg, &m);
-			bg.draw(Magick::DrawableText((BG_W - m.textWidth()) / 2.0, BG_H - 50, pg));
+			bg.draw(Magick::DrawableText((BG_W - m.textWidth()) - 15, BG_H - 15, pg));
 		}
 
 		if (is_last_page && next_restock > 0) {
@@ -121,20 +121,18 @@ namespace image {
 	std::vector<std::string> img_gen_bazaar(const std::vector<db::ShopItem>& pos, const std::vector<db::ShopItem>& neg,
 											long next_restock) {
 		std::vector<std::string> pages;
-		try {
-			int total = std::max({(int)pos.size(), (int)neg.size(), 1});
-			int num_pages = (total + PAGE_SIZE - 1) / PAGE_SIZE;
+		int total = std::max({(int)pos.size(), (int)neg.size(), 1});
+		int num_pages = (total + PAGE_SIZE - 1) / PAGE_SIZE;
 
-			for (int p = 0; p < num_pages; ++p) {
-				int start = p * PAGE_SIZE;
-				auto pos_slice = std::vector<db::ShopItem>(pos.begin() + std::min(start, (int)pos.size()),
-														   pos.begin() + std::min(start + PAGE_SIZE, (int)pos.size()));
-				auto neg_slice = std::vector<db::ShopItem>(neg.begin() + std::min(start, (int)neg.size()),
-														   neg.begin() + std::min(start + PAGE_SIZE, (int)neg.size()));
+		for (int p = 0; p < num_pages; ++p) {
+			int start = p * PAGE_SIZE;
+			auto pos_slice = std::vector<db::ShopItem>(pos.begin() + std::min(start, (int)pos.size()),
+													   pos.begin() + std::min(start + PAGE_SIZE, (int)pos.size()));
+			auto neg_slice = std::vector<db::ShopItem>(neg.begin() + std::min(start, (int)neg.size()),
+													   neg.begin() + std::min(start + PAGE_SIZE, (int)neg.size()));
 
-				pages.push_back(render_page(pos_slice, neg_slice, next_restock, p == num_pages - 1, p + 1, num_pages));
-			}
-		} catch (...) {}
+			pages.push_back(render_page(pos_slice, neg_slice, next_restock, p == num_pages - 1, p + 1, num_pages));
+		}
 		return pages;
 	}
 

@@ -7,7 +7,6 @@
 namespace commands {
 
 	dpp::slashcommand duel_def(dpp::cluster& bot) {
-		std::cout << "COMMAND RETURNED" << std::endl;
 		return dpp::slashcommand("duel", "duel", bot.me.id)
 			.add_option(dpp::command_option(dpp::co_sub_command, "challenge", "threaten someone")
 							.add_option(dpp::command_option(dpp::co_user, "target", "whomst", true))

@@ -53,7 +53,6 @@ namespace commands {
 		}
 
 		int u_aura = db::get_aura(event.command.guild_id, user_id);
-		std::cout << std::to_string(u_aura) << std::endl;
 		if (std::abs(u_aura) >= std::abs(sacrifice) && sgn(u_aura) == sgn(sacrifice)) {
 			event.reply(dpp::message("I see... we have a deal."));
 			db::rmv_aura(event.command.guild_id, user_id, sacrifice);

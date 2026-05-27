@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <ctime>
+#include <dppp/dppp.h>
 #include <random>
 
 #include "bazaar.h"

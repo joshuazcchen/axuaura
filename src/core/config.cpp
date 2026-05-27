@@ -77,7 +77,5 @@ namespace config {
 		for (auto& pair : guild_configs) {
 			pair.second.update_stupid();
 		}
-
-		std::cout << "configs loaded" << std::endl;
 	}
 } // namespace config

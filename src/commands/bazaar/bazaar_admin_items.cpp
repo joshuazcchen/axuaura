@@ -14,14 +14,8 @@ namespace commands {
 	static std::string build_role_data(const dpp::slashcommand_t& ev) {
 		std::string btn = "primary", c1, c2;
 		auto pb = ev.get_parameter("button_colour");
-		auto p1 = ev.get_parameter("colour1");
-		auto p2 = ev.get_parameter("colour2");
 		if (std::holds_alternative<std::string>(pb)) btn = std::get<std::string>(pb);
-		if (std::holds_alternative<std::string>(p1)) c1 = std::get<std::string>(p1);
-		if (std::holds_alternative<std::string>(p2)) c2 = std::get<std::string>(p2);
 		std::string d = "{\"button_style\":\"" + btn + "\"";
-		if (!c1.empty()) d += ",\"colour1\":\"" + c1 + "\"";
-		if (!c2.empty()) d += ",\"colour2\":\"" + c2 + "\"";
 		d += "}";
 		return d;
 	}
@@ -66,13 +60,17 @@ namespace commands {
 		if (type == "role") {
 			auto pr = event.get_parameter("role");
 			if (!std::holds_alternative<dpp::snowflake>(pr)) {
-				event.reply(adm_err("need a role for type=role"));
+				event.reply(dpp::message("need a role for type=role").set_flags(dpp::m_ephemeral));
 				return;
 			}
 			r_id = std::get<dpp::snowflake>(pr);
 			if (name.empty()) name = "<&" + std::to_string(r_id) + ">";
-			data = build_role_data(event);
 
+			std::string btn = "primary";
+			auto pb = event.get_parameter("button_colour");
+			if (std::holds_alternative<std::string>(pb)) btn = std::get<std::string>(pb);
+
+			data = "{\"button_style\":\"" + btn + "\"}";
 		} else if (type == "banner") {
 			auto pf = event.get_parameter("filename");
 			if (!std::holds_alternative<std::string>(pf)) {
