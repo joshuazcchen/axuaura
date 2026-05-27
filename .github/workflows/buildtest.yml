@@ -12,20 +12,24 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: debian:testing
+    container: debian:unstable
 
     steps:
     - name: get git
       run: |
         apt-get update
         apt-get install -y git
+        
     - name: Checkout Repository
       uses: actions/checkout@v6
       with:
         submodules: recursive
-    - name: get d++
+        
+    - name: get d++ and dependencies
       run: |
         apt-get install -y \
+          g++-16 \
+          gcc-16 \
           build-essential \
           pkg-config \
           cmake \
@@ -45,6 +49,9 @@ jobs:
         dpkg -i dpp.deb || apt-get install -f -y
 
     - name: Configure CMake
+      env:
+        CC: gcc-16
+        CXX: g++-16
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
