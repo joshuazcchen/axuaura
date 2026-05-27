@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(dpp REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(dppp CONFIG REQUIRED)
 pkg_check_modules(ImageMagick REQUIRED IMPORTED_TARGET Magick++-7.Q16HDRI)
 
 file(GLOB_RECURSE SRC_FILES "src/*.cpp")
@@ -23,5 +24,6 @@ target_include_directories(${BOT_BINARY_NAME} PRIVATE
 target_link_libraries(${BOT_BINARY_NAME} PRIVATE
     dpp::dpp
     SQLite::SQLite3
+    dppp::dppp
     PkgConfig::ImageMagick
 )
