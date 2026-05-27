@@ -96,7 +96,7 @@ namespace commands {
 	static std::string fmt_mem(long kb) {
 		if (kb < 0) return "unavailable";
 		if (kb < 1024) return std::to_string(kb) + " KB";
-		return std::to_string(kb / 1024) + " MB (" + std::to_string(kb) + " KB)";
+		return std::to_string(kb / 1024) + " MiB (" + std::to_string(kb) + " KiB)";
 	}
 
 	static std::string fmt_db(int64_t us) {
