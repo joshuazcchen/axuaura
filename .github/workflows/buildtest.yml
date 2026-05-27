@@ -53,7 +53,7 @@ jobs:
         git clone https://github.com/joshuazcchen/dpp_enhanced_roles.git
         cd dpp_enhanced_roles
         cmake -B build
-        sudo cmake --install build
+        cmake --install build
 
     - name: Configure CMake
       env:
