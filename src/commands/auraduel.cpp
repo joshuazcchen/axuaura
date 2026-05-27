@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <random>
 
 #include "commands.h"
 #include "db.h"
@@ -122,7 +123,10 @@ namespace commands {
 			if (u_mag + t_mag > 0) { prob_u = (double)u_mag / (u_mag + t_mag); }
 			prob_u = std::max(0.10, std::min(0.90, prob_u));
 
-			double roll = (double)rand() / RAND_MAX;
+			thread_local std::philox4x32 rng(std::random_device{}());
+			std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+			double roll = dist(rng);
 			bool chwin = (roll <= prob_u);
 			if (chwin) {
 				db::add_aura(event.command.guild_id, c_id, sgn(u_aura) * bet);

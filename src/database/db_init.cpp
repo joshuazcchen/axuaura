@@ -43,16 +43,7 @@ namespace db {
 		}
 
 		if (cur_version < 2) {
-			char* err_msg = nullptr;
-			sqlite3_exec(db_ptr, "ALTER TABLE shop_items ADD COLUMN pinned INTEGER DEFAULT 0;", nullptr, nullptr,
-						 &err_msg);
-			sqlite3_exec(db_ptr, "ALTER TABLE shop_items ADD COLUMN global INTEGER DEFAULT 0;", nullptr, nullptr,
-						 &err_msg);
-			sqlite3_exec(db_ptr, "UPDATE db_version SET version=2, updated=170526;", nullptr, nullptr, &err_msg);
-			if (err_msg) {
-				std::cerr << "error: " << err_msg << "\n";
-				sqlite3_free(err_msg);
-			}
+			db::migrate();
 		}
 
 		const char* v2_schema = "CREATE TABLE IF NOT EXISTS aura ("

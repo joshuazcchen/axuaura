@@ -9,6 +9,7 @@ struct sqlite3;
 namespace db {
 	extern sqlite3* db_ptr;
 
+	void db_migrate();
 	void init();
 	bool ping();
 
@@ -24,7 +25,7 @@ namespace db {
 	void set_setting(dpp::snowflake guild_id, const std::string& key, const std::string& val);
 	void set_setting(dpp::snowflake guild_id, const std::string& key, int val);
 	void set_setting(dpp::snowflake guild_id, const std::string& key, bool val);
-	std::string get_setting_str(dpp::snowflake guild_id, const std::string& key, std::string default_val = "kai");
+	std::string get_setting_str(dpp::snowflake guild_id, const std::string& key, std::string default_val = "corgi");
 	int get_setting_int(dpp::snowflake guild_id, const std::string& key, int default_val = 7);
 	bool get_setting_bool(dpp::snowflake guild_id, const std::string& key, bool default_val = false);
 	std::vector<dpp::snowflake> settings_get_guilds_with(const std::string& key);

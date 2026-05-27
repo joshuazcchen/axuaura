@@ -56,8 +56,7 @@ namespace xp {
 		int xp_min = db::get_setting_int(guild_id, "xp_min", 15);
 		int xp_max = db::get_setting_int(guild_id, "xp_max", 30);
 
-		static std::random_device rd;
-		static std::mt19937 gen(rd());
+		thread_local std::philox4x32 gen(std::random_device{}());
 		std::uniform_int_distribution<> dis(xp_min, xp_max);
 		double xp_mult = db::inv_xp_mult(guild_id, user_id);
 		int xp_del = (int)(dis(gen) * xp_mult);

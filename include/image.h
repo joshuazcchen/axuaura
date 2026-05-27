@@ -10,5 +10,6 @@ namespace image {
 							 bool invert = false);
 
 	std::string img_gen_bazaar(const std::vector<db::ShopItem>& positive_items,
-							   const std::vector<db::ShopItem>& negative_items);
+							   const std::vector<db::ShopItem>& negative_items
+							   long next_restock = 0);
 } // namespace image

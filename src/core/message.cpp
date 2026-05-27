@@ -12,8 +12,7 @@
 
 namespace message {
 	std::string resp_msg(const std::vector<std::string>& pool) {
-		static std::random_device rd;
-		static std::mt19937 gen(rd());
+		thread_local std::philox4x32 gen(std::random_device{}());
 		std::uniform_int_distribution<> dis(0, pool.size() - 1);
 		return pool[dis(gen)];
 	}
@@ -24,8 +23,7 @@ namespace message {
 		dpp::snowflake g_id = event.msg.guild_id;
 		auto conf = config::get_config(g_id);
 
-		static std::random_device rd;
-		static std::mt19937 gen(rd());
+		thread_local std::philox4x32 gen(std::random_device{}());
 
 		dpp::snowflake user_id = event.msg.author.id;
 

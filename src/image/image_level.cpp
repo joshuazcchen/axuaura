@@ -1,6 +1,7 @@
 #include "image.h"
 
 #include <iostream>
+#include <random>
 #define MAGICKCORE_QUANTUM_DEPTH 16
 #define MAGICKCORE_HDRI_ENABLE 1
 #include <Magick++.h>
@@ -117,7 +118,11 @@ namespace image {
 			bg.draw(Magick::DrawableRoundRectangle(img_left, bar_y1, img_bar_x, bar_y2, radius, radius));
 			bg.strokeWidth(0);
 
-			if (level == -1) { progress = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX); }
+			if (level == -1) {
+				thread_local std::philox4x32 rng(std::random_device{}());
+				std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+				progress = dist(rng);
+			}
 
 			if (progress > 0.0f) {
 				double fill_x2 = img_left + ((img_bar_x - img_left) * progress);

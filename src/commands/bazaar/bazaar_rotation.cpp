@@ -16,7 +16,7 @@ namespace bazaar {
 	static void b_fill_rotating(dpp::snowflake g_id, int base_slot, int count, std::vector<db::ShopItem>& pool,
 								const std::vector<db::RotationSlot>& current, std::vector<int>& chosen,
 								long stale_before) {
-		static std::mt19937 rng(std::random_device{}());
+		thread_local std::philox4x32 rng(std::random_device{}());
 
 		for (int s = 0; s < count; ++s) {
 			int slot = base_slot + s;

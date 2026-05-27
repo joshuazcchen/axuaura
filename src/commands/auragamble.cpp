@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <random>
 
 #include "commands.h"
 #include "db.h"
@@ -83,9 +84,11 @@ namespace commands {
 				std::vector<int> rates = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
 										  1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 6, 7};
 
-				int i1 = rates[rand() % rates.size()];
-				int i2 = rates[rand() % rates.size()];
-				int i3 = rates[rand() % rates.size()];
+				thread_local std::philox4x32 rng(std::random_device{}());
+				std::uniform_int_distribution<size_t> dist(0, rates.size() - 1);
+				int i1 = rates[dist(rng)];
+				int i2 = rates[dist(rng)];
+				int i3 = rates[dist(rng)];
 
 				std::vector<std::string> r1 = ops[i1];
 				std::vector<std::string> r2 = ops[i2];
@@ -144,12 +147,7 @@ namespace commands {
 					long net = (long)del - bet;
 					rslt = rslt + "\n" + std::to_string(aura) + "->" + std::to_string((aura - bet) + del) + " (" +
 						   std::to_string(del - bet) + ")";
-					if (user_id == 175422893449150464ULL || user_id == 1194435328312881242ULL ||
-						user_id == 318540048779968513ULL || user_id == 603870585482772491ULL) {
-						rslt += " (but you're better than everyone else so you get 1.5x that for no reason) ";
-					}
-				} else { // this is pretty useless of a check but im too lazy to do it properly since i just modified
-						 // the old aura gambling odds basically lol
+				} else {
 					rslt = rslt + "\n" + std::to_string(aura) + "->" + std::to_string(aura - bet) + " (-" +
 						   std::to_string(bet) + ")";
 				}
@@ -175,7 +173,10 @@ namespace commands {
 					  "<:row1column1:1489394309198250044><:row1column2:1489394322972348416>",
 					  "<:row2column1:1489394338378023105><:row2column2:1489394354627022919>"};
 			}
-			bool win = (rand() % 2 == 0);
+
+			thread_local std::philox4x32 rng(std::random_device{}());
+			std::bernoulli_distribution win_chance(0.5);
+			bool win = win_chance(rng);
 
 			if (win) {
 				int rslt = (int)(bet * 1.5);
