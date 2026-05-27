@@ -48,6 +48,13 @@ jobs:
         wget -O dpp.deb https://github.com/brainboxdotcc/DPP/releases/download/v10.1.4/libdpp-10.1.4-linux-x64.deb
         dpkg -i dpp.deb || apt-get install -f -y
 
+    - name: Build D+++++++
+      run: |
+        git clone https://github.com/joshuazcchen/dpp_enhanced_roles.git
+        cd dpp_enhanced_roles
+        cmake -B build
+        sudo cmake --install build
+
     - name: Configure CMake
       env:
         CC: gcc-16
