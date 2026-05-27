@@ -14,10 +14,10 @@ namespace commands {
 		dpp::snowflake g_id = event.command.guild_id;
 		auto conf = config::get_config(g_id);
 
-        int c_lvl = db::lvl_get(event.command.guild_id, u_id);
+		int c_lvl = db::lvl_get(event.command.guild_id, u_id);
 
-        bool changed = false;
-        std::vector<dpp::snowflake> c_roles = member.get_roles();
+		bool changed = false;
+		std::vector<dpp::snowflake> c_roles = member.get_roles();
 
 		for (const auto& [lv, rid] : conf.lvl_roles) {
 			bool has_role = std::find(c_roles.begin(), c_roles.end(), rid) != c_roles.end();
