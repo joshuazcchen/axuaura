@@ -106,7 +106,7 @@ namespace image {
 			text_r.push_back(Magick::DrawablePointSize(32));
 
 			text_r.push_back(Magick::DrawableFillColor(colour_t));
-			text_r.push_back(Magick::DrawableText(rxc, l1y, "Restocks at:"));
+			text_r.push_back(Magick::DrawableText(rxc, l1y, "Restocks on:"));
 			text_r.push_back(Magick::DrawableFillColor(colour_b));
 			text_r.push_back(Magick::DrawableText(rxc, l2y, date_r));
 
