@@ -32,19 +32,19 @@ namespace image {
 
 		std::string dim = std::to_string(PLACARD_W) + "x" + std::to_string(PLACARD_H) + "!";
 		Magick::Image tmpl_df("assets/bazaar/placard.png");
-        tmpl_df.resize(dim);
+		tmpl_df.resize(dim);
 
-        Magick::Image tmpl_xp("assets/bazaar/placard1.png");
-        tmpl_xp.resize(dim);
+		Magick::Image tmpl_xp("assets/bazaar/placard1.png");
+		tmpl_xp.resize(dim);
 
-        Magick::Image tmpl_b("assets/bazaar/placard2.png");
-        tmpl_b.resize(dim);
+		Magick::Image tmpl_b("assets/bazaar/placard2.png");
+		tmpl_b.resize(dim);
 
 		auto get_tmpl = [&](const db::ShopItem& item) -> Magick::Image& {
-            if (item.type == "xp_boost") return tmpl_xp;
-            if (item.type == "banner") return tmpl_b;
-            return tmpl_df;
-        };
+			if (item.type == "xp_boost") return tmpl_xp;
+			if (item.type == "banner") return tmpl_b;
+			return tmpl_df;
+		};
 
 		int margin = (PANEL_W - PLACARD_W) / 2;
 		int left_x = LEFT_PANEL_X + margin;
@@ -52,15 +52,15 @@ namespace image {
 		int max_y = BG_H - PLACARD_H - 30;
 
 		for (size_t i = 0; i < pos_slice.size(); ++i) {
-            int y = PANEL_Y + (int)i * SLOT_H;
-            if (y > max_y) break;
-            draw_placard(bg, get_tmpl(pos_slice[i]), left_x, y, pos_slice[i]);
-        }
-        for (size_t i = 0; i < neg_slice.size(); ++i) {
-            int y = PANEL_Y + (int)i * SLOT_H;
-            if (y > max_y) break;
-            draw_placard(bg, get_tmpl(neg_slice[i]), right_x, y, neg_slice[i]);
-        }
+			int y = PANEL_Y + (int)i * SLOT_H;
+			if (y > max_y) break;
+			draw_placard(bg, get_tmpl(pos_slice[i]), left_x, y, pos_slice[i]);
+		}
+		for (size_t i = 0; i < neg_slice.size(); ++i) {
+			int y = PANEL_Y + (int)i * SLOT_H;
+			if (y > max_y) break;
+			draw_placard(bg, get_tmpl(neg_slice[i]), right_x, y, neg_slice[i]);
+		}
 
 		if (total_pages > 1) {
 			std::string pg = "Page " + std::to_string(page) + " / " + std::to_string(total_pages);
@@ -73,44 +73,44 @@ namespace image {
 
 		if (is_last_page && next_restock > 0) {
 			std::time_t now = std::time(nullptr);
-            std::tm* tm_info = std::localtime(&now);
-            char date_l[64];
-            std::strftime(date_l, sizeof(date_l), "%b %d", tm_info);
+			std::tm* tm_info = std::localtime(&now);
+			char date_l[64];
+			std::strftime(date_l, sizeof(date_l), "%b %d", tm_info);
 
-            tm_info = std::localtime(&next_restock);
-            char date_r[64];
-            std::strftime(date_r, sizeof(date_r), "%b %d, %H:%M", tm_info);
+			tm_info = std::localtime(&next_restock);
+			char date_r[64];
+			std::strftime(date_r, sizeof(date_r), "%b %d, %H:%M", tm_info);
 
-            double lxc = LEFT_PANEL_X + (PANEL_W / 2.0);
-            double rxc = RIGHT_PANEL_X + (PANEL_W / 2.0);
+			double lxc = LEFT_PANEL_X + (PANEL_W / 2.0);
+			double rxc = RIGHT_PANEL_X + (PANEL_W / 2.0);
 
-            int l1y = RESTOCK_Y;
-            int l2y = RESTOCK_Y + 28;
+			int l1y = RESTOCK_Y;
+			int l2y = RESTOCK_Y + 28;
 
-            std::string colour_t = "rgba(255,230,160,1)";
-            std::string colour_b = "rgba(255,200,100,1)"; 
+			std::string colour_t = "rgba(255,230,160,1)";
+			std::string colour_b = "rgba(255,200,100,1)";
 
-            std::vector<Magick::Drawable> text_l;
-            text_l.push_back(Magick::DrawableTextAlignment(Magick::CenterAlign));
-            text_l.push_back(Magick::DrawablePointSize(32));
+			std::vector<Magick::Drawable> text_l;
+			text_l.push_back(Magick::DrawableTextAlignment(Magick::CenterAlign));
+			text_l.push_back(Magick::DrawablePointSize(32));
 
-            text_l.push_back(Magick::DrawableFillColor(colour_t));
-            text_l.push_back(Magick::DrawableText(lxc, l1y, "Shop for"));
-            text_l.push_back(Magick::DrawableFillColor(colour_b));
-            text_l.push_back(Magick::DrawableText(lxc, l2y, date_l));
+			text_l.push_back(Magick::DrawableFillColor(colour_t));
+			text_l.push_back(Magick::DrawableText(lxc, l1y, "Shop for"));
+			text_l.push_back(Magick::DrawableFillColor(colour_b));
+			text_l.push_back(Magick::DrawableText(lxc, l2y, date_l));
 
-            bg.draw(text_l);
+			bg.draw(text_l);
 
-            std::vector<Magick::Drawable> text_r;
-            text_r.push_back(Magick::DrawableTextAlignment(Magick::CenterAlign));
-            text_r.push_back(Magick::DrawablePointSize(32));
+			std::vector<Magick::Drawable> text_r;
+			text_r.push_back(Magick::DrawableTextAlignment(Magick::CenterAlign));
+			text_r.push_back(Magick::DrawablePointSize(32));
 
-            text_r.push_back(Magick::DrawableFillColor(colour_t));
-            text_r.push_back(Magick::DrawableText(rxc, l1y, "Restocks at:"));
-            text_r.push_back(Magick::DrawableFillColor(colour_b));
-            text_r.push_back(Magick::DrawableText(rxc, l2y, date_r));
+			text_r.push_back(Magick::DrawableFillColor(colour_t));
+			text_r.push_back(Magick::DrawableText(rxc, l1y, "Restocks at:"));
+			text_r.push_back(Magick::DrawableFillColor(colour_b));
+			text_r.push_back(Magick::DrawableText(rxc, l2y, date_r));
 
-            bg.draw(text_r);
+			bg.draw(text_r);
 		}
 
 		Magick::Blob blob;

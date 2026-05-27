@@ -55,53 +55,45 @@ namespace image {
 	}
 
 	static void preview_banner(Magick::Image& bg, int px, int py, const std::string& data) {
-        std::string fn = utils::json_str(data, "file");
-        if (fn.empty()) return;
-        std::string ipath = "assets/bg/bazaar/" + fn;
-        if (!std::filesystem::exists(ipath)) return;
-        try {
-            Magick::Image preview(ipath);
+		std::string fn = utils::json_str(data, "file");
+		if (fn.empty()) return;
+		std::string ipath = "assets/bg/bazaar/" + fn;
+		if (!std::filesystem::exists(ipath)) return;
+		try {
+			Magick::Image preview(ipath);
 
-            std::string geom_str = std::to_string(PILL_W) + "x" + std::to_string(PILL_H) + "^";
-            preview.resize(geom_str);
-            preview.extent(Magick::Geometry(PILL_W, PILL_H), Magick::CenterGravity);
-            preview.repage();
-            preview.alpha(true);
+			std::string geom_str = std::to_string(PILL_W) + "x" + std::to_string(PILL_H) + "^";
+			preview.resize(geom_str);
+			preview.extent(Magick::Geometry(PILL_W, PILL_H), Magick::CenterGravity);
+			preview.repage();
+			preview.alpha(true);
 
-            Magick::Image mask(Magick::Geometry(PILL_W, PILL_H), Magick::Color("transparent"));
-            mask.fillColor("white");
-            mask.strokeColor("transparent");
-            mask.strokeWidth(0);
+			Magick::Image mask(Magick::Geometry(PILL_W, PILL_H), Magick::Color("transparent"));
+			mask.fillColor("white");
+			mask.strokeColor("transparent");
+			mask.strokeWidth(0);
 
-            mask.draw(Magick::DrawableRoundRectangle(
-                        0, 0,
-                        PILL_W - 1, PILL_H - 1,
-                        PILL_H / 2.0, PILL_H / 2.0
-                        ));
+			mask.draw(Magick::DrawableRoundRectangle(0, 0, PILL_W - 1, PILL_H - 1, PILL_H / 2.0, PILL_H / 2.0));
 
-            preview.composite(mask, 0, 0, Magick::DstInCompositeOp);
+			preview.composite(mask, 0, 0, Magick::DstInCompositeOp);
 
-            int total_w = PILL_W + (BDR_SZ * 2);
-            int total_h = PILL_H + (BDR_SZ * 2);
+			int total_w = PILL_W + (BDR_SZ * 2);
+			int total_h = PILL_H + (BDR_SZ * 2);
 
-            Magick::Image f_pill(Magick::Geometry(total_w, total_h), Magick::Color("transparent"));
-            f_pill.fillColor(Magick::Color("#3B3637"));
-            f_pill.strokeColor("transparent");
-            f_pill.strokeWidth(0);
+			Magick::Image f_pill(Magick::Geometry(total_w, total_h), Magick::Color("transparent"));
+			f_pill.fillColor(Magick::Color("#3B3637"));
+			f_pill.strokeColor("transparent");
+			f_pill.strokeWidth(0);
 
-            f_pill.draw(Magick::DrawableRoundRectangle(
-                        0, 0,
-                        total_w - 1, total_h - 1,
-                        total_h / 2.0, total_h / 2.0
-                        ));
+			f_pill.draw(Magick::DrawableRoundRectangle(0, 0, total_w - 1, total_h - 1, total_h / 2.0, total_h / 2.0));
 
-            f_pill.composite(preview, BDR_SZ, BDR_SZ, Magick::OverCompositeOp);
+			f_pill.composite(preview, BDR_SZ, BDR_SZ, Magick::OverCompositeOp);
 
-            int ix = px + IND_X - MARGIN_R;
-            int iy = py + (PLACARD_H - PILL_H) / 2;
+			int ix = px + IND_X - MARGIN_R;
+			int iy = py + (PLACARD_H - PILL_H) / 2;
 
-            bg.composite(f_pill, ix - BDR_SZ, iy - BDR_SZ, Magick::OverCompositeOp);
-        } catch (...) {}
+			bg.composite(f_pill, ix - BDR_SZ, iy - BDR_SZ, Magick::OverCompositeOp);
+		} catch (...) {}
 	}
 
 	static void preview_xp(Magick::Image& bg, int px, int py) {
@@ -123,46 +115,37 @@ namespace image {
 		int gx = px + IND_X - MARGIN_R;
 		int gy = py + (PLACARD_H - 40 - BDR_SZ) / 2;
 		try {
-            Magick::Image grad;
-            if (!c2.empty()) {
-                grad.size(Magick::Geometry(PILL_W*2, PILL_H));
-                grad.read("radial-gradient:" + c1 + "-" + c2);
-                grad.crop(Magick::Geometry(PILL_W, PILL_H, 0, 0));
-            } else {
-                grad = Magick::Image(Magick::Geometry(PILL_W, PILL_H), Magick::Color(c1));
-            }
-            grad.repage();
-            grad.alpha(true);
+			Magick::Image grad;
+			if (!c2.empty()) {
+				grad.size(Magick::Geometry(PILL_W * 2, PILL_H));
+				grad.read("radial-gradient:" + c1 + "-" + c2);
+				grad.crop(Magick::Geometry(PILL_W, PILL_H, 0, 0));
+			} else {
+				grad = Magick::Image(Magick::Geometry(PILL_W, PILL_H), Magick::Color(c1));
+			}
+			grad.repage();
+			grad.alpha(true);
 
-            Magick::Image mask(Magick::Geometry(PILL_W, PILL_H), Magick::Color("transparent"));
-            mask.fillColor("white");
-            mask.strokeColor("transparent");
-            mask.strokeWidth(0);
-            mask.draw(Magick::DrawableRoundRectangle(
-                        0, 0,
-                        PILL_W - 1, PILL_H - 1,
-                        PILL_H / 2.0, PILL_H / 2.0
-                        ));
+			Magick::Image mask(Magick::Geometry(PILL_W, PILL_H), Magick::Color("transparent"));
+			mask.fillColor("white");
+			mask.strokeColor("transparent");
+			mask.strokeWidth(0);
+			mask.draw(Magick::DrawableRoundRectangle(0, 0, PILL_W - 1, PILL_H - 1, PILL_H / 2.0, PILL_H / 2.0));
 
-            grad.composite(mask, 0, 0, Magick::DstInCompositeOp);
+			grad.composite(mask, 0, 0, Magick::DstInCompositeOp);
 
+			int total_w = PILL_W + (BDR_SZ * 2);
+			int total_h = PILL_H + (BDR_SZ * 2);
 
-            int total_w = PILL_W + (BDR_SZ * 2);
-            int total_h = PILL_H + (BDR_SZ * 2);
+			Magick::Image f_pill(Magick::Geometry(total_w, total_h), Magick::Color("transparent"));
 
-            Magick::Image f_pill(Magick::Geometry(total_w, total_h), Magick::Color("transparent"));
+			f_pill.fillColor(Magick::Color("#3B3637"));
+			f_pill.strokeWidth(0);
+			f_pill.draw(Magick::DrawableRoundRectangle(0, 0, total_w - 1, total_h - 1, total_h / 2.0, total_h / 2.0));
 
-            f_pill.fillColor(Magick::Color("#3B3637"));
-            f_pill.strokeWidth(0);
-            f_pill.draw(Magick::DrawableRoundRectangle(
-                        0, 0,
-                        total_w - 1, total_h - 1,
-                        total_h / 2.0, total_h / 2.0
-                        ));
+			f_pill.composite(grad, BDR_SZ, BDR_SZ, Magick::OverCompositeOp);
 
-            f_pill.composite(grad, BDR_SZ, BDR_SZ, Magick::OverCompositeOp);
-
-            bg.composite(f_pill, gx - BDR_SZ, gy - BDR_SZ, Magick::OverCompositeOp);
+			bg.composite(f_pill, gx - BDR_SZ, gy - BDR_SZ, Magick::OverCompositeOp);
 		} catch (...) {}
 	}
 

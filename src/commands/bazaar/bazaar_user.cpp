@@ -202,9 +202,9 @@ namespace bazaar {
 
 		db::set_setting(g_id, "bazaar_msg_id", std::string("0"));
 		bot.message_create(msg, [g_id](const dpp::confirmation_callback_t& cb) {
-				if (!cb.is_error())
+			if (!cb.is_error())
 				db::set_setting(g_id, "bazaar_msg_id", std::to_string(std::get<dpp::message>(cb.value).id));
-				});
+		});
 	}
 
 } // namespace bazaar
