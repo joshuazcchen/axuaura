@@ -1,6 +1,7 @@
 #include "image.h"
 
 #include <iostream>
+#include <filesystem>
 #include <random>
 #define MAGICKCORE_QUANTUM_DEPTH 16
 #define MAGICKCORE_HDRI_ENABLE 1
@@ -13,7 +14,10 @@ namespace image {
 		try {
 			std::string bg_file;
 			if (!bg_c.empty()) {
-				bg_file = "assets/bg/custom/" + bg_c;
+				if (!std::filesystem::exists("assets/bg/custom/" + bg_c)) {
+					bg_file = "assets/bg/custom/" + bg_c;
+				}
+				bg_file = "assets/bg/bazaar/" + bg_c;
 			} else {
 				if (level >= 60)
 					bg_file = "assets/bg/60_tmp.png";

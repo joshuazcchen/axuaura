@@ -11,82 +11,119 @@ namespace commands {
 	static dpp::message adm_ok() { return dpp::message("done.").set_flags(dpp::m_ephemeral); }
 	static dpp::message adm_err(const std::string& s) { return dpp::message(s).set_flags(dpp::m_ephemeral); }
 
+	static std::string build_role_data(const dpp::slashcommand_t& ev) {
+		std::string btn = "primary", c1, c2;
+		auto pb = ev.get_parameter("button_colour");
+		auto p1 = ev.get_parameter("colour1");
+		auto p2 = ev.get_parameter("colour2");
+		if (std::holds_alternative<std::string>(pb)) btn = std::get<std::string>(pb);
+		if (std::holds_alternative<std::string>(p1)) c1 = std::get<std::string>(p1);
+		if (std::holds_alternative<std::string>(p2)) c2 = std::get<std::string>(p2);
+		std::string d = "{\"button_style\":\"" + btn + "\"";
+		if (!c1.empty()) d += ",\"colour1\":\"" + c1 + "\"";
+		if (!c2.empty()) d += ",\"colour2\":\"" + c2 + "\"";
+		d += "}";
+		return d;
+	}
+
+	static std::string build_banner_data(const dpp::slashcommand_t& ev, const std::string& fn) {
+		std::string artist;
+		bool invert = false;
+		bool is_global = false;
+		auto pa = ev.get_parameter("artist");
+		auto pi = ev.get_parameter("invert");
+		auto pg = ev.get_parameter("global");
+		if (std::holds_alternative<std::string>(pa)) artist = std::get<std::string>(pa);
+		if (std::holds_alternative<bool>(pi)) invert = std::get<bool>(pi);
+		if (std::holds_alternative<bool>(pg)) is_global = std::get<bool>(pg);
+		return "{\"file\":\"" + fn +
+			   "\","
+			   "\"artist\":\"" +
+			   artist +
+			   "\","
+			   "\"invert\":" +
+			   (invert ? "true" : "false") +
+			   ","
+			   "\"global\":" +
+			   (is_global ? "true" : "false") + "}";
+	}
+
 	static void do_add(const dpp::slashcommand_t& event, dpp::cluster& bot) {
 		dpp::snowflake g_id = event.command.guild_id;
 		std::string type = std::get<std::string>(event.get_parameter("type"));
 		int cost = std::get<int64_t>(event.get_parameter("cost"));
-
 		std::string name, desc, data;
 		dpp::snowflake r_id = 0;
 		bool pinned = false;
 
-		auto p_desc = event.get_parameter("desc");
-		auto p_name = event.get_parameter("name");
-		auto p_pinned = event.get_parameter("pinned");
-		if (std::holds_alternative<std::string>(p_desc)) desc = std::get<std::string>(p_desc);
-		if (std::holds_alternative<std::string>(p_name)) name = std::get<std::string>(p_name);
-		if (std::holds_alternative<bool>(p_pinned)) pinned = std::get<bool>(p_pinned);
+		auto pname = event.get_parameter("name");
+		auto pdesc = event.get_parameter("desc");
+		auto ppinned = event.get_parameter("pinned");
+		if (std::holds_alternative<std::string>(pname)) name = std::get<std::string>(pname);
+		if (std::holds_alternative<std::string>(pdesc)) desc = std::get<std::string>(pdesc);
+		if (std::holds_alternative<bool>(ppinned)) pinned = std::get<bool>(ppinned);
 
 		if (type == "role") {
-			auto p_role = event.get_parameter("role");
-			if (!std::holds_alternative<dpp::snowflake>(p_role)) {
+			auto pr = event.get_parameter("role");
+			if (!std::holds_alternative<dpp::snowflake>(pr)) {
 				event.reply(adm_err("need a role for type=role"));
 				return;
 			}
-			r_id = std::get<dpp::snowflake>(p_role);
-			if (name.empty()) name = "<@&" + std::to_string(r_id) + ">";
-			data = "{}";
+			r_id = std::get<dpp::snowflake>(pr);
+			if (name.empty()) name = "<&" + std::to_string(r_id) + ">";
+			data = build_role_data(event);
 
 		} else if (type == "banner") {
-			auto p_file = event.get_parameter("filename");
-			if (!std::holds_alternative<std::string>(p_file)) {
+			auto pf = event.get_parameter("filename");
+			if (!std::holds_alternative<std::string>(pf)) {
 				event.reply(adm_err("need a filename for type=banner"));
 				return;
 			}
-			std::string fn = std::get<std::string>(p_file);
-			std::string path = "assets/bg/custom/" + fn;
-			if (!std::filesystem::exists(path)) {
-				event.reply(adm_err("file `" + fn + "` not found in assets/bg/custom/"));
+			std::string fn = std::get<std::string>(pf);
+			if (!std::filesystem::exists("assets/bg/bazaar/" + fn)) {
+				event.reply(adm_err("file `" + fn + "` not found in assets/bg/bazaar/"));
 				return;
 			}
 			if (name.empty()) name = fn;
-			data = "{\"file\":\"" + fn + "\"}";
+			data = build_banner_data(event, fn);
+			bool is_global = utils::json_bool(data, "global");
+			int i_id = db::shop_add(g_id, type, r_id, name, desc, cost, data);
+			if (pinned) db::shop_set_int(g_id, i_id, "pinned", 1);
+			if (is_global) db::shop_set_int(g_id, i_id, "global", 1);
+			event.reply(dpp::message("added banner id **" + std::to_string(i_id) + "**").set_flags(dpp::m_ephemeral));
+			return;
 
 		} else if (type == "xp_boost") {
-			auto p_mult = event.get_parameter("multiplier");
-			auto p_dur = event.get_parameter("duration");
+			auto pm = event.get_parameter("multiplier");
+			auto pd = event.get_parameter("duration");
 			double mult = 2.0;
 			int hours = 24;
-			if (std::holds_alternative<std::string>(p_mult)) {
-				try {
-					mult = std::stod(std::get<std::string>(p_mult));
+			if (std::holds_alternative<std::string>(pm)) try {
+					mult = std::stod(std::get<std::string>(pm));
 				} catch (...) {}
-			}
-			if (std::holds_alternative<int64_t>(p_dur)) hours = std::get<int64_t>(p_dur);
-			if (name.empty()) name = std::to_string((int)mult) + "x xp boost";
+			if (std::holds_alternative<int64_t>(pd)) hours = (int)std::get<int64_t>(pd);
+			if (name.empty()) name = std::to_string((int)mult) + "x XP Boost";
 			data = "{\"mult\":" + std::to_string(mult) + ",\"hours\":" + std::to_string(hours) + "}";
-			if (!std::holds_alternative<bool>(p_pinned)) pinned = true;
+			if (!std::holds_alternative<bool>(ppinned)) pinned = true;
 		}
 
 		int i_id = db::shop_add(g_id, type, r_id, name, desc, cost, data);
 		if (pinned) db::shop_set_int(g_id, i_id, "pinned", 1);
-		event.reply(dpp::message("added. id: **" + std::to_string(i_id) + "**").set_flags(dpp::m_ephemeral));
+		event.reply(dpp::message("added id **" + std::to_string(i_id) + "**").set_flags(dpp::m_ephemeral));
 	}
 
 	static void do_remove(const dpp::slashcommand_t& event, dpp::cluster& bot) {
 		dpp::snowflake g_id = event.command.guild_id;
 		int id = std::get<int64_t>(event.get_parameter("id"));
-		auto p_rel = event.get_parameter("relative");
-		bool relative = std::holds_alternative<bool>(p_rel) && std::get<bool>(p_rel);
-
+		auto pr = event.get_parameter("relative");
+		bool relative = std::holds_alternative<bool>(pr) && std::get<bool>(pr);
 		if (relative) {
 			auto slots = db::bazaar_rotation_get(g_id);
 			if (id < 1 || id > (int)slots.size()) {
 				event.reply(adm_err("invalid slot"));
 				return;
 			}
-			int item_id = slots[id - 1].item_id;
-			db::shop_rmv(g_id, item_id);
+			db::shop_rmv(g_id, slots[id - 1].item_id);
 			db::bazaar_rotation_clear_slot(g_id, slots[id - 1].slot);
 			bazaar::b_refresh_guild(bot, g_id);
 		} else {

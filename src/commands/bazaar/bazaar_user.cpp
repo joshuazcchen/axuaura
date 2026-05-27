@@ -2,14 +2,12 @@
 
 #include "bazaar.h"
 #include "commands.h"
-#include "config.h"
 #include "db.h"
 #include "image.h"
 #include "utils.h"
 
 namespace commands {
 
-	// ── sell (by inventory position) ────────────────────────────────────────
 	void handle_bazaar_sell(const dpp::slashcommand_t& event, dpp::cluster& bot) {
 		dpp::snowflake g_id = event.command.guild_id;
 		dpp::snowflake u_id = event.command.get_issuing_user().id;
@@ -27,16 +25,14 @@ namespace commands {
 		}
 		auto item = db::shop_get(g_id, inv.item_id);
 		int refund = std::max(0, item.cost / 10);
-
 		if (item.type == "role") bot.guild_member_remove_role(g_id, u_id, item.role_id);
-		if (item.type == "banner" && inv.equipped) db::set_setting(g_id, "bg_override_" + std::to_string(u_id), "");
+		if (item.type == "banner" && inv.equipped) bazaar::b_banner_unequip(g_id, u_id);
 
 		db::add_aura(g_id, u_id, refund);
 		db::inv_rm_by_inv_id(inv.inv_id);
 		event.reply(dpp::message("sold **" + item.name + "** for " + std::to_string(refund) + " aura."));
 	}
 
-	// ── buy button handler ───────────────────────────────────────────────────
 	void handle_bazaar_button(const dpp::button_click_t& event, dpp::cluster& bot) {
 		dpp::snowflake g_id = event.command.guild_id;
 		dpp::snowflake u_id = event.command.get_issuing_user().id;
@@ -50,7 +46,7 @@ namespace commands {
 				break;
 			}
 		if (!in_rotation) {
-			event.reply(dpp::message("this item is no longer available.").set_flags(dpp::m_ephemeral));
+			event.reply(dpp::message("no longer available.").set_flags(dpp::m_ephemeral));
 			return;
 		}
 		auto item = db::shop_get(g_id, item_id);
@@ -58,45 +54,28 @@ namespace commands {
 			event.reply(dpp::message("item unavailable.").set_flags(dpp::m_ephemeral));
 			return;
 		}
-
 		bool consumable = (item.type == "xp_boost");
 		if (!consumable && db::inv_has(g_id, u_id, item_id)) {
 			event.reply(dpp::message("you already own this.").set_flags(dpp::m_ephemeral));
 			return;
 		}
-
 		int aura = db::get_aura(g_id, u_id);
 		bool can_buy = (item.cost >= 0) ? (aura >= item.cost) : (aura <= item.cost);
 		if (!can_buy) {
-			event.reply(dpp::message("not enough aura.").set_flags(dpp::m_ephemeral));
+			event.reply(dpp::message("not enough aura (" + std::to_string(aura) + ").").set_flags(dpp::m_ephemeral));
 			return;
 		}
-
 		db::rmv_aura(g_id, u_id, item.cost);
 
 		if (item.type == "xp_boost") {
-			int hours = 24;
-			auto p = item.data.find("\"hours\"");
-			if (p != std::string::npos) {
-				auto c = item.data.find(':', p);
-				if (c != std::string::npos) try {
-						hours = std::stoi(item.data.substr(c + 1));
-					} catch (...) {}
-			}
+			int hours = utils::json_int(item.data, "hours", 24);
 			long expires = hours > 0 ? (std::time(nullptr) + (long)hours * 3600) : 0;
 			db::inv_add_timed(g_id, u_id, item_id, expires);
 		} else if (item.type == "banner") {
-			std::string fn;
-			auto p = item.data.find("\"file\"");
-			if (p != std::string::npos) {
-				auto q1 = item.data.find('"', item.data.find(':', p) + 1);
-				auto q2 = item.data.find('"', q1 + 1);
-				if (q1 != std::string::npos && q2 != std::string::npos) fn = item.data.substr(q1 + 1, q2 - q1 - 1);
-			}
 			db::inv_uneq_all_type(g_id, u_id, "banner");
 			db::inv_add(g_id, u_id, item_id);
 			db::inv_eq(g_id, u_id, item_id);
-			if (!fn.empty()) db::set_setting(g_id, "bg_override_" + std::to_string(u_id), fn);
+			bazaar::b_banner_equip(g_id, u_id, item);
 		} else {
 			db::inv_add(g_id, u_id, item_id);
 			db::inv_eq(g_id, u_id, item_id);
@@ -109,60 +88,123 @@ namespace commands {
 
 namespace bazaar {
 
+	void b_banner_equip(dpp::snowflake g_id, dpp::snowflake u_id, const db::ShopItem& item) {
+		std::string u = std::to_string(u_id);
+		std::string fn = utils::json_str(item.data, "file");
+		std::string artist = utils::json_str(item.data, "artist");
+		bool invert = utils::json_bool(item.data, "invert", false);
+		db::set_setting(g_id, "bg_override_" + u, fn);
+		db::set_setting(g_id, "bg_artist_" + u, artist);
+		db::set_setting(g_id, "bg_invert_" + u, invert);
+	}
+
+	void b_banner_unequip(dpp::snowflake g_id, dpp::snowflake u_id) {
+		std::string u = std::to_string(u_id);
+		db::set_setting(g_id, "bg_override_" + u, "");
+		db::set_setting(g_id, "bg_artist_" + u, "");
+		db::set_setting(g_id, "bg_invert_" + u, true);
+	}
+
+	static dpp::component_style parse_btn_style(const std::string& data, dpp::component_style def) {
+		std::string s = utils::json_str(data, "button_style");
+		if (s == "success") return dpp::cos_success;
+		if (s == "danger") return dpp::cos_danger;
+		if (s == "secondary") return dpp::cos_secondary;
+		if (s == "primary") return dpp::cos_primary;
+		return def;
+	}
+
 	void b_post_ui(dpp::cluster& bot, dpp::snowflake g_id) {
-		std::string ch_str = db::get_setting_str(g_id, "bazaar_channel", "0");
+		std::string ch_str = db::get_setting_str(g_id, "bazaar_channel", std::string("0"));
 		dpp::snowflake ch_id = std::stoull(ch_str);
 		if (ch_id == 0) return;
 
 		auto slots = db::bazaar_rotation_get(g_id);
+		std::vector<db::ShopItem> pos, neg;
+		long next_restock = 0;
+		long refresh_s = (long)db::get_setting_int(g_id, "bazaar_refresh_hours", 168) * 3600;
 
-		std::vector<db::ShopItem> pos_items, neg_items;
 		for (auto& s : slots) {
 			auto item = db::shop_get(g_id, s.item_id);
 			if (item.item_id == -1 || !item.active) continue;
-			(item.cost >= 0 ? pos_items : neg_items).push_back(item);
+			(item.cost >= 0 ? pos : neg).push_back(item);
+			if (s.slot >= 10 && !(s.slot >= 100 && s.slot < 110)) {
+				long deadline = s.refreshed_at + refresh_s;
+				if (next_restock == 0 || deadline < next_restock) next_restock = deadline;
+			}
 		}
 
-		std::string img_data = image::img_gen_bazaar(pos_items, neg_items);
-		if (img_data.empty()) return;
+		auto pages = image::img_gen_bazaar(pos, neg, next_restock);
+		if (pages.empty()) return;
 
 		dpp::component pos_row, neg_row;
 		pos_row.set_type(dpp::cot_action_row);
 		neg_row.set_type(dpp::cot_action_row);
-		for (auto& i : pos_items) {
-			std::string lbl = i.name.substr(0, 18) + " (" + std::to_string(i.cost) + "a)";
+		auto get_safe_name = [](const auto& item, size_t max_len = 18) -> std::string {
+			if (item.type == "role" && !item.name.empty() && item.name[0] == '<') {
+				std::string id_str;
+				for (char c : item.name) {
+					if (std::isdigit(c)) { id_str += c; }
+				}
+
+				if (!id_str.empty()) {
+					try {
+						dpp::snowflake role_id = std::stoull(id_str);
+						dpp::role* cached_role = dpp::find_role(role_id);
+						if (cached_role) {
+							std::string c_name = cached_role->name;
+							std::erase_if(c_name, [](unsigned char c) { return !(std::isalnum(c) || c == ' '); });
+							return c_name.size() <= max_len ? c_name : c_name.substr(0, max_len - 3) + "...";
+						}
+					} catch (...) {}
+				}
+				return "Role";
+			}
+
+			return item.name.size() <= max_len ? item.name : item.name.substr(0, max_len - 3) + "...";
+		};
+		for (auto& i : pos) {
+			auto style = parse_btn_style(i.data, dpp::cos_success);
+
+			std::string lbl = get_safe_name(i) + " (" + std::to_string(i.cost) + "a)";
+
 			dpp::component btn;
 			btn.set_type(dpp::cot_button)
-				.set_style(dpp::cos_success)
+				.set_style(style)
 				.set_label(lbl)
 				.set_id("bzr_buy_" + std::to_string(i.item_id));
 			pos_row.add_component(btn);
 		}
-		for (auto& i : neg_items) {
-			std::string lbl = i.name.substr(0, 18) + " (" + std::to_string(i.cost) + "a)";
+
+		for (auto& i : neg) {
+			auto style = parse_btn_style(i.data, dpp::cos_danger);
+
+			std::string lbl = get_safe_name(i) + " (" + std::to_string(std::abs(i.cost)) + "a)";
+
 			dpp::component btn;
 			btn.set_type(dpp::cot_button)
-				.set_style(dpp::cos_danger)
+				.set_style(style)
 				.set_label(lbl)
 				.set_id("bzr_buy_" + std::to_string(i.item_id));
 			neg_row.add_component(btn);
 		}
 
 		dpp::message msg(ch_id, "");
-		msg.add_file("bazaar.png", img_data, "image/png");
 		msg.set_allowed_mentions(false, false, false, false, {}, {});
-		if (!pos_items.empty()) msg.add_component(pos_row);
-		if (!neg_items.empty()) msg.add_component(neg_row);
+		for (size_t i = 0; i < pages.size(); ++i)
+			msg.add_file("bazaar_p" + std::to_string(i + 1) + ".png", pages[i], "image/png");
+		if (!pos.empty()) msg.add_component(pos_row);
+		if (!neg.empty()) msg.add_component(neg_row);
 
-		std::string id_str = db::get_setting_str(g_id, "bazaar_msg_id", std::string("0"));
-		dpp::snowflake old_id = std::stoull(id_str);
+		std::string old_id_str = db::get_setting_str(g_id, "bazaar_msg_id", std::string("0"));
+		dpp::snowflake old_id = std::stoull(old_id_str);
 		if (old_id != 0) bot.message_delete(old_id, ch_id);
 
 		db::set_setting(g_id, "bazaar_msg_id", std::string("0"));
 		bot.message_create(msg, [g_id](const dpp::confirmation_callback_t& cb) {
-			if (!cb.is_error())
+				if (!cb.is_error())
 				db::set_setting(g_id, "bazaar_msg_id", std::to_string(std::get<dpp::message>(cb.value).id));
-		});
+				});
 	}
 
 } // namespace bazaar

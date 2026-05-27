@@ -15,8 +15,22 @@ namespace commands {
 										.add_choice({"XP Boost", std::string("xp_boost")}))
 						.add_option(dpp::command_option(dpp::co_integer, "cost", "cost in aura", true))
 						.add_option(dpp::command_option(dpp::co_role, "role", "role (role type)", false))
+						.add_option(dpp::command_option(dpp::co_string, "button_colour", "colour of button", false)
+										.add_choice({"blurple", std::string("primary")})
+										.add_choice({"green", std::string("success")})
+										.add_choice({"grey", std::string("secondary")})
+										.add_choice({"red", std::string("danger")}))
 						.add_option(
-							dpp::command_option(dpp::co_string, "filename", "file in assets/bg/custom/ ", false))
+							dpp::command_option(dpp::co_string, "colour1", "role colour 1 (hex e.g. #ffffff)", false))
+						.add_option(
+							dpp::command_option(dpp::co_string, "colour2", "role colour 2 for gradient (hex)", false))
+						.add_option(
+							dpp::command_option(dpp::co_string, "filename", "file in assets/bg/bazaar/ ", false))
+						.add_option(
+							dpp::command_option(dpp::co_string, "artist", "artist credit shown on level card", false))
+						.add_option(
+							dpp::command_option(dpp::co_boolean, "invert", "invert level card text colours", false))
+
 						.add_option(dpp::command_option(dpp::co_string, "multiplier", "e.g. 2.0 (xp_boost)", false))
 						.add_option(
 							dpp::command_option(dpp::co_integer, "duration", "hours 0=permanent (xp_boost)", false))

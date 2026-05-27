@@ -1,6 +1,8 @@
+#include "bazaar.h"
 #include "commands.h"
 #include "config.h"
 #include "db.h"
+#include "utils.h"
 
 namespace commands {
 
@@ -16,15 +18,6 @@ namespace commands {
 					.add_option(dpp::command_option(dpp::co_integer, "id", "inventory position (1, 2, 3…)", true)));
 	}
 
-	static std::string banner_filename(const std::string& data) {
-		auto pos = data.find("\"file\"");
-		if (pos == std::string::npos) return "";
-		auto q1 = data.find('"', data.find(':', pos) + 1);
-		auto q2 = data.find('"', q1 + 1);
-		if (q1 == std::string::npos || q2 == std::string::npos) return "";
-		return data.substr(q1 + 1, q2 - q1 - 1);
-	}
-
 	void handle_inventory(const dpp::slashcommand_t& event, dpp::cluster& bot) {
 		auto sub = event.command.get_command_interaction().options[0].name;
 		auto g_id = event.command.guild_id;
@@ -34,24 +27,24 @@ namespace commands {
 			int page = std::get<int64_t>(event.get_parameter("page")) - 1;
 			auto all = db::inv_get_user(g_id, u_id);
 			int pgsz = config::BAZAAR_PGSZ;
-			size_t start = std::min((size_t)page * pgsz, all.size());
-			auto slice = std::span{all}.subspan(start, std::min((size_t)pgsz, all.size() - start));
+			int start = std::min((int)page * pgsz, (int)all.size());
+			int end = std::min(start + pgsz, (int)all.size());
 
 			std::string out = "# your inventory\n\n";
-			if (slice.empty()) {
+			if (start == (int)all.size()) {
 				out += "*nothing here*";
 			} else {
-				int pos = start + 1;
-				for (auto& i : slice) {
-					std::string disp = (i.type == "role") ? "<@&" + std::to_string(i.role_id) + ">" : i.name;
-					out += "**" + std::to_string(pos++) + ".** " + disp;
-					if (i.equipped) out += " `[equipped]`";
-					if (i.expires > 0) out += " *(expires <t:" + std::to_string(i.expires) + ":R>)*";
+				for (int i = start; i < end; ++i) {
+					auto& item = all[i];
+					std::string disp = (item.type == "role") ? "<@&" + std::to_string(item.role_id) + ">" : item.name;
+					out += "**" + std::to_string(i + 1) + ".** " + disp;
+					if (item.equipped) out += " `[equipped]`";
+					if (item.expires > 0) out += " *(expires <t:" + std::to_string(item.expires) + ":R>)*";
 					out += "\n";
 				}
 			}
 			out += "\n-# page " + std::to_string(page + 1) + " of " +
-				   std::to_string(std::max(1, (int)((all.size() + pgsz - 1) / pgsz)));
+				   std::to_string(std::max(1, ((int)all.size() + pgsz - 1) / pgsz));
 			event.reply(dpp::message(out).set_allowed_mentions(false, false, false, false, {}, {}));
 
 		} else if (sub == "equip") {
@@ -68,8 +61,7 @@ namespace commands {
 				bot.guild_member_add_role(g_id, u_id, item.role_id);
 			} else if (item.type == "banner") {
 				db::inv_uneq_all_type(g_id, u_id, "banner");
-				std::string fn = banner_filename(item.data);
-				if (!fn.empty()) db::set_setting(g_id, "bg_override_" + std::to_string(u_id), fn);
+				bazaar::b_banner_equip(g_id, u_id, item);
 			}
 			db::inv_eq(g_id, u_id, inv.item_id);
 			event.reply(dpp::message("equipped **" + item.name + "**.")
@@ -85,11 +77,14 @@ namespace commands {
 			auto& inv = items[pos - 1];
 			auto item = db::shop_get(g_id, inv.item_id);
 
-			if (item.type == "role") {
-				bot.guild_member_remove_role(g_id, u_id, item.role_id);
-			} else if (item.type == "banner") {
-				db::set_setting(g_id, "bg_override_" + std::to_string(u_id), "");
+			if (item.type == "xp_boost") {
+				event.reply(dpp::message("xp boosters can't be unequipped").set_flags(dpp::m_ephemeral));
+				return;
 			}
+
+			if (item.type == "role") bot.guild_member_remove_role(g_id, u_id, item.role_id);
+			if (item.type == "banner") bazaar::b_banner_unequip(g_id, u_id);
+
 			db::inv_uneq(g_id, u_id, inv.item_id);
 			event.reply(dpp::message("unequipped **" + item.name + "**.")
 							.set_allowed_mentions(false, false, false, false, {}, {}));

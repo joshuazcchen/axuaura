@@ -42,9 +42,7 @@ namespace db {
 			sqlite3_finalize(stmt);
 		}
 
-		if (cur_version < 2) {
-			db::migrate();
-		}
+		if (cur_version < 2) { db::db_migrate(); }
 
 		const char* v2_schema = "CREATE TABLE IF NOT EXISTS aura ("
 								"guild_id TEXT NOT NULL, "

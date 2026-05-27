@@ -9,7 +9,6 @@ namespace image {
 							 float progress, const std::string& bg_c = "", const std::string& credit = "",
 							 bool invert = false);
 
-	std::string img_gen_bazaar(const std::vector<db::ShopItem>& positive_items,
-							   const std::vector<db::ShopItem>& negative_items
-							   long next_restock = 0);
+	std::vector<std::string> img_gen_bazaar(const std::vector<db::ShopItem>& positive_items,
+							   const std::vector<db::ShopItem>& negative_items, long next_restock = 0);
 } // namespace image

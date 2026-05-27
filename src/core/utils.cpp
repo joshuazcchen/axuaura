@@ -11,8 +11,8 @@ namespace utils {
 		auto kpos = j.find(search);
 		if (kpos == std::string::npos) return std::string::npos;
 		auto col = j.find(':', kpos + search.size());
-		if (colon == std::string::npos) return std::string::npos;
-		auto vpos = j.find_first_not_of(" \n\r\t", colon + 1);
+		if (col == std::string::npos) return std::string::npos;
+		auto vpos = j.find_first_not_of(" \n\r\t", col + 1);
 		return vpos;
 	}
 
@@ -36,9 +36,7 @@ namespace utils {
 		if (vpos == std::string::npos) return df;
 		try {
 			return std::stoi(j.substr(vpos));
-		} catch (...) {
-			return df;
-		}
+		} catch (...) { return df; }
 	}
 
 	double json_doub(const std::string& j, const std::string& key, double df) {
@@ -46,8 +44,6 @@ namespace utils {
 		if (vpos == std::string::npos) return df;
 		try {
 			return std::stod(j.substr(vpos));
-		} catch (...) {
-			return df;
-		}
+		} catch (...) { return df; }
 	}
 } // namespace utils
