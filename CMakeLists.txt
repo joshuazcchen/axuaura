@@ -13,17 +13,25 @@ pkg_check_modules(ImageMagick REQUIRED IMPORTED_TARGET Magick++-7.Q16HDRI)
 
 file(GLOB_RECURSE SRC_FILES "src/*.cpp")
 
-set(BOT_BINARY_NAME "axuaxibot" CACHE STRING "vsn")
+add_executable(axuaxibot ${SRC_FILES})
 
-add_executable(${BOT_BINARY_NAME} ${SRC_FILES})
-
-target_include_directories(${BOT_BINARY_NAME} PRIVATE
+target_include_directories(axuaxibot PRIVATE
     ${CMAKE_SOURCE_DIR}/include
 )
 
-target_link_libraries(${BOT_BINARY_NAME} PRIVATE
+target_link_libraries(axuaxibot PRIVATE
     dpp::dpp
     SQLite::SQLite3
     dppp::dppp
     PkgConfig::ImageMagick
+)
+
+add_executable(axuctl tools/axuctl.cpp)
+
+target_include_directories(axuctl PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(axuctl PRIVATE 
+    SQLite::SQLite3
 )

@@ -10,7 +10,8 @@
 namespace image {
 
 	std::string img_gen_card(const std::string& av_png, const std::string& user, int level, int xp_now, int xp_next,
-							 float progress, const std::string& bg_c, const std::string& artist, bool invert) {
+							 float progress, const std::string& bg_c, const std::string& artist, bool invert,
+							 const std::vector<std::string>& badges) {
 		try {
 			std::string bg_file;
 			if (!bg_c.empty()) {
@@ -155,6 +156,35 @@ namespace image {
 				bg.strokeWidth(0);
 				bg.fillColor(Magick::Color(base));
 				bg.annotate("axuaxi", Magick::Geometry("+10+10"), Magick::SouthEastGravity);
+			}
+
+			if (!badges.empty()) {
+				constexpr int b_size = 75;
+				constexpr int b_gap = 8;
+				constexpr int cols = 4;
+
+				size_t b_amt = std::min(badges.size(), static_cast<size_t>(12));
+				int a_cols = std::min(static_cast<int>(b_amt), cols);
+
+				int start_x = 1800 - (a_cols * b_size) - ((a_cols - 1) * b_gap) - 28;
+				constexpr int start_y = 28;
+
+				for (size_t i = 0; i < badges.size(); i++) {
+					std::string b_path = "assets/badges/" + badges[i] + ".png";
+					if (!std::filesystem::exists(b_path)) {
+						b_path = "assets/badges/" + badges[i];
+						if (!std::filesystem::exists(b_path)) continue;
+					}
+					try {
+						Magick::Image b_img(b_path);
+						b_img.resize(std::to_string(b_size) + "x" + std::to_string(b_size));
+						int col = static_cast<int>(i) % cols;
+						int row = static_cast<int>(i) / cols;
+						int bx = start_x + (col * (b_size + b_gap));
+						int by = start_y + (row * (b_size + b_gap));
+						bg.composite(b_img, bx, by, Magick::OverCompositeOp);
+					} catch (...) {}
+				}
 			}
 
 			Magick::Blob output;

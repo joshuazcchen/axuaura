@@ -59,6 +59,7 @@ namespace xp {
 		thread_local std::philox4x32 gen(std::random_device{}());
 		std::uniform_int_distribution<> dis(xp_min, xp_max);
 		double xp_mult = db::inv_xp_mult(guild_id, user_id);
+		xp_mult += db::gb_get(user_id);
 		int xp_del = (int)(dis(gen) * xp_mult);
 
 		db::xp_add(guild_id, user_id, xp_del);

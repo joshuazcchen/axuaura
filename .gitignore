@@ -12,3 +12,4 @@ build_test/
 *.sqlite-wal
 *.db
 .env
+axuctl

@@ -32,7 +32,24 @@ namespace bazaar {
 			std::vector<db::ShopItem> cands;
 			for (auto& p : pool)
 				if (std::find(chosen.begin(), chosen.end(), p.item_id) == chosen.end()) cands.push_back(p);
-			if (cands.empty()) continue;
+			if (cands.empty()) {
+				int cur_item = -1;
+				for (auto& cs : current) {
+					if (cs.slot == slot) {
+						cur_item = cs.item_id;
+						break;
+					}
+				}
+				for (auto& p : pool) {
+					if (p.item_id != cur_item) {
+						cands.push_back(p);
+					}
+				}
+				if (cands.empty()) {
+					if (cur_item != -1) db::bazaar_rotation_set(g_id, slot, cur_item);
+					continue;
+				}
+			}
 
 			std::shuffle(cands.begin(), cands.end(), rng);
 			db::bazaar_rotation_set(g_id, slot, cands[0].item_id);
