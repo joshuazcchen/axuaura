@@ -92,7 +92,14 @@ namespace db {
 								"CREATE TABLE IF NOT EXISTS bazaar_rotation ("
 								"guild_id TEXT NOT NULL, slot INTEGER NOT NULL, "
 								"item_id INTEGER NOT NULL, refreshed_at INTEGER NOT NULL,"
-								"PRIMARY KEY (guild_id, slot));";
+								"PRIMARY KEY (guild_id, slot));"
+
+								"CREATE TABLE IF NOT EXISTS user_badges ("
+								"user_id TEXT NOT NULL, badge_id TEXT NOT NULL, granted_at INTEGER NOT NULL, "
+								"PRIMARY KEY (user_id, badge_id));"
+
+								"CREATE TABLE IF NOT EXISTS global_boosts ("
+								"user_id TEXT PRIMARY KEY, mult REAL NOT NULL, expires INTEGER NOT NULL);";
 
 		sqlite3_exec(db_ptr, v2_schema, nullptr, nullptr, nullptr);
 	}

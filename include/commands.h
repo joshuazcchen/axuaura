@@ -27,9 +27,6 @@ namespace commands {
 
 	dpp::slashcommand duel_def(dpp::cluster& bot);
 	void handle_duel(const dpp::slashcommand_t& event, dpp::cluster& bot);
-	// void handle_duel_buttons(const dpp::button_click_t& event, dpp::cluster& bot);
-	// void process_duel_result(dpp::cluster& bot, dpp::snowflake channel_id, dpp::snowflake challenger_id,
-	// dpp::snowflake opponent_id, int wager);
 
 	dpp::slashcommand settings_def(dpp::cluster& bot);
 	void handle_settings(const dpp::slashcommand_t& event, dpp::cluster& bot);

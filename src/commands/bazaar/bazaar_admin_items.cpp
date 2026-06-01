@@ -65,12 +65,6 @@ namespace commands {
 			}
 			r_id = std::get<dpp::snowflake>(pr);
 			if (name.empty()) name = "<&" + std::to_string(r_id) + ">";
-
-			std::string btn = "primary";
-			auto pb = event.get_parameter("button_colour");
-			if (std::holds_alternative<std::string>(pb)) btn = std::get<std::string>(pb);
-
-			data = "{\"button_style\":\"" + btn + "\"}";
 		} else if (type == "banner") {
 			auto pf = event.get_parameter("filename");
 			if (!std::holds_alternative<std::string>(pf)) {
@@ -105,6 +99,10 @@ namespace commands {
 			if (!std::holds_alternative<bool>(ppinned)) pinned = true;
 		}
 
+		std::string btn = "primary";
+		auto pb = event.get_parameter("button_colour");
+		if (std::holds_alternative<std::string>(pb)) btn = std::get<std::string>(pb);
+		data = "{\"button_style\":\"" + btn + "\"}";
 		int i_id = db::shop_add(g_id, type, r_id, name, desc, cost, data);
 		if (pinned) db::shop_set_int(g_id, i_id, "pinned", 1);
 		event.reply(dpp::message("added id **" + std::to_string(i_id) + "**").set_flags(dpp::m_ephemeral));

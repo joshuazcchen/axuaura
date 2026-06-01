@@ -95,10 +95,8 @@ namespace commands {
 			adm_ok();
 
 		} else if (sub == "refresh") {
-			db::set_setting(g_id, "bazaar_msg_id", std::string("0"));
 			bazaar::b_refresh_guild(bot, g_id);
 			adm_ok();
-
 		} else if (sub == "listall") {
 			int page = std::get<int64_t>(event.get_parameter("page")) - 1;
 			auto all = db::shop_get_all(g_id, false);
