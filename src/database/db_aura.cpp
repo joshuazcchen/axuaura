@@ -8,6 +8,7 @@
 namespace db {
 	extern sqlite3* db_ptr;
 
+	// TODO: convert this into standard naming scheme of aura_(thing)
 	int get_aura(dpp::snowflake guild_id, dpp::snowflake user_id) {
 		std::string g_id_str = std::to_string(guild_id);
 		std::string u_id_str = std::to_string(user_id);
@@ -88,5 +89,22 @@ namespace db {
 			sqlite3_step(stmt);
 		}
 		sqlite3_finalize(stmt);
+	}
+
+	int aura_rank(dpp::snowflake guild_id, dpp::snowflake user_id) {
+		// certainly an overstated way to do it but I just learned about coalesce and you know how it is.
+		// gotta use it if i learned it lol.
+		const char* sql =
+			"SELECT count(*) + 1 FROM aura WHERE guild_id = ? "
+			"AND amount > (SELECT COALESCE((SELECT amount FROM aura WHERE guild_id = ? AND user_id = ?), 0));";
+		int a_rank = 0;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(s, 1, std::to_string(guild_id).c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(s, 2, std::to_string(guild_id).c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(s, 3, std::to_string(user_id).c_str(), -1, SQLITE_TRANSIENT);
+			if (sqlite3_step(s) == SQLITE_ROW) a_rank = sqlite3_column_int(s, 0);
+			sqlite3_finalize(s)
+		}
+		return a_rank;
 	}
 } // namespace db

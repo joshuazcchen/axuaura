@@ -237,8 +237,9 @@ namespace bazaar {
 						btn.set_type(dpp::cot_button)
 							.set_style(style)
 							.set_label(lbl)
-							.set_id("bzr_buy_" + std::to_string(items[i].item_id) + "_" + std::to_string(i) + (is_pos ? "p" : "n"));
-						std::cout<<"bzr_buy_" + std::to_string(items[i].item_id)<<std::endl;
+							.set_id("bzr_buy_" + std::to_string(items[i].item_id) + "_" + std::to_string(i) +
+									(is_pos ? "p" : "n"));
+						std::cout << "bzr_buy_" + std::to_string(items[i].item_id) << std::endl;
 
 						current_row.add_component(btn);
 					}
@@ -264,9 +265,9 @@ namespace bazaar {
 				std::string old_id_str = db::get_setting_str(g_id, "bazaar_msg_id", std::string("0"));
 				dpp::snowflake old_id = std::stoull(old_id_str);
 
-				if (old_id != 0) { 
+				if (old_id != 0) {
 					try {
-						bot.message_delete(old_id, ch_id); 
+						bot.message_delete(old_id, ch_id);
 					} catch (...) {}
 				}
 

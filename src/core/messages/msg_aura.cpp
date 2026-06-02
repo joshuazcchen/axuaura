@@ -1,0 +1,44 @@
+#include "message.h"
+
+#include <ctime>
+#include <mutex>
+#include <unordered_map>
+
+#include "config.h"
+#include "db.h"
+
+namespace message {
+
+	static std::mutex cd_mtx;
+	static std::unordered_map<std::string, long> aura_loss_cd;
+	// TODO TODO TODO: IMPORTANT: I ONLY HAVE THIS HERE RIGHT NOW FOR TESTING.
+	// MOVE TO CONFIG WITH A SETTING FOR IT.
+	static constexpr long CD_SECS = 30;
+
+	static bool cd_ok(dpp::snowflake g_id, dpp::snowflake u_id) {
+		std::string key = std::to_string(g_ud) + "_" + std::to_string(u_id);
+		long now = std::time(nullptr);
+		std::lock_guard<std::mutex> lk(cd_mtx);
+		auto it = aura_loss_cd.find(key);
+		if (it != aura_loss_cd.end() && now - it->second < CD_SECS) return false;
+		aura_loss_cd[key] = now;
+		return true;
+	}
+
+	std::string resp_msg(const std::vector<std::string>& pool) {
+		thread_local std::philox4x32 gen(std::random_device{}());
+		std::uniform_int_distribution<> dis(0, pool.size() - 1);
+		return pool[dis(gen)];
+	}
+
+	void do_auraloss(dpp::cluster& bot, dpp::snowflake g_id, dpp::snowflake u_id, dpp::snowflake ch_id,
+					 dpp::snowflake msg_id, bool is_non_eng) {
+		if (!cd_ok(g_id, u_id)) return;
+		db::aura_rmv(g_id, user_id, db::get_setting_int(g_id, "auralossamt", 100));
+		std::string text = is_non_eng ? resp_msg(config::SPANISH_LOSS) : resp_msg(config::AURA_LOSSES);
+		dpp::message rep(ch_id, text);
+		rep.set_reference(msg_id);
+		bot.message_create(rep);
+	}
+
+} // namespace message

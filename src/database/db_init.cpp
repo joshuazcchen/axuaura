@@ -29,21 +29,6 @@ namespace db {
 								 ");";
 		sqlite3_exec(db_ptr, db_version, nullptr, nullptr, nullptr);
 
-		// get latest version of the database so older versions can be migrated if necessary.
-		int cur_version = 0;
-		sqlite3_stmt* stmt;
-		if (sqlite3_prepare_v2(db_ptr, "SELECT MAX(version) FROM db_version;", -1, &stmt, nullptr) == SQLITE_OK) {
-			if (sqlite3_step(stmt) == SQLITE_ROW) {
-				cur_version = sqlite3_column_int(stmt, 0);
-			} else {
-				sqlite3_exec(db_ptr, "INSERT INTO db_version (version, updated) VALUES (0, 0)", nullptr, nullptr,
-							 nullptr);
-			}
-			sqlite3_finalize(stmt);
-		}
-
-		if (cur_version < 2) { db::db_migrate(); }
-
 		const char* v2_schema = "CREATE TABLE IF NOT EXISTS aura ("
 								"guild_id TEXT NOT NULL, "
 								"user_id TEXT NOT NULL, "
@@ -102,5 +87,7 @@ namespace db {
 								"user_id TEXT PRIMARY KEY, mult REAL NOT NULL, expires INTEGER NOT NULL);";
 
 		sqlite3_exec(db_ptr, v2_schema, nullptr, nullptr, nullptr);
+
+		db::db_migrate();
 	}
 } // namespace db
