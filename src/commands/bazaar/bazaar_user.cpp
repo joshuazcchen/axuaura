@@ -127,15 +127,13 @@ namespace bazaar {
 		std::vector<db::ShopItem> pos, neg;
 		long next_restock = 0;
 		long refresh_s = (long)db::get_setting_int(g_id, "bazaar_refresh_hours", 168) * 3600;
+		long refresh_l = (long)db::get_setting_int(g_id, "bazaar_last_refresh", 0);
+		long refresh_n = refresh_l > 0 ? refresh_l + refresh_s : 0;
 
 		for (auto& s : slots) {
 			auto item = db::shop_get(g_id, s.item_id);
 			if (item.item_id == -1 || !item.active) continue;
 			(item.cost >= 0 ? pos : neg).push_back(item);
-			if (s.slot >= 10 && !(s.slot >= 100 && s.slot < 110)) {
-				long deadline = s.refreshed_at + refresh_s;
-				if (next_restock == 0 || deadline < next_restock) next_restock = deadline;
-			}
 		}
 
 		if (pos.empty() && neg.empty()) return;

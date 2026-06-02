@@ -59,12 +59,12 @@ namespace bazaar {
 				db::bazaar_rotation_clear_slot(g_id, cs.slot);
 	}
 
-	void b_refresh_guild(dpp::cluster& bot, dpp::snowflake g_id) {
+	void b_refresh_guild(dpp::cluster& bot, dpp::snowflake g_id, bool force) {
 		int pos_cnt = db::get_setting_int(g_id, "bazaar_positive_cnt", 2);
 		int neg_cnt = db::get_setting_int(g_id, "bazaar_negative_cnt", 2);
 		long refresh_s = (long)db::get_setting_int(g_id, "bazaar_refresh_hours", 168) * 3600;
 		long now = std::time(nullptr);
-		long stale_before = now - refresh_s;
+		long stale_before = force ? now : now - refresh_s;
 
 		auto pinned = db::shop_get_pinned(g_id);
 		int pp = 0, np = 0;
@@ -92,6 +92,8 @@ namespace bazaar {
 
 		b_fill_rotating(g_id, 10, pos_cnt, pos_pool, current, chosen, stale_before);
 		b_fill_rotating(g_id, 110, neg_cnt, neg_pool, current, chosen, stale_before);
+
+		db::set_setting(g_id, "bazaar_last_refresh", (int)now);
 
 		b_post_ui(bot, g_id);
 	}

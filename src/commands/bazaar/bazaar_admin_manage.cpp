@@ -71,7 +71,7 @@ namespace commands {
 		} else if (sub == "reroll") {
 			int slot = std::get<int64_t>(event.get_parameter("slot"));
 			db::bazaar_rotation_clear_slot(g_id, slot);
-			bazaar::b_refresh_guild(bot, g_id);
+			bazaar::b_refresh_guild(bot, g_id, true);
 			adm_ok();
 
 		} else if (sub == "setchannel") {
