@@ -6,7 +6,7 @@
 namespace db {
 
 	struct Migrate {
-		int vsn;
+		int version;
 		const char* sql;
 	};
 
