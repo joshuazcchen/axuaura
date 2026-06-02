@@ -71,7 +71,7 @@ namespace image {
 			bg.draw(Magick::DrawableText((BG_W - m.textWidth()) - 15, BG_H - 15, pg));
 		}
 
-		std::cout<<std::to_string(next_restock)<<std::endl;
+		std::cout << std::to_string(next_restock) << std::endl;
 		if (is_last_page && next_restock > 0) {
 			std::time_t now = std::time(nullptr);
 			std::tm* tm_info = std::localtime(&now);
@@ -119,7 +119,8 @@ namespace image {
 		return std::string(static_cast<const char*>(blob.data()), blob.length());
 	}
 
-	std::vector<std::string> img_gen_bazaar(const std::vector<db::ShopItem>& pos, const std::vector<db::ShopItem>& neg, long next_restock) {
+	std::vector<std::string> img_gen_bazaar(const std::vector<db::ShopItem>& pos, const std::vector<db::ShopItem>& neg,
+											long next_restock) {
 		std::vector<std::string> pages;
 		int total = std::max({(int)pos.size(), (int)neg.size(), 1});
 		int num_pages = (total + PAGE_SIZE - 1) / PAGE_SIZE;
