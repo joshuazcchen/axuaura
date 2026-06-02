@@ -252,7 +252,6 @@ namespace bazaar {
 				auto msg = std::make_shared<dpp::message>(ch_id, "eee");
 				msg->set_allowed_mentions(false, false, false, false, {}, {});
 
-				std::cout<<"made it here"<<std::endl;
 				for (size_t i = 0; i < pages.size(); ++i) {
 					msg->add_file("bazaar_p" + std::to_string(i + 1) + ".png", pages[i]);
 				}
@@ -261,7 +260,6 @@ namespace bazaar {
 					msg->add_component(row);
 				for (auto& row : neg_rows)
 					msg->add_component(row);
-				std::cout<<"made it here"<<std::endl;
 
 				std::string old_id_str = db::get_setting_str(g_id, "bazaar_msg_id", std::string("0"));
 				dpp::snowflake old_id = std::stoull(old_id_str);
@@ -271,17 +269,12 @@ namespace bazaar {
 						bot.message_delete(old_id, ch_id); 
 					} catch (...) {}
 				}
-				std::cout<<"made it here"<<std::endl;
-				std::cerr<< pos_rows.size() + neg_rows.size() << pages.size() << std::endl;
-				std::cerr<< "pos rows: " << pos_rows[0].components.size() << "neg rows: " << neg_rows[0].components.size() << pages.size() << std::endl;
 
 				bot.message_create(*msg, [g_id, msg, &bot](const dpp::confirmation_callback_t& cb) {
 					if (!cb.is_error()) {
 						db::set_setting(g_id, "bazaar_msg_id", std::to_string(std::get<dpp::message>(cb.value).id));
 					} else {
-						std::cout<<"big bad error"<<std::endl;
-						dpp::error_info _e = cb.get_error();
-						std::cerr<< _e.message << std::endl;
+						std::cerr << cb.get_error().message << std::endl;
 					}
 				});
 			});
