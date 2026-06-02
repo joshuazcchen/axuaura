@@ -120,4 +120,20 @@ namespace db {
 		sqlite3_finalize(stmt);
 		return result;
 	}
+
+	void xp_set(dpp::snowflake guild_id, dpp::snowflake user_id, int xp, int level) {
+		const char* sql = "INSERT INTO xp (guild_id, user_id, xp, level) VALUES (/, ?, ?, ?) "
+						  "ON CONFLICT(guild_id, user_id) DO UPDATE SET xp = ?, level = ?;";
+		sqlite3_stmt* stmt;
+		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+			sqlite3_bind_text(stmt, 1, std::to_string(guild_id).c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, std::to_string(user_id).c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_int(stmt, 3, xp);
+			sqlite3_bind_int(stmt, 4, level);
+			sqlite3_bind_int(stmt, 5, xp);
+			sqlite3_bind_int(stmt, 6, level);
+			sqlite3_step(stmt);
+			sqlite3_finalize(stmt);
+		}
+	}
 } // namespace db

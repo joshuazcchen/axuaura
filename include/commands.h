@@ -37,6 +37,12 @@ namespace commands {
 	dpp::slashcommand auraboard_def(dpp::cluster& bot);
 	void handle_auraboard(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
+	dpp::slashcommand aura_def(dpp::cluster& bot);
+	void handle_aura(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
+	dpp::slashcommand setlevel_def(dpp::cluster& bot);
+	void handle_setlevel(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
 	dpp::slashcommand movaura_def(dpp::cluster& bot);
 	void handle_movaura(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
@@ -68,17 +74,17 @@ namespace commands {
 	void handle_diagnostics(const dpp::slashcommand_t& event, dpp::cluster& bot);
 	void diagnostics_set_boot();
 
-	// ctxm DEPRECATED UNUSED
-	dpp::slashcommand mkshm_def(dpp::cluster& bot);
-	void handle_mkshm(const dpp::message_context_menu_t& event, dpp::cluster& bot);
-
-	dpp::slashcommand mkshm_prime_def(dpp::cluster& bot);
-	void handle_mkshm_prime(const dpp::message_context_menu_t& event, dpp::cluster& bot);
-
 	dpp::slashcommand bazaar_def(dpp::cluster& bot);
 	void handle_bazaar(const dpp::slashcommand_t& event, dpp::cluster& bot);
 	void handle_bazaar_sell(const dpp::slashcommand_t& event, dpp::cluster& bot);
 	void handle_bazaar_admin(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
+	// context menus
+	dpp::slashcommand mkshm_def(dpp::cluster& bot);
+	void handle_mkshm(const dpp::message_context_menu_t& event, dpp::cluster& bot);
+
+	dpp::slashcommand giveitm_def(dpp::cluster& bot);
+	void handle_giveitm(const dpp::message_context_menu_t& event, dpp::cluster& bot);
 
 	// button handlers
 	void handle_bazaar_button(const dpp::button_click_t& event, dpp::cluster& bot);

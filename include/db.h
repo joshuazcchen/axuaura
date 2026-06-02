@@ -102,6 +102,7 @@ namespace db {
 
 	// xp related
 	int xp_get(dpp::snowflake guild_id, dpp::snowflake user_id);
+	void xp_set(dpp::snowflake guild_id, dpp::snowflake user_id, int xp, int level);
 	int lvl_get(dpp::snowflake guild_id, dpp::snowflake user_id);
 	void xp_add(dpp::snowflake guild_id, dpp::snowflake user_id, int amt);
 	void xp_lvl_set(dpp::snowflake guild_id, dpp::snowflake user_id, int xp, int lvl);

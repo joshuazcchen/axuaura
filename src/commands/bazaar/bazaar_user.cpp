@@ -239,8 +239,6 @@ namespace bazaar {
 							.set_label(lbl)
 							.set_id("bzr_buy_" + std::to_string(items[i].item_id) + "_" + std::to_string(i) +
 									(is_pos ? "p" : "n"));
-						std::cout << "bzr_buy_" + std::to_string(items[i].item_id) << std::endl;
-
 						current_row.add_component(btn);
 					}
 					rows.push_back(current_row);
