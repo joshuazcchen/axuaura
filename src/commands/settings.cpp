@@ -25,6 +25,13 @@ namespace commands {
 		std::string new_val = std::get<std::string>(event.get_parameter("value"));
 		dpp::snowflake g_id = event.command.guild_id;
 
+		auto val_param = event.get_parameter("value");
+		if (!std::holds_alternative<std::string>(val_param)) {
+			std::string cur = db::get_setting_str(g_id, target_setting, "not set");
+			event.reply(dpp::message(target_setting + " = `" + cur + "`").set_flags(dpp::m_ephemeral));
+			return;
+		}
+
 		if (target_setting == "status") {
 			db::set_setting(event.command.guild_id, "status", new_val);
 			bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_game, new_val));
