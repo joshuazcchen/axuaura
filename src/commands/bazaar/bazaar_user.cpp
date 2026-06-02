@@ -37,7 +37,9 @@ namespace commands {
 	void handle_bazaar_button(const dpp::button_click_t& event, dpp::cluster& bot) {
 		dpp::snowflake g_id = event.command.guild_id;
 		dpp::snowflake u_id = event.command.get_issuing_user().id;
-		int item_id = std::stoi(event.custom_id.substr(8));
+		std::string payload = event.custom_id.substr(8);
+		size_t next = payload.find('_');
+		int item_id = std::stoi(payload.substr(0, next));
 
 		auto slots = db::bazaar_rotation_get(g_id);
 		bool in_rotation = false;
@@ -235,7 +237,8 @@ namespace bazaar {
 						btn.set_type(dpp::cot_button)
 							.set_style(style)
 							.set_label(lbl)
-							.set_id("bzr_buy_" + std::to_string(items[i].item_id));
+							.set_id("bzr_buy_" + std::to_string(items[i].item_id) + "_" + std::to_string(i) + (is_pos ? "p" : "n"));
+						std::cout<<"bzr_buy_" + std::to_string(items[i].item_id)<<std::endl;
 
 						current_row.add_component(btn);
 					}
@@ -246,9 +249,10 @@ namespace bazaar {
 				auto pos_rows = build_rows(pos, true);
 				auto neg_rows = build_rows(neg, false);
 
-				auto msg = std::make_shared<dpp::message>(ch_id, "");
+				auto msg = std::make_shared<dpp::message>(ch_id, "eee");
 				msg->set_allowed_mentions(false, false, false, false, {}, {});
 
+				std::cout<<"made it here"<<std::endl;
 				for (size_t i = 0; i < pages.size(); ++i) {
 					msg->add_file("bazaar_p" + std::to_string(i + 1) + ".png", pages[i]);
 				}
@@ -257,15 +261,27 @@ namespace bazaar {
 					msg->add_component(row);
 				for (auto& row : neg_rows)
 					msg->add_component(row);
+				std::cout<<"made it here"<<std::endl;
 
 				std::string old_id_str = db::get_setting_str(g_id, "bazaar_msg_id", std::string("0"));
 				dpp::snowflake old_id = std::stoull(old_id_str);
 
-				if (old_id != 0) { bot.message_delete(old_id, ch_id); }
+				if (old_id != 0) { 
+					try {
+						bot.message_delete(old_id, ch_id); 
+					} catch (...) {}
+				}
+				std::cout<<"made it here"<<std::endl;
+				std::cerr<< pos_rows.size() + neg_rows.size() << pages.size() << std::endl;
+				std::cerr<< "pos rows: " << pos_rows[0].components.size() << "neg rows: " << neg_rows[0].components.size() << pages.size() << std::endl;
 
 				bot.message_create(*msg, [g_id, msg, &bot](const dpp::confirmation_callback_t& cb) {
 					if (!cb.is_error()) {
 						db::set_setting(g_id, "bazaar_msg_id", std::to_string(std::get<dpp::message>(cb.value).id));
+					} else {
+						std::cout<<"big bad error"<<std::endl;
+						dpp::error_info _e = cb.get_error();
+						std::cerr<< _e.message << std::endl;
 					}
 				});
 			});
