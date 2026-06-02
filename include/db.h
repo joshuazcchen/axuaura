@@ -24,16 +24,13 @@ namespace db {
 	// TODO: see db_aura.cpp
 	// TEMPORARY ALIASES:
 
-	inline int aura_get(dpp::snowflake guild_id, dpp::snowflake user_id) return get_aura(guild_id, user_id);
-	inline void aura_set(dpp::snowflake guild_id, dpp::snowflake user_id, int amount) return set_aura(guild_id, user_id,
-																									  amount);
-	inline void aura_add(dpp::snowflake guild_id, dpp::snowflake user_id, int amount) return add_aura(guild_id, user_id,
-																									  amount);
-	inline void aura_rmv(dpp::snowflake guild_id, dpp::snowflake user_id, int amount) return rmv_aura(guild_id, user_id,
-																									  amount);
+	inline int aura_get(dpp::snowflake guild_id, dpp::snowflake user_id) { return get_aura(guild_id, user_id); }
+	inline void aura_set(dpp::snowflake guild_id, dpp::snowflake user_id, int amount) { return set_aura(guild_id, user_id, amount); }
+	inline void aura_add(dpp::snowflake guild_id, dpp::snowflake user_id, int amount) { return add_aura(guild_id, user_id, amount); }
+	inline void aura_rmv(dpp::snowflake guild_id, dpp::snowflake user_id, int amount) { return rmv_aura(guild_id, user_id, amount); }
 	inline std::vector<std::pair<std::string, int>> ab_get(dpp::snowflake guild_id, int limit,
-														   bool bottom) return get_ab(guild_id, limit, bottom);
-	inline int aura_total(dpp::snowflake guild_id) return get_total_aura(guild_id);
+														   bool bottom) { return get_ab(guild_id, limit, bottom); }
+	inline int aura_total(dpp::snowflake guild_id) { return get_total_aura(guild_id); }
 
 	// settings related
 	void set_setting(dpp::snowflake guild_id, const std::string& key, const std::string& val);
@@ -45,22 +42,17 @@ namespace db {
 	std::vector<dpp::snowflake> settings_get_guilds_with(const std::string& key);
 
 	// TODO: REMOVE, TEMPORARY ALIAS
-	inline void setting_set(dpp::snowflake guild_id, const std::string& key, const std::string& val)
-		set_setting(guild_id, key, val);
+	inline void setting_set(dpp::snowflake guild_id, const std::string& key, const std::string& val) { set_setting(guild_id, key, val); }
 
-	inline void setting_set(dpp::snowflake guild_id, const std::string& key, int val) set_setting(guild_id, key, val);
+	inline void setting_set(dpp::snowflake guild_id, const std::string& key, int val) { set_setting(guild_id, key, val); }
 
-	inline void setting_set(dpp::snowflake guild_id, const std::string& key, bool val) set_setting(guild_id, key, val);
+	inline void setting_set(dpp::snowflake guild_id, const std::string& key, bool val) { set_setting(guild_id, key, val); }
 
-	inline std::string setting_get_str(dpp::snowflake guild_id, const std::string& key,
-									   std::string default_val = "corgi") return get_setting_str(guild_id, key,
-																								 default_val);
+	inline std::string setting_get_str(dpp::snowflake guild_id, const std::string& key, std::string default_val = "corgi") { return get_setting_str(guild_id, key, default_val); }
 
-	inline int setting_get_int(dpp::snowflake guild_id, const std::string& key,
-							   int default_val = 7) return get_setting_int(guild_id, key, default_val);
+	inline int setting_get_int(dpp::snowflake guild_id, const std::string& key, int default_val = 7) { return get_setting_int(guild_id, key, default_val); }
 
-	inline bool setting_get_bool(dpp::snowflake guild_id, const std::string& key,
-								 bool default_val = false) return get_setting_bool(guild_id, key, default_val);
+	inline bool setting_get_bool(dpp::snowflake guild_id, const std::string& key, bool default_val = false) { return get_setting_bool(guild_id, key, default_val); }
 
 	// polls related
 	struct Poll {
