@@ -248,7 +248,7 @@ namespace bazaar {
 				auto pos_rows = build_rows(pos, true);
 				auto neg_rows = build_rows(neg, false);
 
-				auto msg = std::make_shared<dpp::message>(ch_id, "eee");
+				auto msg = std::make_shared<dpp::message>(ch_id, "");
 				msg->set_allowed_mentions(false, false, false, false, {}, {});
 
 				for (size_t i = 0; i < pages.size(); ++i) {

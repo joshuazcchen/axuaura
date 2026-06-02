@@ -122,7 +122,7 @@ namespace db {
 	}
 
 	void xp_set(dpp::snowflake guild_id, dpp::snowflake user_id, int xp, int level) {
-		const char* sql = "INSERT INTO xp (guild_id, user_id, xp, level) VALUES (/, ?, ?, ?) "
+		const char* sql = "INSERT INTO xp (guild_id, user_id, xp, level) VALUES (?, ?, ?, ?) "
 						  "ON CONFLICT(guild_id, user_id) DO UPDATE SET xp = ?, level = ?;";
 		sqlite3_stmt* stmt;
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &stmt, nullptr) == SQLITE_OK) {

@@ -36,8 +36,7 @@ namespace commands {
 		}
 
 		db::xp_set(g_id, uid, new_xp, new_level);
-		event.reply(dpp::message("set <@" + std::to_string(uid) + "> → level **" + std::to_string(new_level) + "** (" +
-								 std::to_string(new_xp) + " xp)")
+		event.reply(dpp::message("set <@" + std::to_string(uid) + "> -> level **" + std::to_string(new_level) + "** (" + std::to_string(new_xp) + " xp)")
 						.set_flags(dpp::m_ephemeral)
 						.set_allowed_mentions(false, false, false, false, {}, {}));
 	}
