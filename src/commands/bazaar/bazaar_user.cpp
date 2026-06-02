@@ -7,6 +7,7 @@
 #include "image.h"
 #include "utils.h"
 
+// TODO : Split this file
 namespace commands {
 
 	void handle_bazaar_sell(const dpp::slashcommand_t& event, dpp::cluster& bot) {
@@ -127,7 +128,6 @@ namespace bazaar {
 
 		auto slots = db::bazaar_rotation_get(g_id);
 		std::vector<db::ShopItem> pos, neg;
-		long next_restock = 0;
 		long refresh_s = (long)db::get_setting_int(g_id, "bazaar_refresh_hours", 168) * 3600;
 		long refresh_l = (long)db::get_setting_int(g_id, "bazaar_last_refresh", 0);
 		long refresh_n = refresh_l > 0 ? refresh_l + refresh_s : 0;
@@ -183,7 +183,7 @@ namespace bazaar {
 					inject_colors(neg);
 				}
 
-				auto pages = image::img_gen_bazaar(pos, neg, next_restock);
+				auto pages = image::img_gen_bazaar(pos, neg, refresh_n);
 				if (pages.empty()) return;
 
 				dpp::component pos_row, neg_row;
