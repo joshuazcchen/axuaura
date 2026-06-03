@@ -22,6 +22,9 @@ namespace db {
 			"PRIMARY KEY (user_id, badge_id));"
 			"CREATE TABLE IF NOT EXISTS global_boosts ("
 			"user_id TEXT PRIMARY KEY, mult REAL NOT NULL, expires INTEGER NOT NULL);"},
+		{6, "CREATE TABLE IF NOT EXISTS starboard_channels ("
+			"guild_id TEXT NOT NULL, channel_id TEXT NOT NULL, "
+				"PRIMARY KEY (guild_id, channel_id));"},
 		{0, nullptr},
 	};
 
@@ -38,7 +41,7 @@ namespace db {
 			if (migrations[i].version <= cur) continue;
 			sqlite3_exec(db_ptr, migrations[i].sql, nullptr, nullptr, nullptr);
 			if (sqlite3_prepare_v2(db_ptr, "INSERT OR IGNORE INTO db_version (version, updated) VALUES (?, ?);", -1, &s,
-								   nullptr) == SQLITE_OK) {
+						nullptr) == SQLITE_OK) {
 				sqlite3_bind_int(s, 1, migrations[i].version);
 				sqlite3_bind_int64(s, 2, std::time(nullptr));
 				sqlite3_step(s);

@@ -168,13 +168,13 @@ namespace db {
 	void inv_rm(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
 	void inv_rm_by_inv_id(int inv_id);
 	bool inv_has(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
+	bool inv_has_xp(dpp::snowflake g_id, dpp::snowflake u_id);
 	std::vector<InvItem> inv_get_user(dpp::snowflake g_id, dpp::snowflake u_id);
 	void inv_eq(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
 	void inv_uneq(dpp::snowflake g_id, dpp::snowflake u_id, int item_id);
 	void inv_uneq_all_type(dpp::snowflake g_id, dpp::snowflake u_id, const std::string& type);
 	double inv_xp_mult(dpp::snowflake g_id, dpp::snowflake u_id);
-
-	int shop_ensure_sys(dpp::snowflake g_id, const std::string& name, dpp::snowflake r_id, int cost);
+	void inv_purge(dpp::snowflake g_id, dpp::snowflake u_id);
 
 	// badges
 	void badge_grant(dpp::snowflake user_id, const std::string& badge_id);
@@ -185,4 +185,10 @@ namespace db {
 	void gb_set(dpp::snowflake user_id, double mult, long expires);
 	void gb_clear(dpp::snowflake user_id);
 	double gb_get(dpp::snowflake user_id);
+
+	// starboard
+	void sb_add_channel(dpp::snowflake guild_id, dpp::snowflake channel_id);
+	void sb_remove_channel(dpp::snowflake guild_id, dpp::snowflake channel_id);
+	bool sb_is_allowed(dpp::snowflake guild_id, dpp::snowflake channel_id);
+	std::vector<dpp::snowflake> sb_get_channels(dpp::snowflake guild_id);
 } // namespace db

@@ -79,6 +79,9 @@ namespace commands {
 	void handle_bazaar_sell(const dpp::slashcommand_t& event, dpp::cluster& bot);
 	void handle_bazaar_admin(const dpp::slashcommand_t& event, dpp::cluster& bot);
 
+	dpp::slashcommand starboard_admin_def(dpp::cluster& bot);
+	void handle_starboard_admin(const dpp::slashcommand_t& event, dpp::cluster& bot);
+
 	// context menus
 	dpp::slashcommand mkshm_def(dpp::cluster& bot);
 	void handle_mkshm(const dpp::message_context_menu_t& event, dpp::cluster& bot);
@@ -86,6 +89,13 @@ namespace commands {
 	dpp::slashcommand giveitm_def(dpp::cluster& bot);
 	void handle_giveitm(const dpp::message_context_menu_t& event, dpp::cluster& bot);
 
+	dpp::slashcommand starboard_ctx_def(dpp::cluster& bot);
+	void handle_starboard_ctx(const dpp::message_context_menu_t& event, dpp::cluster& bot);
+
 	// button handlers
 	void handle_bazaar_button(const dpp::button_click_t& event, dpp::cluster& bot);
+
+	void handle_starboard_button(const dpp::button_click_t& event, dpp::cluster& bot);
+	
+	void handle_inv_button(const dpp::button_click_t& event, dpp::cluster& bot);
 } // namespace commands

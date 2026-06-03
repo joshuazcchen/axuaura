@@ -21,6 +21,7 @@ namespace db {
 	}
 
 	double inv_xp_mult(dpp::snowflake g_id, dpp::snowflake u_id) {
+		inv_purge(g_id, u_id);
 		sqlite3_stmt* s;
 		double max_mult = 1.0;
 		long now = std::time(nullptr);

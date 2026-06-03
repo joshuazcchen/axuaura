@@ -93,7 +93,7 @@ namespace commands {
 												   task_data.xp_next, task_data.progress, task_data.bg_c,
 												   task_data.artist, task_data.invert, task_data.badges);
 					} catch (const std::exception& e) {
-						std::cout << e.what() << "\n";
+						std::cerr << e.what() << "\n";
 						card = "";
 					}
 				}
