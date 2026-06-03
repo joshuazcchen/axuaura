@@ -5,12 +5,14 @@
 #include <Magick++.h>
 
 #include "db.h"
+#include "utils.h"
 
 static constexpr int PLACARD_W = 500;
 static constexpr int PLACARD_H = 160;
 static constexpr int MARGIN_L = 80;
 // TODO: make the margins identical since previously it just dealt in single circles and pills
-static constexpr int MARGIN_R = 40;
+static constexpr int MARGIN_R = 70;
+static constexpr int MARGIN_T = 70;
 static constexpr int MAX_LEN = 16;
 
 namespace image {
@@ -21,8 +23,7 @@ namespace image {
 
 		double cx = px + MARGIN_L;
 
-		std::string name = item.name;
-		if (name.size() > (size_t)MAX_LEN) name = name.substr(0, MAX_LEN - 3) + "...";
+		std::string name = utils::get_safe_role(item.name, item.type, 18);
 
 		bg.fontPointsize(36);
 		bg.fillColor("rgba(255,230,160,1)");
@@ -52,7 +53,7 @@ namespace image {
 			bg.fontPointsize(22);
 			bg.fontTypeMetrics(eq_txt, &em);
 			bg.fillColor("rgba(140,220,140,1)");
-			bg.draw(Magick::DrawableText(px + PLACARD_W - MARGIN_R - em.textWidth(), py + 26, eq_txt));
+			bg.draw(Magick::DrawableText(px + PLACARD_W - MARGIN_R - em.textWidth(), py + MARGIN_T, eq_txt));
 		}
 	}
 
