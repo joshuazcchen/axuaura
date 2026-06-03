@@ -147,46 +147,46 @@ namespace bazaar {
 		if (pos.empty() && neg.empty()) return;
 
 		dppp::get_enhanced_roles(
-				bot, g_id, [=, &bot](const dppp::result<std::vector<dppp::enhanced_role>>& res) mutable {
+			bot, g_id, [=, &bot](const dppp::result<std::vector<dppp::enhanced_role>>& res) mutable {
 				if (res.success) {
-				std::unordered_map<dpp::snowflake, dppp::enhanced_role> role_map;
-				for (const auto& r : res.value) {
-				role_map[r.id] = r;
-				}
-
-				auto inject_colors = [&](std::vector<db::ShopItem>& items) {
-				for (auto& item : items) {
-				if (item.type == "role" && role_map.contains(item.role_id)) {
-				const auto& r = role_map[item.role_id];
-
-				std::string c1 = r.colours.primary_hex_colour();
-				std::string c2 = r.colours.secondary_hex_colour().value_or("");
-				std::string c3 = r.colours.tertiary_colour.has_value()
-				? dppp::to_hex_colour(r.colours.tertiary_colour.value())
-				: "";
-
-				std::string new_keys = "";
-				if (!c1.empty()) new_keys += "\"colour1\":\"" + c1 + "\",";
-				if (!c2.empty()) new_keys += "\"colour2\":\"" + c2 + "\",";
-				if (!c3.empty()) new_keys += "\"colour3\":\"" + c3 + "\",";
-
-				if (!new_keys.empty()) {
-					new_keys.pop_back();
-					if (item.data.empty() || item.data == "{}") {
-						item.data = "{" + new_keys + "}";
-					} else {
-						size_t brace_pos = item.data.find_last_of('}');
-						if (brace_pos != std::string::npos) {
-							item.data.insert(brace_pos, "," + new_keys);
-						}
+					std::unordered_map<dpp::snowflake, dppp::enhanced_role> role_map;
+					for (const auto& r : res.value) {
+						role_map[r.id] = r;
 					}
-				}
-				}
-				}
-				};
 
-				inject_colors(pos);
-				inject_colors(neg);
+					auto inject_colors = [&](std::vector<db::ShopItem>& items) {
+						for (auto& item : items) {
+							if (item.type == "role" && role_map.contains(item.role_id)) {
+								const auto& r = role_map[item.role_id];
+
+								std::string c1 = r.colours.primary_hex_colour();
+								std::string c2 = r.colours.secondary_hex_colour().value_or("");
+								std::string c3 = r.colours.tertiary_colour.has_value()
+													 ? dppp::to_hex_colour(r.colours.tertiary_colour.value())
+													 : "";
+
+								std::string new_keys = "";
+								if (!c1.empty()) new_keys += "\"colour1\":\"" + c1 + "\",";
+								if (!c2.empty()) new_keys += "\"colour2\":\"" + c2 + "\",";
+								if (!c3.empty()) new_keys += "\"colour3\":\"" + c3 + "\",";
+
+								if (!new_keys.empty()) {
+									new_keys.pop_back();
+									if (item.data.empty() || item.data == "{}") {
+										item.data = "{" + new_keys + "}";
+									} else {
+										size_t brace_pos = item.data.find_last_of('}');
+										if (brace_pos != std::string::npos) {
+											item.data.insert(brace_pos, "," + new_keys);
+										}
+									}
+								}
+							}
+						}
+					};
+
+					inject_colors(pos);
+					inject_colors(neg);
 				}
 
 				auto pages = image::img_gen_bazaar(pos, neg, refresh_n);
@@ -210,7 +210,7 @@ namespace bazaar {
 								if (cached_role) {
 									std::string c_name = cached_role->name;
 									std::erase_if(c_name,
-											[](unsigned char c) { return !(std::isalnum(c) || c == ' '); });
+												  [](unsigned char c) { return !(std::isalnum(c) || c == ' '); });
 									return c_name.size() <= max_len ? c_name : c_name.substr(0, max_len - 3) + "...";
 								}
 							} catch (...) {}
@@ -276,13 +276,13 @@ namespace bazaar {
 				}
 
 				bot.message_create(*msg, [g_id, msg, &bot](const dpp::confirmation_callback_t& cb) {
-						if (!cb.is_error()) {
+					if (!cb.is_error()) {
 						db::set_setting(g_id, "bazaar_msg_id", std::to_string(std::get<dpp::message>(cb.value).id));
-						} else {
+					} else {
 						std::cerr << cb.get_error().message << std::endl;
-						}
-						});
+					}
 				});
+			});
 	}
 
 } // namespace bazaar

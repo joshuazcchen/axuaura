@@ -32,20 +32,20 @@ namespace commands {
 	dpp::slashcommand auraboard_def(dpp::cluster& bot) {
 		return dpp::slashcommand("auraboard", "who has lost the most aura?", bot.me.id)
 			.add_option(dpp::command_option(dpp::co_string, "sort", "top or bottom 10", false)
-					.add_choice(dpp::command_option_choice("top", std::string("top")))
-					.add_choice(dpp::command_option_choice("bottom", std::string("bottom"))))
+							.add_choice(dpp::command_option_choice("top", std::string("top")))
+							.add_choice(dpp::command_option_choice("bottom", std::string("bottom"))))
 			.add_option(dpp::command_option(dpp::co_user, "who", "check a specific user", false));
 	}
 
-	static void aura_reply_single(const dpp::slashcommand_t& event, dpp::snowflake g_id,
-			dpp::snowflake target, dpp::snowflake caller) {
+	static void aura_reply_single(const dpp::slashcommand_t& event, dpp::snowflake g_id, dpp::snowflake target,
+								  dpp::snowflake caller) {
 		int aura = db::get_aura(g_id, target);
 		int rank = db::aura_rank(g_id, target);
 		bool self = (target == caller);
 		std::string who = self ? "You have" : "<@" + std::to_string(target) + "> has";
 		std::string body = who + " **" + std::to_string(aura) + "** aura (rank #" + std::to_string(rank) + ")";
 		event.reply(
-				dpp::message(body).set_flags(dpp::m_ephemeral).set_allowed_mentions(false, false, false, false, {}, {}));
+			dpp::message(body).set_flags(dpp::m_ephemeral).set_allowed_mentions(false, false, false, false, {}, {}));
 	}
 
 	void handle_auraboard(const dpp::slashcommand_t& event, dpp::cluster& bot) {
@@ -75,7 +75,9 @@ namespace commands {
 		entries.reserve(15);
 		for (auto& [uid_str, aura] : raw) {
 			dpp::snowflake uid;
-			try { uid = std::stoull(uid_str); } catch (...) { continue; }
+			try {
+				uid = std::stoull(uid_str);
+			} catch (...) { continue; }
 			if (!is_guild_member(g_id, uid)) continue;
 			entries.push_back({get_display_name(g_id, uid), aura, 0});
 			if ((int)entries.size() >= 15) break;
@@ -88,7 +90,9 @@ namespace commands {
 
 		while (ab_rendering.exchange(true)) {}
 		std::string img;
-		try { img = image::img_gen_auraboard(entries, is_bottom, db::get_total_aura(g_id)); } catch (...) {}
+		try {
+			img = image::img_gen_auraboard(entries, is_bottom, db::get_total_aura(g_id));
+		} catch (...) {}
 		ab_rendering = false;
 		malloc_trim(0);
 

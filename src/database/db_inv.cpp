@@ -37,7 +37,7 @@ namespace db {
 		sqlite3_stmt* s;
 		long now = std::time(nullptr);
 		const char* sql = "DELETE FROM inventory WHERE guild_id = ? AND user_id = ? "
-			"AND expires > 0 AND expires <= ?";
+						  "AND expires > 0 AND expires <= ?";
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(s, 2, std::to_string(u_id).c_str(), -1, SQLITE_TRANSIENT);
@@ -76,8 +76,8 @@ namespace db {
 		bool has = false;
 		long now = std::time(nullptr);
 		const char* sql = "SELECT 1 FROM inventory i JOIN shop_items si ON i.item_id = si.item_id "
-			"WHERE i.guild_id = ? AND i.user_id = ? AND si.type = 'xp_boost' "
-			"AND (i.expires = 0 OR i.expires > ?) LIMIT 1";
+						  "WHERE i.guild_id = ? AND i.user_id = ? AND si.type = 'xp_boost' "
+						  "AND (i.expires = 0 OR i.expires > ?) LIMIT 1";
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(s, 2, std::to_string(u_id).c_str(), -1, SQLITE_TRANSIENT);
@@ -109,8 +109,8 @@ namespace db {
 		std::vector<InvItem> items;
 		sqlite3_stmt* s;
 		const char* sql = "SELECT i.inv_id, s.item_id, s.name, s.type, s.role_id, i.equipped, i.acquired, i.expires"
-			" FROM inventory i JOIN shop_items s ON i.item_id = s.item_id"
-			" WHERE i.guild_id = ? AND i.user_id = ? ORDER BY i.inv_id";
+						  " FROM inventory i JOIN shop_items s ON i.item_id = s.item_id"
+						  " WHERE i.guild_id = ? AND i.user_id = ? ORDER BY i.inv_id";
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(s, 2, std::to_string(u_id).c_str(), -1, SQLITE_TRANSIENT);
@@ -158,7 +158,7 @@ namespace db {
 	void inv_uneq_all_type(dpp::snowflake g_id, dpp::snowflake u_id, const std::string& type) {
 		sqlite3_stmt* s;
 		const char* sql = "UPDATE inventory SET equipped = 0 WHERE guild_id = ? AND user_id = ?"
-			" AND item_id IN (SELECT item_id FROM shop_items WHERE type = ?)";
+						  " AND item_id IN (SELECT item_id FROM shop_items WHERE type = ?)";
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(s, 2, std::to_string(u_id).c_str(), -1, SQLITE_TRANSIENT);

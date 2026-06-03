@@ -15,8 +15,8 @@ namespace image {
 	static constexpr int INV_BG_H = 1800;
 	static constexpr int PLACARD_W = 500;
 	static constexpr int PLACARD_H = 160;
-	static constexpr int SLOT_H	= 175;
-	static constexpr int LEFT_X	= 90;
+	static constexpr int SLOT_H = 175;
+	static constexpr int LEFT_X = 90;
 	static constexpr int RIGHT_X = 618;
 	static constexpr int START_Y = 330;
 	static constexpr int ITEMS_PER_PAGE = 10;
@@ -29,9 +29,12 @@ namespace image {
 			bg.textAntiAlias(true);
 
 			std::string dim = std::to_string(PLACARD_W) + "x" + std::to_string(PLACARD_H) + "!";
-			Magick::Image tmpl_df("assets/bazaar/placard.png"); tmpl_df.resize(dim);
-			Magick::Image tmpl_xp("assets/bazaar/placard1.png"); tmpl_xp.resize(dim);
-			Magick::Image tmpl_b ("assets/bazaar/placard2.png"); tmpl_b.resize(dim);
+			Magick::Image tmpl_df("assets/bazaar/placard.png");
+			tmpl_df.resize(dim);
+			Magick::Image tmpl_xp("assets/bazaar/placard1.png");
+			tmpl_xp.resize(dim);
+			Magick::Image tmpl_b("assets/bazaar/placard2.png");
+			tmpl_b.resize(dim);
 
 			auto get_tmpl = [&](const db::InvItem& item) -> Magick::Image& {
 				if (item.type == "xp_boost") return tmpl_xp;

@@ -96,6 +96,6 @@ namespace commands {
 	void handle_bazaar_button(const dpp::button_click_t& event, dpp::cluster& bot);
 
 	void handle_starboard_button(const dpp::button_click_t& event, dpp::cluster& bot);
-	
+
 	void handle_inv_button(const dpp::button_click_t& event, dpp::cluster& bot);
 } // namespace commands

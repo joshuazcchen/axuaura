@@ -48,8 +48,7 @@ namespace commands {
 				dpp::snowflake ch_id = std::stoull(clean);
 				std::string db_key = (target_setting == "levelup_channel") ? "lvl_ch" : "sb_channel";
 				db::set_setting(g_id, db_key, std::to_string(ch_id));
-				if (target_setting == "levelup_channel")
-					config::guild_configs[g_id].lvl_ch = ch_id;
+				if (target_setting == "levelup_channel") config::guild_configs[g_id].lvl_ch = ch_id;
 			} catch (...) {
 				event.reply(dpp::message("provide a valid channel ID or mention.").set_flags(dpp::m_ephemeral));
 				return;
@@ -66,7 +65,7 @@ namespace commands {
 			} catch (...) {
 				event.reply(dpp::message("kys").set_flags(dpp::m_ephemeral));
 				return;
-			} 
+			}
 		} else {
 			try {
 				int rate = std::stoi(new_val);

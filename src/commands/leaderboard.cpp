@@ -58,7 +58,9 @@ namespace commands {
 
 		while (lb_rendering.exchange(true)) {}
 		std::string img;
-		try { img = image::img_gen_leaderboard(entries); } catch (...) {}
+		try {
+			img = image::img_gen_leaderboard(entries);
+		} catch (...) {}
 		lb_rendering = false;
 		malloc_trim(0);
 
