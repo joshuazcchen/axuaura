@@ -48,7 +48,9 @@ namespace commands {
 			while (inv_rendering.exchange(true)) {}
 			std::string img;
 			try {
-				img = image::img_gen_inventory(slice, page, total_pages);
+				std::string title_name = utils::get_display_name(g_id, u_id);
+				std::string pfp_url = utils::get_avatar_url(u_id, 64);
+				img = image::img_gen_inventory(slice, page, total_pages, title_name, pfp_url);
 			} catch (...) {}
 			inv_rendering = false;
 			malloc_trim(0);

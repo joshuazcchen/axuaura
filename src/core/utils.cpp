@@ -46,4 +46,29 @@ namespace utils {
 			return std::stod(j.substr(vpos));
 		} catch (...) { return df; }
 	}
+
+	std::string get_display_name(dpp::snowflake guild_id, dpp::snowflake user_id) {
+		dpp::guild* g = dpp::find_guild(guild_id);
+		if (g) {
+			auto mit = g->members.find(user_id);
+			if (mit != g->members.end()) {
+				if (!mit->second.get_nickname().empty()) return mit->second.get_nickname();
+			}
+		}
+		dpp::user* u = dpp::find_user(user_id);
+		if (u && !u->username.empty()) return u->username;
+		return std::to_string(user_id);
+	}
+
+	std::string get_avatar_url(dpp::snowflake user_id, uint16_t size) {
+		dpp::user* u = dpp::find_user(user_id);
+		if (!u) return "";
+		return u->get_avatar_url(size, dpp::i_png);
+	}
+
+	bool is_guild_member(dpp::snowflake guild_id, dpp::snowflake user_id) {
+		dpp::guild* g = dpp::find_guild(guild_id);
+		if (!g) return true;
+		return g->members.find(user_id) != g->members.end();
+	}
 } // namespace utils

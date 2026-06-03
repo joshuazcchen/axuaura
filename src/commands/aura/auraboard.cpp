@@ -5,29 +5,11 @@
 #include "commands.h"
 #include "db.h"
 #include "image.h"
+#include "utils.h"
 
 namespace commands {
 
 	static std::atomic_bool ab_rendering{false};
-
-	static std::string get_display_name(dpp::snowflake guild_id, dpp::snowflake user_id) {
-		dpp::guild* g = dpp::find_guild(guild_id);
-		if (g) {
-			auto mit = g->members.find(user_id);
-			if (mit != g->members.end()) {
-				if (!mit->second.get_nickname().empty()) return mit->second.get_nickname();
-			}
-		}
-		dpp::user* u = dpp::find_user(user_id);
-		if (u && !u->username.empty()) return u->username;
-		return std::to_string(user_id);
-	}
-
-	static bool is_guild_member(dpp::snowflake guild_id, dpp::snowflake user_id) {
-		dpp::guild* g = dpp::find_guild(guild_id);
-		if (!g) return true;
-		return g->members.find(user_id) != g->members.end();
-	}
 
 	dpp::slashcommand auraboard_def(dpp::cluster& bot) {
 		return dpp::slashcommand("auraboard", "who has lost the most aura?", bot.me.id)
@@ -78,8 +60,8 @@ namespace commands {
 			try {
 				uid = std::stoull(uid_str);
 			} catch (...) { continue; }
-			if (!is_guild_member(g_id, uid)) continue;
-			entries.push_back({get_display_name(g_id, uid), aura, 0});
+			if (!utils::is_guild_member(g_id, uid)) continue;
+			entries.push_back({utils::get_display_name(g_id, uid), utils::get_avatar_url(uid), aura, 0});
 			if ((int)entries.size() >= 15) break;
 		}
 

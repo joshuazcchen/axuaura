@@ -5,9 +5,13 @@
 
 namespace utils {
 	bool is_admin(const dpp::slashcommand_t& event);
+	bool is_guild_member(dpp::snowflake guild_id, dpp::snowflake user_id);
 
 	std::string json_str(const std::string& json, const std::string& key);
 	bool json_bool(const std::string& json, const std::string& key, bool default_val = false);
 	int json_int(const std::string& json, const std::string& key, int default_val = 0);
 	double json_doub(const std::string& json, const std::string& key, double default_val = 0.0);
+
+	std::string get_display_name(dpp::snowflake guild_id, dpp::snowflake user_id);
+	std::string get_avatar_url(dpp::snowflake user_id, uint16_t size = 64);
 } // namespace utils

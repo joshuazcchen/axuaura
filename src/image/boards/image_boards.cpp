@@ -25,11 +25,28 @@ namespace image {
 
 	static constexpr int ROW_CENTERS[7] = {681, 848, 1010, 1173, 1336, 1499, 1672};
 	static constexpr int ROW_RANK_X = 55;
-	static constexpr int ROW_NAME_X = 230;
+	static constexpr int ROW_NAME_X = 265;
 	static constexpr int ROW_VAL_X = 1155;
 
+	static void draw_avatar_circle(Magick::Image& img, const std::string& url, int cx, int cy, int size) {
+		if (url.empty()) return;
+		try {
+			Magick::Image av(url);
+			av.resize(std::to_string(size) + "x" + std::to_string(size) + "^");
+			av.extent(Magick::Geometry(size, size), Magick::CenterGravity);
+			av.repage();
+			av.alpha(true);
+			Magick::Image mask(Magick::Geometry(size, size), Magick::Color("transparent"));
+			mask.fillColor("white");
+			mask.strokeWidth(0);
+			mask.draw(Magick::DrawableCircle(size / 2.0, size / 2.0, size / 2.0 - 0.5, 0));
+			av.composite(mask, 0, 0, Magick::DstInCompositeOp);
+			img.composite(av, cx - size / 2, cy - size / 2, Magick::OverCompositeOp);
+		} catch (...) {}
+	}
+
 	static void draw_centered(Magick::Image& img, const std::string& txt, int cx, int y, int ptsize,
-							  const std::string& color) {
+			const std::string& color) {
 		img.fontPointsize(ptsize);
 		img.fillColor(Magick::Color(color));
 		img.strokeWidth(0);
@@ -45,6 +62,8 @@ namespace image {
 		int line2_y = p.top_y + avail * 58 / 100;
 		int line3_y = p.top_y + avail * 84 / 100;
 
+		draw_avatar_circle(img, e.avatar_url, p.cx, line2_y - 60, 52);
+
 		static const char* medals[] = {"#2", "#1", "#3"};
 		draw_centered(img, medals[rank_idx], p.cx, line1_y, p.font_large, "rgba(56,53,55,0.95)");
 		std::string name = e.display;
@@ -52,13 +71,14 @@ namespace image {
 		draw_centered(img, name, p.cx, line2_y, p.font_small, "rgba(56,53,55,0.90)");
 
 		std::string val = show_level && e.secondary > 0
-							  ? "lv." + std::to_string(e.secondary) + " / " + std::to_string(e.value) + "xp"
-							  : std::to_string(e.value);
+			? "lv." + std::to_string(e.secondary) + " / " + std::to_string(e.value) + "xp"
+			: std::to_string(e.value);
 		draw_centered(img, val, p.cx, line3_y, p.font_small - 4, "rgba(80,60,40,0.90)");
 	}
 
 	static void draw_row_entry(Magick::Image& img, int rank, const BoardEntry& e, int cy, bool show_level) {
 		img.strokeWidth(0);
+		draw_avatar_circle(img, e.avatar_url, ROW_NAME_X - 20, cy + 2, 40);
 
 		img.fontPointsize(52);
 		img.fillColor(Magick::Color("rgba(255,255,255,0.90)"));
@@ -71,8 +91,8 @@ namespace image {
 		img.draw(Magick::DrawableText(ROW_NAME_X, cy + 20, name));
 
 		std::string val = show_level && e.secondary > 0
-							  ? "lv." + std::to_string(e.secondary) + "  " + std::to_string(e.value) + "xp"
-							  : std::to_string(e.value);
+			? "lv." + std::to_string(e.secondary) + "  " + std::to_string(e.value) + "xp"
+			: std::to_string(e.value);
 		img.fontPointsize(40);
 		img.fillColor(Magick::Color("rgba(200,220,255,0.90)"));
 		Magick::TypeMetric tm;
@@ -81,7 +101,7 @@ namespace image {
 	}
 
 	static std::string render_board(const std::string& bg_file, const std::string& title,
-									const std::vector<BoardEntry>& entries, bool show_level) {
+			const std::vector<BoardEntry>& entries, bool show_level) {
 		Magick::Image bg(bg_file);
 		bg.resize(std::to_string(BRD_W) + "x" + std::to_string(BRD_H) + "!");
 		bg.font("assets/fonts/axufont.ttf");

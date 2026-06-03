@@ -87,8 +87,11 @@ namespace bazaar {
 
 		current = db::bazaar_rotation_get(g_id);
 		std::vector<int> chosen;
-		for (auto& s : current)
-			chosen.push_back(s.item_id);
+		for (auto& s : current) {
+			bool is_pinned = (s.slot >= 0 && s.slot < 10) || (s.slot >= 100 && s.slot < 110);
+			bool is_fresh = s.refreshed_at > stale_before;
+			if (is_pinned || is_fresh) chosen.push_back(s.item_id);
+		}
 
 		b_fill_rotating(g_id, 10, pos_cnt, pos_pool, current, chosen, stale_before);
 		b_fill_rotating(g_id, 110, neg_cnt, neg_pool, current, chosen, stale_before);

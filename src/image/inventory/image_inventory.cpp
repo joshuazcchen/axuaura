@@ -8,7 +8,7 @@
 
 namespace image {
 
-	// Declared in image_b_item.cpp
+	// declared god knows where i just refactored and idek where i put it
 	void draw_inv_placard(Magick::Image& bg, const Magick::Image& tmpl, int px, int py, const db::InvItem& item);
 
 	static constexpr int INV_BG_W = 1200;
@@ -20,13 +20,41 @@ namespace image {
 	static constexpr int RIGHT_X = 618;
 	static constexpr int START_Y = 330;
 	static constexpr int ITEMS_PER_PAGE = 10;
+	static constexpr int AV_SIZE  = 64;
+	static constexpr int TITLE_Y  = 255;
 
-	std::string img_gen_inventory(const std::vector<db::InvItem>& items, int page, int total_pages) {
+	std::string img_gen_inventory(const std::vector<db::InvItem>& items, int page, int total_pages, const std::string& title_name, const std::string& avatar_url) {
 		try {
 			Magick::Image bg("assets/inventory/inv_bg.png");
 			bg.resize(std::to_string(INV_BG_W) + "x" + std::to_string(INV_BG_H) + "!");
 			bg.font("assets/fonts/axufont.ttf");
 			bg.textAntiAlias(true);
+			if (!title_name.empty()) {
+				int text_x = LEFT_X;
+
+				if (!avatar_url.empty()) {
+					try {
+						Magick::Image av(avatar_url);
+						av.resize(std::to_string(AV_SIZE) + "x" + std::to_string(AV_SIZE) + "^");
+						av.extent(Magick::Geometry(AV_SIZE, AV_SIZE), Magick::CenterGravity);
+						av.repage();
+						av.alpha(true);
+						Magick::Image mask(Magick::Geometry(AV_SIZE, AV_SIZE), Magick::Color("transparent"));
+						mask.fillColor("white");
+						mask.strokeWidth(0);
+						mask.draw(Magick::DrawableCircle(AV_SIZE / 2.0, AV_SIZE / 2.0,
+									AV_SIZE / 2.0 - 0.5, 0));
+						av.composite(mask, 0, 0, Magick::DstInCompositeOp);
+						bg.composite(av, LEFT_X, TITLE_Y - AV_SIZE + 8, Magick::OverCompositeOp);
+						text_x = LEFT_X + AV_SIZE + 12;
+					} catch (...) {}
+				}
+
+				bg.fontPointsize(42);
+				bg.fillColor(Magick::Color("rgba(255,230,160,0.9)"));
+				bg.strokeWidth(0);
+				bg.draw(Magick::DrawableText(text_x, TITLE_Y, title_name + "'s inventory"));
+			}
 
 			std::string dim = std::to_string(PLACARD_W) + "x" + std::to_string(PLACARD_H) + "!";
 			Magick::Image tmpl_df("assets/bazaar/placard.png");

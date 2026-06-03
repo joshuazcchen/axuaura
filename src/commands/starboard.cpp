@@ -1,6 +1,8 @@
 #include "commands.h"
 #include "db.h"
 
+#include <cstdlib>
+
 namespace commands {
 
 	dpp::slashcommand starboard_admin_def(dpp::cluster& bot) {
@@ -125,54 +127,43 @@ namespace commands {
 			return;
 		}
 
-		int cost = db::get_setting_int(g_id, is_positive ? "sb_pos_cost" : "sb_neg_cost", 100);
+		int cost = std::abs(db::get_setting_int(g_id, is_positive ? "sb_pos_cost" : "sb_neg_cost", 100));
 		int aura = db::get_aura(g_id, u_id);
 		if (aura < cost) {
 			event.reply(dpp::message("not enough aura (you have **" + std::to_string(aura) + "**, need **" +
-									 std::to_string(cost) + "**).")
-							.set_flags(dpp::m_ephemeral));
+						std::to_string(cost) + "**).")
+					.set_flags(dpp::m_ephemeral));
 			return;
 		}
 
-		event.reply(dpp::message("posting…").set_flags(dpp::m_ephemeral));
+		event.reply(dpp::message("posted").set_flags(dpp::m_ephemeral));
 		db::rmv_aura(g_id, u_id, cost);
 
 		bot.message_get(
-			src_msg_id, src_ch_id,
-			[&bot, g_id, u_id, sb_ch, src_ch_id, is_positive, cost](const dpp::confirmation_callback_t& cb) {
+				src_msg_id, src_ch_id,
+				[&bot, g_id, u_id, sb_ch, src_ch_id, is_positive, cost](const dpp::confirmation_callback_t& cb) {
 				if (cb.is_error()) return;
 				const dpp::message& orig = std::get<dpp::message>(cb.value);
 
-				dpp::embed emb;
-				emb.set_color(is_positive ? 0x52CB6C : 0xCF3048);
-				emb.add_field("Posted by", "<@" + std::to_string(orig.author.id) + ">", true);
-				emb.add_field("Channel", "<#" + std::to_string(src_ch_id) + ">", true);
-				emb.add_field("Paid by", "<@" + std::to_string(u_id) + ">  (" + std::to_string(cost) + " aura)", true);
+				std::string jump = "https://discord.com/channels/" + std::to_string(g_id) + "/" +
+				std::to_string(src_ch_id) + "/" + std::to_string(orig.id);
+
+				std::string out = "**starboard** | <#" + std::to_string(src_ch_id) + "> | by <@" +
+				std::to_string(orig.author.id) + "> | paid by <@" + std::to_string(u_id) +
+				"> (" + std::to_string(cost) + " aura)\n";
 
 				if (!orig.content.empty()) {
-					std::string content = orig.content;
-					if (content.size() > 1024) content = content.substr(0, 1021) + "…";
-					emb.set_description(content);
+				std::string content = orig.content;
+				if (content.size() > 1800) content = content.substr(0, 1797) + "…";
+				out += content + "\n";
 				}
 
-				for (auto& att : orig.attachments) {
-					if (att.filename.size() >= 4) {
-						std::string ext = att.filename.substr(att.filename.size() - 4);
-						for (auto& c : ext)
-							c = (char)tolower((unsigned char)c);
-						if (ext == ".png" || ext == ".jpg" || ext == "jpeg" || ext == ".gif" || ext == "webp") {
-							emb.set_image(att.url);
-							break;
-						}
-					}
-				}
+				out += jump;
 
-				std::string jump = "https://discord.com/channels/" + std::to_string(g_id) + "/" +
-								   std::to_string(src_ch_id) + "/" + std::to_string(orig.id);
-				emb.set_footer("jump to original : " + jump, "");
-
-				bot.message_create(dpp::message(sb_ch, emb));
-			});
+				dpp::message msg(sb_ch, out);
+				msg.set_allowed_mentions(false, false, false, false, {}, {});
+				bot.message_create(msg);
+				});
 	}
 
 } // namespace commands

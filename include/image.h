@@ -14,11 +14,13 @@ namespace image {
 
 	struct BoardEntry {
 		std::string display;
+		std::string avatar_url;
 		int value;
 		int secondary;
 	};
 
 	std::string img_gen_leaderboard(const std::vector<BoardEntry>& entries);
 	std::string img_gen_auraboard(const std::vector<BoardEntry>& entries, bool is_bottom, int total_aura);
-	std::string img_gen_inventory(const std::vector<db::InvItem>& items, int page, int pages);
+	std::string img_gen_inventory(const std::vector<db::InvItem>& items, int page, int pages,
+			const std::string& title_name = "", const std::string& avatar_url = "");
 } // namespace image
