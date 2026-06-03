@@ -29,7 +29,8 @@ namespace commands {
 		entries.reserve(15);
 		for (auto& [uid, xp] : raw) {
 			if (!utils::is_guild_member(g_id, uid)) continue;
-			entries.push_back({utils::get_display_name(g_id, uid), utils::get_avatar_url(uid), xp, db::lvl_get(g_id, uid)});
+			entries.push_back(
+				{utils::get_display_name(g_id, uid), utils::get_avatar_url(uid), xp, db::lvl_get(g_id, uid)});
 			if ((int)entries.size() >= 15) break;
 		}
 

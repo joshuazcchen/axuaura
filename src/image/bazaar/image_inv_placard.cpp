@@ -9,7 +9,8 @@
 static constexpr int PLACARD_W = 500;
 static constexpr int PLACARD_H = 160;
 static constexpr int MARGIN_L = 80;
-static constexpr int MARGIN_R = 15;
+// TODO: make the margins identical since previously it just dealt in single circles and pills
+static constexpr int MARGIN_R = 40;
 static constexpr int MAX_LEN = 16;
 
 namespace image {
@@ -31,9 +32,8 @@ namespace image {
 		if (item.expires > 0) {
 			long secs = item.expires - std::time(nullptr);
 			if (secs > 0) {
-				sub = secs > 172800
-					? "expires ~" + std::to_string(secs / 86400) + "d"
-					: "expires ~" + std::to_string(secs / 3600) + "h";
+				sub = secs > 172800 ? "expires ~" + std::to_string(secs / 86400) + "d"
+									: "expires ~" + std::to_string(secs / 3600) + "h";
 			} else {
 				sub = "expired";
 			}
@@ -52,10 +52,7 @@ namespace image {
 			bg.fontPointsize(22);
 			bg.fontTypeMetrics(eq_txt, &em);
 			bg.fillColor("rgba(140,220,140,1)");
-			bg.draw(Magick::DrawableText(
-				px + PLACARD_W - MARGIN_R - em.textWidth(),
-				py + 26,
-				eq_txt));
+			bg.draw(Magick::DrawableText(px + PLACARD_W - MARGIN_R - em.textWidth(), py + 26, eq_txt));
 		}
 	}
 

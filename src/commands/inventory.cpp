@@ -69,7 +69,7 @@ namespace commands {
 				row.set_type(dpp::cot_action_row);
 				for (int i = start; i < start + count && i < (int)slice.size(); ++i) {
 					const auto& it = slice[i];
-					std::string lbl = it.name.size() > 10 ? it.name.substr(0, 9) + "\xe2\x80\xa6" : it.name;
+					std::string lbl = utils::get_safe_role(it.name, it.type, 10);
 					dpp::component btn;
 					btn.set_type(dpp::cot_button)
 						.set_id("inv_tog_" + std::to_string(page) + "_" + std::to_string(i + 1))

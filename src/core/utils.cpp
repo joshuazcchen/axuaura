@@ -60,6 +60,27 @@ namespace utils {
 		return std::to_string(user_id);
 	}
 
+	std::string get_safe_role(const std::string& name, const std::string& type, size_t max_len) {
+		if (type == "role" && !name.empty() && name[0] == '<') {
+			std::string id_str;
+			for (char c : name)
+				if (std::isdigit(c)) id_str += c;
+			if (!id_str.empty()) {
+				try {
+					dpp::snowflake role_id = std::stoull(id_str);
+					dpp::role* cached_role = dpp::find_role(role_id);
+					if (cached_role) {
+						std::string c_name = cached_role->name;
+						std::erase_if(c_name, [](unsigned char c) { return !(std::isalnum(c) || c == ' '); });
+						return c_name.size() <= max_len ? c_name : c_name.substr(0, max_len - 3) + "...";
+					}
+				} catch (...) {}
+			}
+			return "Role";
+		}
+		return name.size() <= max_len ? name : name.substr(0, max_len - 3) + "...";
+	}
+
 	std::string get_avatar_url(dpp::snowflake user_id, uint16_t size) {
 		dpp::user* u = dpp::find_user(user_id);
 		if (!u) return "";

@@ -196,30 +196,6 @@ namespace bazaar {
 				pos_row.set_type(dpp::cot_action_row);
 				neg_row.set_type(dpp::cot_action_row);
 
-				auto get_safe_name = [](const auto& item, size_t max_len = 18) -> std::string {
-					if (item.type == "role" && !item.name.empty() && item.name[0] == '<') {
-						std::string id_str;
-						for (char c : item.name) {
-							if (std::isdigit(c)) { id_str += c; }
-						}
-
-						if (!id_str.empty()) {
-							try {
-								dpp::snowflake role_id = std::stoull(id_str);
-								dpp::role* cached_role = dpp::find_role(role_id);
-								if (cached_role) {
-									std::string c_name = cached_role->name;
-									std::erase_if(c_name,
-												  [](unsigned char c) { return !(std::isalnum(c) || c == ' '); });
-									return c_name.size() <= max_len ? c_name : c_name.substr(0, max_len - 3) + "...";
-								}
-							} catch (...) {}
-						}
-						return "Role";
-					}
-					return item.name.size() <= max_len ? item.name : item.name.substr(0, max_len - 3) + "...";
-				};
-
 				auto build_rows = [&](std::vector<db::ShopItem>& items, bool is_pos) {
 					std::vector<dpp::component> rows;
 					if (items.empty()) return rows;
@@ -236,8 +212,8 @@ namespace bazaar {
 						dpp::component_style def_style = is_pos ? dpp::cos_success : dpp::cos_danger;
 						auto style = parse_btn_style(items[i].data, def_style);
 
-						std::string lbl =
-							get_safe_name(items[i]) + " (" + std::to_string(std::abs(items[i].cost)) + "a)";
+						std::string lbl = utils::get_safe_role(items[i].name, items[i].type, 18) + " (" +
+										  std::to_string(std::abs(items[i].cost)) + "a)";
 
 						dpp::component btn;
 						btn.set_type(dpp::cot_button)

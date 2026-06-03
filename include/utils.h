@@ -14,4 +14,5 @@ namespace utils {
 
 	std::string get_display_name(dpp::snowflake guild_id, dpp::snowflake user_id);
 	std::string get_avatar_url(dpp::snowflake user_id, uint16_t size = 64);
+	std::string get_safe_role(const std::string& name, const std::string& type, size_t max_len = 18);
 } // namespace utils

@@ -23,30 +23,6 @@ static constexpr int BDR_SZ = 4;
 
 namespace image {
 
-	static std::string safe_name(const db::ShopItem& item) {
-		if (item.type == "role" && !item.name.empty() && item.name[0] == '<') {
-			std::string id_str;
-			for (char c : item.name) {
-				if (std::isdigit(c)) { id_str += c; }
-			}
-
-			if (!id_str.empty()) {
-				try {
-					dpp::snowflake role_id = std::stoull(id_str);
-					dpp::role* cached_role = dpp::find_role(role_id);
-					if (cached_role) {
-						std::string c_name = cached_role->name;
-						std::erase_if(c_name, [](unsigned char c) { return !(std::isalnum(c) || c == ' '); });
-						return c_name.size() <= MAX_LEN ? c_name : c_name.substr(0, MAX_LEN - 3) + "...";
-					}
-				} catch (const std::exception&) {}
-			}
-			return "Role";
-		}
-
-		return item.name.size() <= MAX_LEN ? item.name : item.name.substr(0, MAX_LEN - 3) + "...";
-	}
-
 	static std::string cost_label(const db::ShopItem& item) {
 		std::string s = std::to_string(std::abs(item.cost)) + " aura";
 		if (item.cost < 0) s = "-" + s;
@@ -162,7 +138,7 @@ namespace image {
 		double cx = px + MARGIN_L;
 
 		Magick::TypeMetric m;
-		std::string name = safe_name(item);
+		std::string name = utils::get_safe_role(item.name, item.type, 16);
 		std::string cost = cost_label(item);
 
 		bg.strokeWidth(0);

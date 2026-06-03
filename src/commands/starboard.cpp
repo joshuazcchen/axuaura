@@ -1,7 +1,7 @@
+#include <cstdlib>
+
 #include "commands.h"
 #include "db.h"
-
-#include <cstdlib>
 
 namespace commands {
 
@@ -52,10 +52,10 @@ namespace commands {
 	void handle_starboard_ctx(const dpp::message_context_menu_t& event, dpp::cluster& bot) {
 		dpp::snowflake g_id = event.command.guild_id;
 		dpp::snowflake ch_id = event.command.channel_id;
+		dpp::snowflake u_id = event.command.get_issuing_user().id;
 
 		if (!db::sb_is_allowed(g_id, ch_id)) {
-			event.reply(
-				dpp::message("this channel isn't set up for starboard nominations.").set_flags(dpp::m_ephemeral));
+			event.reply(dpp::message("this channel isn't set up for starboard.").set_flags(dpp::m_ephemeral));
 			return;
 		}
 
@@ -65,34 +65,28 @@ namespace commands {
 			sb_ch = std::stoull(sb_ch_str);
 		} catch (...) {}
 		if (sb_ch == 0) {
-			event.reply(dpp::message("no starboard channel configured. Admins: use `/settings sb_channel`.")
-							.set_flags(dpp::m_ephemeral));
+			event.reply(dpp::message("no starboard channel configured.").set_flags(dpp::m_ephemeral));
 			return;
 		}
 
-		int pos_cost = db::get_setting_int(g_id, "sb_pos_cost", 1000);
-		int neg_cost = db::get_setting_int(g_id, "sb_neg_cost", 1000);
+		int aura = db::get_aura(g_id, u_id);
+		bool is_positive = (aura >= 0);
+
+		int cost = std::abs(db::get_setting_int(g_id, is_positive ? "sb_pos_cost" : "sb_neg_cost", 1000));
+
 		const dpp::message& target = event.get_message();
+		std::string btn_id =
+			(is_positive ? "sb_pos_" : "sb_neg_") + std::to_string(target.id) + "_" + std::to_string(ch_id);
 
-		std::string pos_id = "sb_pos_" + std::to_string(target.id) + "_" + std::to_string(ch_id);
-		std::string neg_id = "sb_neg_" + std::to_string(target.id) + "_" + std::to_string(ch_id);
-
-		dpp::component pos_btn;
-		pos_btn.set_type(dpp::cot_button)
-			.set_id(pos_id)
-			.set_label("positive (" + std::to_string(pos_cost) + " aura)")
-			.set_style(dpp::cos_success);
-
-		dpp::component neg_btn;
-		neg_btn.set_type(dpp::cot_button)
-			.set_id(neg_id)
-			.set_label("negative (" + std::to_string(neg_cost) + " aura)")
-			.set_style(dpp::cos_danger);
+		dpp::component btn;
+		btn.set_type(dpp::cot_button)
+			.set_id(btn_id)
+			.set_label((is_positive ? "positive" : "negative") + std::string(" (") + std::to_string(cost) + " aura)")
+			.set_style(is_positive ? dpp::cos_success : dpp::cos_danger);
 
 		dpp::component row;
 		row.set_type(dpp::cot_action_row);
-		row.add_component(pos_btn);
-		row.add_component(neg_btn);
+		row.add_component(btn);
 
 		dpp::message reply;
 		reply.set_flags(dpp::m_ephemeral);
@@ -127,35 +121,57 @@ namespace commands {
 			return;
 		}
 
-		int cost = std::abs(db::get_setting_int(g_id, is_positive ? "sb_pos_cost" : "sb_neg_cost", 100));
 		int aura = db::get_aura(g_id, u_id);
-		if (aura < cost) {
-			event.reply(dpp::message("not enough aura (you have **" + std::to_string(aura) + "**, need **" +
-						std::to_string(cost) + "**).")
-					.set_flags(dpp::m_ephemeral));
+		bool current_positive = (aura >= 0);
+		if (current_positive != is_positive) {
+			event.reply(dpp::message("your aura sign has changed since this button was shown — "
+									 "right-click the message again to get a fresh button.")
+							.set_flags(dpp::m_ephemeral));
 			return;
 		}
 
-		event.reply(dpp::message("posted").set_flags(dpp::m_ephemeral));
+		int cost = std::abs(db::get_setting_int(g_id, is_positive ? "sb_pos_cost" : "sb_neg_cost", 1000));
+
+		if (std::abs(aura) < cost) {
+			event.reply(dpp::message("not enough aura (you have **" + std::to_string(aura) + "**, need **" +
+									 (is_positive ? "" : "-") + std::to_string(cost) + "**).")
+							.set_flags(dpp::m_ephemeral));
+			return;
+		}
+
+		event.reply(dpp::message("posting…").set_flags(dpp::m_ephemeral));
 		db::rmv_aura(g_id, u_id, cost);
 
 		bot.message_get(
-				src_msg_id, src_ch_id,
-				[&bot, g_id, u_id, sb_ch, src_ch_id, is_positive, cost](const dpp::confirmation_callback_t& cb) {
+			src_msg_id, src_ch_id,
+			[&bot, g_id, u_id, sb_ch, src_ch_id, is_positive, cost](const dpp::confirmation_callback_t& cb) {
 				if (cb.is_error()) return;
 				const dpp::message& orig = std::get<dpp::message>(cb.value);
 
 				std::string jump = "https://discord.com/channels/" + std::to_string(g_id) + "/" +
-				std::to_string(src_ch_id) + "/" + std::to_string(orig.id);
+								   std::to_string(src_ch_id) + "/" + std::to_string(orig.id);
 
-				std::string out = "**starboard** | <#" + std::to_string(src_ch_id) + "> | by <@" +
-				std::to_string(orig.author.id) + "> | paid by <@" + std::to_string(u_id) +
-				"> (" + std::to_string(cost) + " aura)\n";
+				std::string out = (is_positive ? std::string("**starboard**") : std::string("**shameboard**")) +
+								  " | <#" + std::to_string(src_ch_id) + "> | by <@" + std::to_string(orig.author.id) +
+								  "> | paid by <@" + std::to_string(u_id) + "> (" + std::to_string(cost) + " aura)\n";
 
 				if (!orig.content.empty()) {
-				std::string content = orig.content;
-				if (content.size() > 1800) content = content.substr(0, 1797) + "…";
-				out += content + "\n";
+					std::string content = orig.content;
+					if (content.size() > 1800) content = content.substr(0, 1797) + "…";
+					out += content + "\n";
+				}
+
+				for (const auto& att : orig.attachments) {
+					std::string fn = att.filename;
+					if (fn.size() >= 4) {
+						std::string ext = fn.substr(fn.size() - 4);
+						for (auto& c : ext)
+							c = (char)tolower((unsigned char)c);
+						if (ext == ".png" || ext == ".jpg" || ext == "jpeg" || ext == ".gif" || ext == "webp") {
+							out += att.url + "\n";
+							break;
+						}
+					}
 				}
 
 				out += jump;
@@ -163,7 +179,7 @@ namespace commands {
 				dpp::message msg(sb_ch, out);
 				msg.set_allowed_mentions(false, false, false, false, {}, {});
 				bot.message_create(msg);
-				});
+			});
 	}
 
 } // namespace commands

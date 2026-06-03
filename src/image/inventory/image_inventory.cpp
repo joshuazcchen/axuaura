@@ -20,10 +20,11 @@ namespace image {
 	static constexpr int RIGHT_X = 618;
 	static constexpr int START_Y = 330;
 	static constexpr int ITEMS_PER_PAGE = 10;
-	static constexpr int AV_SIZE  = 64;
-	static constexpr int TITLE_Y  = 255;
+	static constexpr int AV_SIZE = 64;
+	static constexpr int TITLE_Y = 255;
 
-	std::string img_gen_inventory(const std::vector<db::InvItem>& items, int page, int total_pages, const std::string& title_name, const std::string& avatar_url) {
+	std::string img_gen_inventory(const std::vector<db::InvItem>& items, int page, int total_pages,
+								  const std::string& title_name, const std::string& avatar_url) {
 		try {
 			Magick::Image bg("assets/inventory/inv_bg.png");
 			bg.resize(std::to_string(INV_BG_W) + "x" + std::to_string(INV_BG_H) + "!");
@@ -42,8 +43,7 @@ namespace image {
 						Magick::Image mask(Magick::Geometry(AV_SIZE, AV_SIZE), Magick::Color("transparent"));
 						mask.fillColor("white");
 						mask.strokeWidth(0);
-						mask.draw(Magick::DrawableCircle(AV_SIZE / 2.0, AV_SIZE / 2.0,
-									AV_SIZE / 2.0 - 0.5, 0));
+						mask.draw(Magick::DrawableCircle(AV_SIZE / 2.0, AV_SIZE / 2.0, AV_SIZE / 2.0 - 0.5, 0));
 						av.composite(mask, 0, 0, Magick::DstInCompositeOp);
 						bg.composite(av, LEFT_X, TITLE_Y - AV_SIZE + 8, Magick::OverCompositeOp);
 						text_x = LEFT_X + AV_SIZE + 12;

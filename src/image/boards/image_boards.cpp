@@ -46,7 +46,7 @@ namespace image {
 	}
 
 	static void draw_centered(Magick::Image& img, const std::string& txt, int cx, int y, int ptsize,
-			const std::string& color) {
+							  const std::string& color) {
 		img.fontPointsize(ptsize);
 		img.fillColor(Magick::Color(color));
 		img.strokeWidth(0);
@@ -71,8 +71,8 @@ namespace image {
 		draw_centered(img, name, p.cx, line2_y, p.font_small, "rgba(56,53,55,0.90)");
 
 		std::string val = show_level && e.secondary > 0
-			? "lv." + std::to_string(e.secondary) + " / " + std::to_string(e.value) + "xp"
-			: std::to_string(e.value);
+							  ? "lv." + std::to_string(e.secondary) + " / " + std::to_string(e.value) + "xp"
+							  : std::to_string(e.value);
 		draw_centered(img, val, p.cx, line3_y, p.font_small - 4, "rgba(80,60,40,0.90)");
 	}
 
@@ -91,8 +91,8 @@ namespace image {
 		img.draw(Magick::DrawableText(ROW_NAME_X, cy + 20, name));
 
 		std::string val = show_level && e.secondary > 0
-			? "lv." + std::to_string(e.secondary) + "  " + std::to_string(e.value) + "xp"
-			: std::to_string(e.value);
+							  ? "lv." + std::to_string(e.secondary) + "  " + std::to_string(e.value) + "xp"
+							  : std::to_string(e.value);
 		img.fontPointsize(40);
 		img.fillColor(Magick::Color("rgba(200,220,255,0.90)"));
 		Magick::TypeMetric tm;
@@ -101,7 +101,7 @@ namespace image {
 	}
 
 	static std::string render_board(const std::string& bg_file, const std::string& title,
-			const std::vector<BoardEntry>& entries, bool show_level) {
+									const std::vector<BoardEntry>& entries, bool show_level) {
 		Magick::Image bg(bg_file);
 		bg.resize(std::to_string(BRD_W) + "x" + std::to_string(BRD_H) + "!");
 		bg.font("assets/fonts/axufont.ttf");
