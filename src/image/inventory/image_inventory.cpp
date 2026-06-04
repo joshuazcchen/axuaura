@@ -20,7 +20,7 @@ namespace image {
 	static constexpr int RIGHT_X = 618;
 	static constexpr int START_Y = 330;
 	static constexpr int ITEMS_PER_PAGE = 10;
-	static constexpr int AV_SIZE = 64;
+	static constexpr int AV_SIZE = 96;
 	static constexpr int TITLE_Y = 255;
 
 	std::string img_gen_inventory(const std::vector<db::InvItem>& items, int page, int total_pages,
@@ -50,7 +50,7 @@ namespace image {
 					} catch (...) {}
 				}
 
-				bg.fontPointsize(42);
+				bg.fontPointsize(72);
 				bg.fillColor(Magick::Color("rgba(255,230,160,0.9)"));
 				bg.strokeWidth(0);
 				bg.draw(Magick::DrawableText(text_x, TITLE_Y, title_name + "'s inventory"));
