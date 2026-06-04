@@ -18,8 +18,8 @@ namespace image {
 	};
 	static constexpr PodiumSpec PODIUMS[3] = {
 		{200, 400, 46, 36},
-		{600, 350, 56, 40},
-		{1000, 450, 40, 32},
+		{610, 360, 56, 40},
+		{1010, 445, 40, 32},
 	};
 	static constexpr int PODIUM_BOTTOM = 570;
 
@@ -27,6 +27,9 @@ namespace image {
 	static constexpr int ROW_RANK_X = 55;
 	static constexpr int ROW_NAME_X = 265;
 	static constexpr int ROW_VAL_X = 1155;
+	static constexpr int P_AV_SIZE = 120;
+	static constexpr int P_NAME_SIZE = 240;
+	static constexpr int R_AV_SIZE = 40; 
 
 	static void draw_avatar_circle(Magick::Image& img, const std::string& url, int cx, int cy, int size) {
 		if (url.empty()) return;
@@ -61,24 +64,45 @@ namespace image {
 		int line1_y = p.top_y + avail * 30 / 100;
 		int line2_y = p.top_y + avail * 58 / 100;
 		int line3_y = p.top_y + avail * 84 / 100;
+		int avatar_cy = p.top_y - P_AV_SIZE + 20;
 
-		draw_avatar_circle(img, e.avatar_url, p.cx, line2_y - 60, 52);
+		draw_avatar_circle(img, e.avatar_url, p.cx, avatar_cy, P_AV_SIZE);
 
-		static const char* medals[] = {"#2", "#1", "#3"};
+		static const char* medals[] = {"2", "1", "3"};
 		draw_centered(img, medals[rank_idx], p.cx, line1_y, p.font_large, "rgba(56,53,55,0.95)");
 		std::string name = e.display;
-		if (name.size() > 14) name = name.substr(0, 12) + "\xe2\x80\xa6";
-		draw_centered(img, name, p.cx, line2_y, p.font_small, "rgba(56,53,55,0.90)");
+		int font = p.font_small;
+		Magick::TypeMetric tm;
+		img.fontPointsize(font);
+		img.fontTypeMetrics(name, &tm);
+		while (tm.textWidth() > P_NAME_SIZE && font > 18) {
+			font -= 2;
+			img.fontPointsize(font);
+			img.fontTypeMetrics(name, &tm);
+		}
 
-		std::string val = show_level && e.secondary > 0
-							  ? "lv." + std::to_string(e.secondary) + " / " + std::to_string(e.value) + "xp"
-							  : std::to_string(e.value);
-		draw_centered(img, val, p.cx, line3_y, p.font_small - 4, "rgba(80,60,40,0.90)");
+		if (tm.textWidth() > P_NAME_SIZE) {
+			while (name.size() > 3) {
+				name.pop_back();
+				std::string cand = name + "...";
+				img.fontTypeMetrics(cand, &tm);
+				if (tm.textWidth() <= P_NAME_SIZE) { name = cand; break; }
+			}
+		}
+
+		img.fontPointsize(font);
+		img.fillColor(Magick::Color("rgba(56,53,55,0.9)"));
+		img.strokeWidth(0);
+		img.fontTypeMetrics(name, &tm);
+		img.draw(Magick::DrawableText(p.cx - tm.textWidth() / 2.0, line2_y, name));
+
+		std::string val = show_level && e.secondary > 0 ? "lv." + std::to_string(e.secondary) + " / " + std::to_string(e.value) + "xp" : std::to_string(e.value);
+		draw_centered(img, val, p.cx, line3_y, p.font_small - 4, "rgba(80,60,40,0.9)");
 	}
 
 	static void draw_row_entry(Magick::Image& img, int rank, const BoardEntry& e, int cy, bool show_level) {
 		img.strokeWidth(0);
-		draw_avatar_circle(img, e.avatar_url, ROW_NAME_X - 20, cy + 2, 40);
+		draw_avatar_circle(img, e.avatar_url, ROW_NAME_X - (R_AV_SIZE), cy + 2, R_AV_SIZE);
 
 		img.fontPointsize(52);
 		img.fillColor(Magick::Color("rgba(255,255,255,0.90)"));
@@ -107,12 +131,12 @@ namespace image {
 		bg.font("assets/fonts/axufont.ttf");
 		bg.textAntiAlias(true);
 
-		bg.fontPointsize(72);
+		bg.fontPointsize(102);
 		bg.fillColor(Magick::Color("rgba(255,255,255,0.9)"));
 		bg.strokeWidth(0);
 		Magick::TypeMetric tm;
 		bg.fontTypeMetrics(title, &tm);
-		bg.draw(Magick::DrawableText((BRD_W - tm.textWidth()) / 2.0, 300, title));
+		bg.draw(Magick::DrawableText((BRD_W - tm.textWidth()) / 2.0, 125, title));
 
 		static const int podium_rank_order[] = {1, 0, 2};
 		for (int i = 0; i < (int)entries.size() && i < 3; ++i) {
