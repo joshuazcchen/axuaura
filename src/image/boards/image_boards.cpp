@@ -29,7 +29,7 @@ namespace image {
 	static constexpr int ROW_VAL_X = 1155;
 	static constexpr int P_AV_SIZE = 120;
 	static constexpr int P_NAME_SIZE = 240;
-	static constexpr int R_AV_SIZE = 40; 
+	static constexpr int R_AV_SIZE = 40;
 
 	static void draw_avatar_circle(Magick::Image& img, const std::string& url, int cx, int cy, int size) {
 		if (url.empty()) return;
@@ -86,7 +86,10 @@ namespace image {
 				name.pop_back();
 				std::string cand = name + "...";
 				img.fontTypeMetrics(cand, &tm);
-				if (tm.textWidth() <= P_NAME_SIZE) { name = cand; break; }
+				if (tm.textWidth() <= P_NAME_SIZE) {
+					name = cand;
+					break;
+				}
 			}
 		}
 
@@ -96,7 +99,9 @@ namespace image {
 		img.fontTypeMetrics(name, &tm);
 		img.draw(Magick::DrawableText(p.cx - tm.textWidth() / 2.0, line2_y, name));
 
-		std::string val = show_level && e.secondary > 0 ? "lv." + std::to_string(e.secondary) + " / " + std::to_string(e.value) + "xp" : std::to_string(e.value);
+		std::string val = show_level && e.secondary > 0
+							  ? "lv." + std::to_string(e.secondary) + " / " + std::to_string(e.value) + "xp"
+							  : std::to_string(e.value);
 		draw_centered(img, val, p.cx, line3_y, p.font_small - 4, "rgba(80,60,40,0.9)");
 	}
 
