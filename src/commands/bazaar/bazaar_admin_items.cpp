@@ -16,9 +16,9 @@ namespace commands {
 		auto pb = ev.get_parameter("button_colour");
 		auto pc1 = ev.get_parameter("colour1");
 		auto pc2 = ev.get_parameter("colour2");
-		if (std::holds_alternative<std::string>(pb))  btn = std::get<std::string>(pb);
-		if (std::holds_alternative<std::string>(pc1)) c1  = std::get<std::string>(pc1);
-		if (std::holds_alternative<std::string>(pc2)) c2  = std::get<std::string>(pc2);
+		if (std::holds_alternative<std::string>(pb)) btn = std::get<std::string>(pb);
+		if (std::holds_alternative<std::string>(pc1)) c1 = std::get<std::string>(pc1);
+		if (std::holds_alternative<std::string>(pc2)) c2 = std::get<std::string>(pc2);
 		std::string d = "{\"button_style\":\"" + btn + "\"";
 		if (!c1.empty()) d += ",\"colour1\":\"" + c1 + "\"";
 		if (!c2.empty()) d += ",\"colour2\":\"" + c2 + "\"";
@@ -37,15 +37,15 @@ namespace commands {
 		if (std::holds_alternative<bool>(pi)) invert = std::get<bool>(pi);
 		if (std::holds_alternative<bool>(pg)) is_global = std::get<bool>(pg);
 		return "{\"file\":\"" + fn +
-			"\","
-			"\"artist\":\"" +
-			artist +
-			"\","
-			"\"invert\":" +
-			(invert ? "true" : "false") +
-			","
-			"\"global\":" +
-			(is_global ? "true" : "false") + "}";
+			   "\","
+			   "\"artist\":\"" +
+			   artist +
+			   "\","
+			   "\"invert\":" +
+			   (invert ? "true" : "false") +
+			   ","
+			   "\"global\":" +
+			   (is_global ? "true" : "false") + "}";
 	}
 
 	static void do_add(const dpp::slashcommand_t& event, dpp::cluster& bot) {
@@ -102,8 +102,8 @@ namespace commands {
 			double mult = 2.0;
 			int hours = 24;
 			if (std::holds_alternative<std::string>(pm)) try {
-				mult = std::stod(std::get<std::string>(pm));
-			} catch (...) {}
+					mult = std::stod(std::get<std::string>(pm));
+				} catch (...) {}
 			if (std::holds_alternative<int64_t>(pd)) hours = (int)std::get<int64_t>(pd);
 			if (name.empty()) name = std::to_string((int)mult) + "x XP Boost";
 			data = "{\"mult\":" + std::to_string(mult) + ",\"hours\":" + std::to_string(hours) + "}";
@@ -151,7 +151,7 @@ namespace commands {
 		std::string reply = "deleted **" + item.name + "**";
 		if (!owners.empty()) {
 			reply += " and removed it from " + std::to_string(owners.size()) + " inventor" +
-				(owners.size() == 1 ? "y" : "ies");
+					 (owners.size() == 1 ? "y" : "ies");
 			if (compensation > 0) reply += " (+" + std::to_string(compensation) + " aura compensation each)";
 		}
 		event.reply(dpp::message(reply).set_flags(dpp::m_ephemeral));

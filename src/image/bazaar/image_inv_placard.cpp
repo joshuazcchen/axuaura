@@ -1,5 +1,5 @@
-#include <ctime>
 #include <cstdio>
+#include <ctime>
 #include <iostream>
 #define MAGICKCORE_QUANTUM_DEPTH 16
 #define MAGICKCORE_HDRI_ENABLE 1
