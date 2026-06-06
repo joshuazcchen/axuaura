@@ -14,7 +14,7 @@ namespace test {
         int passed = 0, failed = 0;
         for (auto& c : registry()) {
             try { c.fn(); std::cout << "PASS: " << c.name << "\n"; ++passed; }
-            catch (const std::exception& e) { std::cout << "  [FAIL] " << c.name << ": " << e.what() << "\n"; ++failed; }
+            catch (const std::exception& e) { std::cout << "FAIL: " << c.name << ": " << e.what() << "\n"; ++failed; }
             catch (...) { std::cout << "FAIL: " << c.name << ": unknown exception\n"; ++failed; }
         }
         std::cout << "\n" << passed << " passed, " << failed << " failed.\n";

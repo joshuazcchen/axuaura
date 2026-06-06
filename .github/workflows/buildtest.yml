@@ -51,9 +51,9 @@ jobs:
     - name: Build D+++++++
       run: |
         git clone https://github.com/joshuazcchen/dpp_enhanced_roles.git
-        cd dpp_enhanced_roles
-        cmake -B build
-        cmake --install build
+        cmake -S dpp_enhanced_roles -B dpp_enhanced_roles/build -DCMAKE_BUILD_TYPE=Release
+        cmake --build dpp_enhanced_roles/build --parallel $(nproc)
+        cmake --install dpp_enhanced_roles/build
 
     - name: Configure CMake
       env:
@@ -64,5 +64,32 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Unit tests
-      run: ctest --test-dir build --output-on-failure
+    - name: Upload
+      uses: actions/upload-artifact@v7
+      with:
+        name: axuaxibot-folder
+        path: ${{github.workspace}}/build
+
+  test:
+    name: Unit tests
+    needs: build
+    runs-on: ubuntu-latest
+    container: debian:unstable
+
+    steps:
+    - name: Download workspace
+      uses: actions/download-artifact@v8
+      with:
+        name: axuaxibot-folder
+        path: ${{github.workspace}}/build
+
+    - name: checkout
+      uses: actions/checkout@v6
+
+    - name: Install runtime dependencies
+      run: |
+        apt-get update
+        apt-get install -y cmake libsqlite3-dev libmagick++-7.q16hdri-dev libsodium-dev libssl-dev libopus0
+    
+    - name: Run unit tests
+      run: ${{github.workspace}}/build/axuaura_tests
