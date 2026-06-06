@@ -16,6 +16,7 @@ namespace image {
 
 	void preview_banner(Magick::Image& bg, int px, int py, const std::string& data);
 	void preview_xp(Magick::Image& bg, int px, int py);
+	void preview_role(Magick::Image& bg, int px, int py, const std::string& data);
 
 	void draw_inv_placard(Magick::Image& bg, const Magick::Image& tmpl, int px, int py, const db::InvItem& item) {
 		bg.composite(tmpl, px, py, Magick::OverCompositeOp);
@@ -56,6 +57,8 @@ namespace image {
 			preview_banner(bg, px, py, item.data);
 		} else if (item.type == "xp_boost") {
 			preview_xp(bg, px, py);
+		} else if (item.type == "role") {
+			preview_role(bg, px, py, item.data);
 		}
 	}
 
