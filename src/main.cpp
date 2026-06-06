@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 		bot.start_timer([&bot](dpp::timer) { bazaar::b_refresh_all(bot); }, 3600);
 
 		backup::do_backup();
-		bazaar::b_refresh_all(bot);
+		if (dpp::run_once<struct boot_bazaar_t>()) bazaar::b_refresh_all(bot);
 		bot.start_timer([](dpp::timer) { backup::do_backup(); }, 86400);
 	});
 

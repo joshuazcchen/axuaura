@@ -37,7 +37,7 @@ namespace commands {
 			if (page < 1) page = 1;
 
 			auto all = db::inv_get_user(g_id, u_id);
-			constexpr int pgsz = 20;
+			constexpr int pgsz = 14;
 			int total_pages = std::max(1, ((int)all.size() + pgsz - 1) / pgsz);
 			if (page > total_pages) page = total_pages;
 
@@ -95,7 +95,7 @@ namespace commands {
 			if (!slice.empty()) {
 				int half = std::min(5, (int)slice.size());
 				msg.add_component(build_btn_row(0, half));
-				if ((int)slice.size() > 5) msg.add_component(build_btn_row(5, (int)slice.size() - 5));
+				if ((int)slice.size() > 5) msg.add_component(build_btn_row(5, std::min(5, (int)slice.size() - 5)));
 			}
 
 			event.edit_original_response(msg);

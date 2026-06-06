@@ -1,4 +1,5 @@
 #include <ctime>
+#include <cstdio>
 #include <iostream>
 #define MAGICKCORE_QUANTUM_DEPTH 16
 #define MAGICKCORE_HDRI_ENABLE 1
@@ -12,7 +13,6 @@ static constexpr int MARGIN_R = 70;
 static constexpr int MARGIN_T = 70;
 
 namespace image {
-	// TODO: steal role colour too
 
 	void preview_banner(Magick::Image& bg, int px, int py, const std::string& data);
 	void preview_xp(Magick::Image& bg, int px, int py);
@@ -58,6 +58,14 @@ namespace image {
 		} else if (item.type == "xp_boost") {
 			preview_xp(bg, px, py);
 		} else if (item.type == "role") {
+			std::string rdata = item.data;
+			if (utils::json_str(rdata, "colour1").empty() && item.role_id) {
+				if (dpp::role* r = dpp::find_role(item.role_id); r && r->colour) {
+					char hex[8];
+					std::snprintf(hex, sizeof(hex), "#%06x", r->colour & 0xFFFFFF);
+					rdata = "{\"colour1\":\"" + std::string(hex) + "\"}";
+				}
+			}
 			preview_role(bg, px, py, item.data);
 		}
 	}
