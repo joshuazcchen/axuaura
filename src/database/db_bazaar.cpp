@@ -36,6 +36,50 @@ namespace db {
 		}
 	}
 
+	std::vector<dpp::snowflake> shop_delete(dpp::snowflake g_id, int item_id, int compensation) {
+		std::vector<dpp::snowflake> owners = inv_list(g_id, item_id);
+
+		if (compensation > 0) {
+			for (auto uid : owners)
+				add_aura(g_id, uid, compensation);
+		}
+
+		{
+			sqlite3_stmt* s;
+			const char* sql = "DELETE FROM inventory WHERE guild_id = ? AND item_id = ?";
+			if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
+				sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_int(s, 2, item_id);
+				sqlite3_step(s);
+				sqlite3_finalize(s);
+			}
+		}
+
+		{
+			sqlite3_stmt* s;
+			const char* sql = "DELETE FROM bazaar_rotation WHERE guild_id = ? AND item_id = ?";
+			if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
+				sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_int(s, 2, item_id);
+				sqlite3_step(s);
+				sqlite3_finalize(s);
+			}
+		}
+
+		{
+			sqlite3_stmt* s;
+			const char* sql = "DELETE FROM shop_items WHERE guild_id = ? AND item_id = ?";
+			if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
+				sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_int(s, 2, item_id);
+				sqlite3_step(s);
+				sqlite3_finalize(s);
+			}
+		}
+
+		return owners;
+	}
+
 	int shop_state(dpp::snowflake g_id, int item_id, const std::string& key) {
 		sqlite3_stmt* s;
 		std::string sql = "SELECT " + key + " FROM shop_items WHERE guild_id = ? AND item_id = ? LIMIT 1";

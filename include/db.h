@@ -132,6 +132,7 @@ namespace db {
 	int shop_add(dpp::snowflake g_id, const std::string& type, dpp::snowflake r_id, const std::string& name,
 				 const std::string& desc, int cost, const std::string& data);
 	void shop_rmv(dpp::snowflake g_id, int item_id);
+	std::vector<dpp::snowflake> shop_delete(dpp::snowflake g_id, int item_id, int compensation = 0);
 	ShopItem shop_get(dpp::snowflake g_id, int item_id);
 	std::vector<ShopItem> shop_get_all(dpp::snowflake g_id, bool active_only);
 	std::vector<ShopItem> shop_get_sign(dpp::snowflake g_id, int sign);
@@ -156,6 +157,7 @@ namespace db {
 		int item_id = 0;
 		std::string name;
 		std::string type;
+		std::string data;
 		dpp::snowflake role_id = 0;
 		bool equipped = false;
 		long acquired = 0;

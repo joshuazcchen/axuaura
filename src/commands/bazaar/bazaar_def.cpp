@@ -40,7 +40,9 @@ namespace commands {
 				.add_option(
 					dpp::command_option(dpp::co_sub_command, "remove", "remove item from shop")
 						.add_option(dpp::command_option(dpp::co_integer, "id", "item id or rotation slot", true))
-						.add_option(dpp::command_option(dpp::co_boolean, "relative", "id is a rotation slot?", false)))
+						.add_option(dpp::command_option(dpp::co_boolean, "relative", "id is a rotation slot?", false))
+						.add_option(dpp::command_option(dpp::co_integer, "compensation",
+														"aura to give each owner (0 = none)", false)))
 				.add_option(dpp::command_option(dpp::co_sub_command, "listall", "list all items")
 								.add_option(dpp::command_option(dpp::co_integer, "page", "page", true)))
 				.add_option(dpp::command_option(dpp::co_sub_command, "toggle", "toggle active")

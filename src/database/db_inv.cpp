@@ -8,7 +8,7 @@ namespace db {
 	void inv_add(dpp::snowflake g_id, dpp::snowflake u_id, int item_id) {
 		sqlite3_stmt* s;
 		const char* sql = "INSERT INTO inventory (guild_id, user_id, item_id, acquired, expires, equipped)"
-						  " VALUES (?, ?, ?, ?, 0, 0)";
+						  "VALUES (?, ?, ?, ?, 0, 0)";
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(s, 2, std::to_string(u_id).c_str(), -1, SQLITE_TRANSIENT);
@@ -22,8 +22,8 @@ namespace db {
 	void inv_rm(dpp::snowflake g_id, dpp::snowflake u_id, int item_id) {
 		sqlite3_stmt* s;
 		const char* sql = "DELETE FROM inventory WHERE inv_id = ("
-						  "  SELECT inv_id FROM inventory WHERE guild_id = ? AND user_id = ? AND item_id = ?"
-						  "  ORDER BY acquired DESC LIMIT 1)";
+						  "SELECT inv_id FROM inventory WHERE guild_id = ? AND user_id = ? AND item_id = ?"
+						  "ORDER BY acquired DESC LIMIT 1)";
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(s, 2, std::to_string(u_id).c_str(), -1, SQLITE_TRANSIENT);
@@ -108,9 +108,10 @@ namespace db {
 		inv_purge(g_id, u_id);
 		std::vector<InvItem> items;
 		sqlite3_stmt* s;
-		const char* sql = "SELECT i.inv_id, s.item_id, s.name, s.type, s.role_id, i.equipped, i.acquired, i.expires"
-						  " FROM inventory i JOIN shop_items s ON i.item_id = s.item_id"
-						  " WHERE i.guild_id = ? AND i.user_id = ? ORDER BY i.inv_id";
+		const char* sql =
+			"SELECT i.inv_id, s.item_id, s.name, s.type, s.role_id, i.equipped, i.acquired, i.expires, s.data"
+			" FROM inventory i JOIN shop_items s ON i.item_id = s.item_id"
+			" WHERE i.guild_id = ? AND i.user_id = ? ORDER BY i.inv_id";
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(s, 1, std::to_string(g_id).c_str(), -1, SQLITE_TRANSIENT);
 			sqlite3_bind_text(s, 2, std::to_string(u_id).c_str(), -1, SQLITE_TRANSIENT);
@@ -124,6 +125,7 @@ namespace db {
 				i.equipped = sqlite3_column_int(s, 5) == 1;
 				i.acquired = sqlite3_column_int64(s, 6);
 				i.expires = sqlite3_column_int64(s, 7);
+				if (auto* d = sqlite3_column_text(s, 8)) i.data = reinterpret_cast<const char*>(d);
 				items.push_back(i);
 			}
 			sqlite3_finalize(s);

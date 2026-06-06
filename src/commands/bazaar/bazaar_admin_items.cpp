@@ -113,19 +113,37 @@ namespace commands {
 		int id = std::get<int64_t>(event.get_parameter("id"));
 		auto pr = event.get_parameter("relative");
 		bool relative = std::holds_alternative<bool>(pr) && std::get<bool>(pr);
+
+		int compensation = 0;
+		auto pc = event.get_parameter("compensation");
+		if (std::holds_alternative<int64_t>(pc)) compensation = (int)std::get<int64_t>(pc);
+
+		int item_id = id;
 		if (relative) {
 			auto slots = db::bazaar_rotation_get(g_id);
 			if (id < 1 || id > (int)slots.size()) {
 				event.reply(adm_err("invalid slot"));
 				return;
 			}
-			db::shop_rmv(g_id, slots[id - 1].item_id);
-			db::bazaar_rotation_clear_slot(g_id, slots[id - 1].slot);
-			bazaar::b_refresh_guild(bot, g_id);
-		} else {
-			db::shop_rmv(g_id, id);
+			item_id = slots[id - 1].item_id;
 		}
-		event.reply(adm_ok());
+
+		auto item = db::shop_get(g_id, item_id);
+		if (item.item_id == -1) {
+			event.reply(adm_err("item not found"));
+			return;
+		}
+
+		auto owners = db::shop_delete(g_id, item_id, compensation);
+		bazaar::b_refresh_guild(bot, g_id);
+
+		std::string reply = "deleted **" + item.name + "**";
+		if (!owners.empty()) {
+			reply += " and removed it from " + std::to_string(owners.size()) + " inventor" +
+					 (owners.size() == 1 ? "y" : "ies");
+			if (compensation > 0) reply += " (+" + std::to_string(compensation) + " aura compensation each)";
+		}
+		event.reply(dpp::message(reply).set_flags(dpp::m_ephemeral));
 	}
 
 	bool handle_admin_item_cmd(const std::string& sub, const dpp::slashcommand_t& event, dpp::cluster& bot) {

@@ -6,16 +6,17 @@
 #define MAGICKCORE_HDRI_ENABLE 1
 #include <Magick++.h>
 
+#include "image_constants.h"
+
+static constexpr int INV_BG_W = 1200;
+static constexpr int INV_BG_H = 1800;
+static constexpr int SLOT_H = 175;
+
 namespace image {
 
 	// declared god knows where i just refactored and idek where i put it
 	void draw_inv_placard(Magick::Image& bg, const Magick::Image& tmpl, int px, int py, const db::InvItem& item);
 
-	static constexpr int INV_BG_W = 1200;
-	static constexpr int INV_BG_H = 1800;
-	static constexpr int PLACARD_W = 500;
-	static constexpr int PLACARD_H = 160;
-	static constexpr int SLOT_H = 175;
 	static constexpr int LEFT_X = 90;
 	static constexpr int RIGHT_X = 618;
 	static constexpr int START_Y = 330;

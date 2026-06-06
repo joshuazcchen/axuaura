@@ -35,3 +35,10 @@ target_include_directories(axuctl PRIVATE
 target_link_libraries(axuctl PRIVATE 
     SQLite::SQLite3
 )
+
+enable_testing()
+
+add_executable(axuaura_tests tests/test_main.cpp)
+target_include_directories(axuaura_tests PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/tests)
+target_link_libraries(axuaura_tests PRIVATE SQLite::SQLite3)
+add_test(NAME unit_tests COMMAND axuaura_tests)

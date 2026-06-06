@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "backup.h"
 #include "bazaar.h"
 #include "commands.h"
 #include "config.h"
@@ -38,7 +39,9 @@ int main(int argc, char** argv) {
 
 		bot.start_timer([&bot](dpp::timer) { bazaar::b_refresh_all(bot); }, 3600);
 
+		backup::do_backup();
 		bazaar::b_refresh_all(bot);
+		bot.start_timer([](dpp::timer) { backup::do_backup(); }, 86400);
 	});
 
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) { commands::route_slash_command(bot, event); });

@@ -6,20 +6,11 @@
 #include <string>
 
 #include "db.h"
+#include "image_constants.h"
 #include "utils.h"
 
-static constexpr int PLACARD_W = 500;
-static constexpr int PLACARD_H = 160;
-static constexpr int TEXT_AREA_W = 360;
-static constexpr int IND_X = 370;
-static constexpr int IND_W = 80;
-static constexpr int IND_H = 80;
-static constexpr int PILL_H = 40;
-static constexpr int PILL_W = 80;
-static constexpr int MARGIN_L = 80;
 static constexpr int MARGIN_R = 15;
-static constexpr int MAX_LEN = 16;
-static constexpr int BDR_SZ = 4;
+static constexpr int TEXT_AREA_W = 360;
 
 namespace image {
 
@@ -30,7 +21,7 @@ namespace image {
 		return s;
 	}
 
-	static void preview_banner(Magick::Image& bg, int px, int py, const std::string& data) {
+	void preview_banner(Magick::Image& bg, int px, int py, const std::string& data) {
 		std::string fn = utils::json_str(data, "file");
 		if (fn.empty()) return;
 		std::string ipath = "assets/bg/bazaar/" + fn;
@@ -72,7 +63,7 @@ namespace image {
 		} catch (...) {}
 	}
 
-	static void preview_xp(Magick::Image& bg, int px, int py) {
+	void preview_xp(Magick::Image& bg, int px, int py) {
 		const char* ipath = "assets/icons/xp_boost.png";
 		if (!std::filesystem::exists(ipath)) return;
 		try {
@@ -84,7 +75,7 @@ namespace image {
 		} catch (...) {}
 	}
 
-	static void preview_role(Magick::Image& bg, int px, int py, const std::string& data) {
+	void preview_role(Magick::Image& bg, int px, int py, const std::string& data) {
 		std::string c1 = utils::json_str(data, "colour1");
 		if (c1.empty()) return;
 		std::string c2 = utils::json_str(data, "colour2");

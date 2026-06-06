@@ -71,10 +71,22 @@ namespace commands {
 					const auto& it = slice[i];
 					std::string lbl = utils::get_safe_role(it.name, it.type, 10);
 					dpp::component btn;
+					dpp::component_style style = dpp::cos_secondary;
+					if (it.equipped) {
+						style = dpp::cos_success;
+					} else {
+						std::string bs = utils::json_str(it.data, "button_style");
+						if (bs == "primary")
+							style = dpp::cos_primary;
+						else if (bs == "success")
+							style = dpp::cos_success;
+						else if (bs == "danger")
+							style = dpp::cos_danger;
+					}
 					btn.set_type(dpp::cot_button)
 						.set_id("inv_tog_" + std::to_string(page) + "_" + std::to_string(i + 1))
 						.set_label(std::to_string(i + 1) + ". " + lbl)
-						.set_style(it.equipped ? dpp::cos_success : dpp::cos_secondary);
+						.set_style(style);
 					row.add_component(btn);
 				}
 				return row;
