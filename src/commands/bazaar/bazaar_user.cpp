@@ -146,6 +146,7 @@ namespace bazaar {
 
 		if (pos.empty() && neg.empty()) return;
 
+		// TODO: copy this into its own function so i can use it in inventory
 		dppp::get_enhanced_roles(
 			bot, g_id, [=, &bot](const dppp::result<std::vector<dppp::enhanced_role>>& res) mutable {
 				if (res.success) {

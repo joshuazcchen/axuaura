@@ -12,6 +12,7 @@ static constexpr int MARGIN_R = 70;
 static constexpr int MARGIN_T = 70;
 
 namespace image {
+	// TODO: steal role colour too
 
 	void preview_banner(Magick::Image & bg, int px, int py, const std::string& data);
 	void preview_xp(Magick::Image & bg, int px, int py);
