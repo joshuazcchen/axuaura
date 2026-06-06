@@ -158,8 +158,9 @@ namespace image {
 				bg.annotate("axuaxi", Magick::Geometry("+10+10"), Magick::SouthEastGravity);
 			}
 
+			// badges
 			if (!badges.empty()) {
-				constexpr int b_size = 75;
+				constexpr int b_size = 110;
 				constexpr int b_gap = 8;
 				constexpr int cols = 4;
 

@@ -71,7 +71,7 @@ namespace image {
 			bg.draw(Magick::DrawableText((BG_W - m.textWidth()) - 15, BG_H - 15, pg));
 		}
 
-		if (is_last_page && next_restock > 0) {
+		if (next_restock > 0) {
 			std::time_t now = std::time(nullptr);
 			std::tm* tm_info = std::localtime(&now);
 			char date_l[64];
