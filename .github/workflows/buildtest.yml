@@ -13,7 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: debian:unstable
-
     steps:
     - name: get git
       run: |
@@ -27,24 +26,7 @@ jobs:
         
     - name: get d++ and dependencies
       run: |
-        apt-get install -y \
-          g++-16 \
-          gcc-16 \
-          build-essential \
-          pkg-config \
-          cmake \
-          wget \
-          libsqlite3-dev \
-          libmagick++-7.q16hdri-dev \
-          nlohmann-json3-dev \
-          libsodium-dev \
-          libssl-dev \
-          zlib1g-dev \
-          ocl-icd-opencl-dev \
-          opencl-headers \
-          libopus0 \
-          libopus-dev
-
+        apt-get install -y g++-16 gcc-16 build-essential pkg-config cmake wget libsqlite3-dev libmagick++-7.q16hdri-dev nlohmann-json3-dev libsodium-dev libssl-dev zlib1g-dev ocl-icd-opencl-dev opencl-headers libopus0 libopus-dev
         wget -O dpp.deb https://github.com/brainboxdotcc/DPP/releases/download/v10.1.4/libdpp-10.1.4-linux-x64.deb
         dpkg -i dpp.deb || apt-get install -f -y
 
@@ -64,7 +46,7 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Upload
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v7
       with:
         name: axuaxibot-folder
@@ -75,7 +57,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     container: debian:unstable
-
     steps:
     - name: Download workspace
       uses: actions/download-artifact@v8
