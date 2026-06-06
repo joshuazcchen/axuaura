@@ -14,10 +14,10 @@ static constexpr int MARGIN_T = 70;
 namespace image {
 	// TODO: steal role colour too
 
-	void preview_banner(Magick::Image & bg, int px, int py, const std::string& data);
-	void preview_xp(Magick::Image & bg, int px, int py);
+	void preview_banner(Magick::Image& bg, int px, int py, const std::string& data);
+	void preview_xp(Magick::Image& bg, int px, int py);
 
-	void draw_inv_placard(Magick::Image & bg, const Magick::Image& tmpl, int px, int py, const db::InvItem& item) {
+	void draw_inv_placard(Magick::Image& bg, const Magick::Image& tmpl, int px, int py, const db::InvItem& item) {
 		bg.composite(tmpl, px, py, Magick::OverCompositeOp);
 		bg.strokeWidth(0);
 
@@ -35,7 +35,7 @@ namespace image {
 			long secs = item.expires - std::time(nullptr);
 			if (secs > 0) {
 				sub = secs > 172800 ? "expires ~" + std::to_string(secs / 86400) + "d"
-					: "expires ~" + std::to_string(secs / 3600) + "h";
+									: "expires ~" + std::to_string(secs / 3600) + "h";
 			} else {
 				sub = "expired";
 				sub_colour = Magick::Color("rgba(220,100,100,1)");
