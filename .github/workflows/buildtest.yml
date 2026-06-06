@@ -50,7 +50,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: axuaxibot-folder
-        path: ${{github.workspace}}/build
+        path: build
 
   test:
     name: Unit tests
@@ -62,7 +62,7 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         name: axuaxibot-folder
-        path: ${{github.workspace}}/build
+        path: build
 
     - name: checkout
       uses: actions/checkout@v6
@@ -74,5 +74,5 @@ jobs:
           sh -c "
           apt-get update &&
           apt-get install -y libsqlite3-dev libmagick++-7.q16hdri-dev libsodium-dev libssl-dev libopus0 &&
-          ${{github.workspace}}/build/axuaura_tests
+          build/axuaura_tests
           "
