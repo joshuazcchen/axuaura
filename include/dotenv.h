@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Joshua Chen. All rights reserved.
+// Licensed under the PolyForm Noncommercial License 1.0.0.
+
 // Copyright (c) 2018 Heikki Johannes Hildén <hildenjohannes@gmail.com>
 //
 // All rights reserved.

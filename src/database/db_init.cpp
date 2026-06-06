@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Joshua Chen. All rights reserved.
+// Licensed under the PolyForm Noncommercial License 1.0.0.
+
 // overhauling the entire database system into separate files so that I don't have to work with a monolith of like
 // 50,000,000 lines every time I make any database changes.
 //
