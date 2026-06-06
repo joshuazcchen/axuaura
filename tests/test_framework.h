@@ -32,7 +32,7 @@ namespace test {
     }
 } // namespace test
 
-#define TEST(name)                                          \
-    static void _test_##name();                             \
+#define TEST(name) \
+    static void _test_##name(); \
     static const bool _reg_##name = (test::reg(#name, _test_##name), true); \
     static void _test_##name()
