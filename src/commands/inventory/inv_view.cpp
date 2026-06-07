@@ -17,9 +17,12 @@ namespace commands {
 					style = dpp::cos_success;
 				} else {
 					std::string bs = utils::json_str(it.data, "button_style");
-					if (bs == "primary") style = dpp::cos_primary;
-					else if (bs == "success") style = dpp::cos_success;
-					else if (bs == "danger") style = dpp::cos_danger;
+					if (bs == "primary")
+						style = dpp::cos_primary;
+					else if (bs == "success")
+						style = dpp::cos_success;
+					else if (bs == "danger")
+						style = dpp::cos_danger;
 				}
 				btn.set_type(dpp::cot_button)
 					.set_id("inv_tog_" + std::to_string(page) + "_" + std::to_string(i + 1))
@@ -74,15 +77,13 @@ namespace commands {
 		if (page > total_pages) page = total_pages;
 
 		int start = (page - 1) * INV_PGSZ;
-		std::vector<db::InvItem> slice(all.begin() + start,
-				all.begin() + std::min(start + INV_PGSZ, (int)all.size()));
+		std::vector<db::InvItem> slice(all.begin() + start, all.begin() + std::min(start + INV_PGSZ, (int)all.size()));
 
 		while (inv_rendering.exchange(true)) {}
 		std::string img;
 		try {
-			img = image::img_gen_inventory(slice, page, total_pages,
-					utils::get_display_name(g_id, u_id),
-					utils::get_avatar_url(u_id, 64));
+			img = image::img_gen_inventory(slice, page, total_pages, utils::get_display_name(g_id, u_id),
+										   utils::get_avatar_url(u_id, 64));
 		} catch (...) {}
 		inv_rendering = false;
 		malloc_trim(0);

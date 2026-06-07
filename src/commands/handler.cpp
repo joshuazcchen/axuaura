@@ -37,12 +37,8 @@ namespace commands {
 	};
 
 	std::map<std::string, ButtonHandler> button_map = {
-		{"bzr_buy_", handle_bazaar_button},
-		{"sb_pos_", handle_starboard_button},
-		{"sb_neg_", handle_starboard_button},
-		{"inv_tog_", handle_inv_button},
-		{"inv_prev_", handle_inv_button},
-		{"inv_next_", handle_inv_button},
+		{"bzr_buy_", handle_bazaar_button}, {"sb_pos_", handle_starboard_button}, {"sb_neg_", handle_starboard_button},
+		{"inv_tog_", handle_inv_button},	{"inv_prev_", handle_inv_button},	  {"inv_next_", handle_inv_button},
 	};
 
 	void route_slash_command(dpp::cluster& bot, const dpp::slashcommand_t& event) {
@@ -68,13 +64,13 @@ namespace commands {
 	void register_all(dpp::cluster& bot) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			bot.global_bulk_command_create({
-					auraboard_def(bot),		  movaura_def(bot),		  duel_def(bot),		settings_def(bot),
-					gamble_def(bot),		  bet_def(bot),			  smite_def(bot),		leaderboard_def(bot),
-					fixlevel_def(bot),		  level_def(bot),		  bazaar_def(bot),		inventory_def(bot),
-					credits_def(bot),		  coinflip_def(bot),	  diagnostics_def(bot), echo_def(bot),
-					setlevel_def(bot),		  mkshm_def(bot),		  giveitm_def(bot),		aura_def(bot),
-					starboard_admin_def(bot), starboard_ctx_def(bot),
-					});
+				auraboard_def(bot),		  movaura_def(bot),		  duel_def(bot),		settings_def(bot),
+				gamble_def(bot),		  bet_def(bot),			  smite_def(bot),		leaderboard_def(bot),
+				fixlevel_def(bot),		  level_def(bot),		  bazaar_def(bot),		inventory_def(bot),
+				credits_def(bot),		  coinflip_def(bot),	  diagnostics_def(bot), echo_def(bot),
+				setlevel_def(bot),		  mkshm_def(bot),		  giveitm_def(bot),		aura_def(bot),
+				starboard_admin_def(bot), starboard_ctx_def(bot),
+			});
 		}
 	}
 
