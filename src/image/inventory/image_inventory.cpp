@@ -10,6 +10,7 @@
 #include <Magick++.h>
 
 #include "image_constants.h"
+#include "inventory.h"
 
 static constexpr int INV_BG_W = 1200;
 static constexpr int INV_BG_H = 1800;
@@ -23,7 +24,6 @@ namespace image {
 	static constexpr int LEFT_X = 90;
 	static constexpr int RIGHT_X = 618;
 	static constexpr int START_Y = 330;
-	static constexpr int ITEMS_PER_PAGE = 10;
 	static constexpr int AV_SIZE = 96;
 	static constexpr int TITLE_Y = 255;
 
@@ -80,7 +80,7 @@ namespace image {
 				bg.draw(Magick::DrawableText(LEFT_X, START_Y + 80, "nothing here yet."));
 			}
 
-			for (int i = 0; i < (int)items.size() && i < ITEMS_PER_PAGE; ++i) {
+			for (int i = 0; i < (int)items.size() && i < commands::INV_PGSZ; ++i) {
 				int col = i % 2;
 				int row = i / 2;
 				int x = (col == 0) ? LEFT_X : RIGHT_X;

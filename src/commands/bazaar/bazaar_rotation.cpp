@@ -105,8 +105,13 @@ namespace bazaar {
 	}
 
 	void b_refresh_all(dpp::cluster& bot) {
-		for (auto g : db::settings_get_guilds_with("bazaar_channel"))
+		long now = std::time(nullptr);
+		for (auto g : db::settings_get_guilds_with("bazaar_channel")) {
+			long last = (long)db::get_setting_int(g, "bazaar_last_refresh", 0);
+			long refresh_s = (long)db::get_setting_int(g, "bazaar_refresh_hours", 168) * 3600;
+			if (last > 0 && now - last < refresh_s) continue;
 			b_refresh_guild(bot, g);
+		}
 	}
 
 } // namespace bazaar

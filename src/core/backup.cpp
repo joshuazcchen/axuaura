@@ -59,7 +59,7 @@ namespace backup {
 		}
 
 		int keep = backup_days();
-		std::regex pat(stem + R"(_(\d{4}-\d{2}-\d{2})" + ext + "$");
+		std::regex pat(stem + "_(\\d{4}-\\d{2}-\\d{2})" + ext + "$");
 		std::vector<std::pair<std::string, fs::path>> found;
 		try {
 			for (auto& entry : fs::directory_iterator(dir.empty() ? "." : dir)) {

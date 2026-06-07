@@ -72,8 +72,7 @@ namespace commands {
 			event.reply(dpp::message(out).set_allowed_mentions(false, false, false, false, {}, {}));
 
 		} else if (sub == "reroll") {
-			int slot = std::get<int64_t>(event.get_parameter("slot"));
-			db::bazaar_rotation_clear_slot(g_id, slot);
+			db::bazaar_rotation_clear_all(g_id);
 			bazaar::b_refresh_guild(bot, g_id, true);
 			adm_ok();
 

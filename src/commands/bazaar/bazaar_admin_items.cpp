@@ -73,7 +73,7 @@ namespace commands {
 				return;
 			}
 			r_id = std::get<dpp::snowflake>(pr);
-			if (name.empty()) name = "<&" + std::to_string(r_id) + ">";
+			if (name.empty()) name = "<@&" + std::to_string(r_id) + ">";
 			data = build_role_data(event);
 			int i_id = db::shop_add(g_id, type, r_id, name, desc, cost, data);
 			if (pinned) db::shop_set_int(g_id, i_id, "pinned", 1);
