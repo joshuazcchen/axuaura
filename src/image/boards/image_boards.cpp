@@ -52,9 +52,9 @@ namespace image {
 	}
 
 	static void draw_centered(Magick::Image& img, const std::string& txt, int cx, int y, int ptsize,
-							  const std::string& color) {
+							  const std::string& colour) {
 		img.fontPointsize(ptsize);
-		img.fillColor(Magick::Color(color));
+		img.fillColor(Magick::Color(colour));
 		img.strokeWidth(0);
 		Magick::TypeMetric tm;
 		img.fontTypeMetrics(txt, &tm);

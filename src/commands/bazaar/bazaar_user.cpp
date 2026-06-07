@@ -158,7 +158,7 @@ namespace bazaar {
 						role_map[r.id] = r;
 					}
 
-					auto inject_colors = [&](std::vector<db::ShopItem>& items) {
+					auto inject_colours = [&](std::vector<db::ShopItem>& items) {
 						for (auto& item : items) {
 							if (item.type == "role" && role_map.contains(item.role_id)) {
 								const auto& r = role_map[item.role_id];
@@ -189,8 +189,8 @@ namespace bazaar {
 						}
 					};
 
-					inject_colors(pos);
-					inject_colors(neg);
+					inject_colours(pos);
+					inject_colours(neg);
 				}
 
 				auto pages = image::img_gen_bazaar(pos, neg, refresh_n);
