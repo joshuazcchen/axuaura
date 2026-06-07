@@ -69,7 +69,7 @@ namespace image {
 					rdata = "{\"colour1\":\"" + std::string(hex) + "\"}";
 				}
 			}
-			preview_role(bg, px, py, item.data);
+			preview_role(bg, px, py, rdata);
 		}
 	}
 
