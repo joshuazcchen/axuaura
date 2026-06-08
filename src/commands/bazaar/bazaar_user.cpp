@@ -30,7 +30,6 @@ namespace commands {
 		auto item = db::shop_get(g_id, inv.item_id);
 		int refund = std::max(0, item.cost / 10);
 		if (item.type == "role") bot.guild_member_remove_role(g_id, u_id, item.role_id);
-		if (item.type == "banner" && inv.equipped) bazaar::b_banner_unequip(g_id, u_id);
 
 		db::add_aura(g_id, u_id, refund);
 		db::inv_rm_by_inv_id(inv.inv_id);
@@ -87,7 +86,6 @@ namespace commands {
 			db::inv_uneq_all_type(g_id, u_id, "banner");
 			db::inv_add(g_id, u_id, item_id);
 			db::inv_eq(g_id, u_id, item_id);
-			bazaar::b_banner_equip(g_id, u_id, item);
 		} else {
 			db::inv_add(g_id, u_id, item_id);
 			db::inv_eq(g_id, u_id, item_id);
@@ -99,26 +97,6 @@ namespace commands {
 } // namespace commands
 
 namespace bazaar {
-
-	void b_banner_equip(dpp::snowflake g_id, dpp::snowflake u_id, const db::ShopItem& item) {
-		std::string u = std::to_string(u_id);
-		std::string fn = utils::json_str(item.data, "file");
-		std::string artist = utils::json_str(item.data, "artist");
-		bool invert_val = utils::json_bool(item.data, "invert", false);
-		std::string invert = invert_val ? "true" : "false";
-
-		// why did i put this in settings instead of making it its own thing???
-		db::set_setting(g_id, "bg_override_" + u, fn);
-		db::set_setting(g_id, "bg_artist_" + u, artist);
-		db::set_setting(g_id, "bg_invert_" + u, invert);
-	}
-
-	void b_banner_unequip(dpp::snowflake g_id, dpp::snowflake u_id) {
-		std::string u = std::to_string(u_id);
-		db::set_setting(g_id, "bg_override_" + u, "");
-		db::set_setting(g_id, "bg_artist_" + u, "");
-		db::set_setting(g_id, "bg_invert_" + u, std::string("false"));
-	}
 
 	static dpp::component_style parse_btn_style(const std::string& data, dpp::component_style def) {
 		std::string s = utils::json_str(data, "button_style");

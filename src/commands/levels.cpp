@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <filesystem>
 #include <malloc.h>
 
 #include "commands.h"
@@ -42,38 +43,58 @@ namespace commands {
 		int xp_next = nexp - cexp;
 		float p_pct = (xp_next > 0) ? (float)xp_this / xp_next : 0.0f;
 
-		bot.request(av_url, dpp::m_get,
-					[event, stats, u_id, u_ser, p_pct, xp_this, xp_next](const dpp::http_request_completion_t& result) {
-						if (result.status != 200 || result.body.empty()) {
-							event.edit_original_response(dpp::message("something went wrong fetching avatar"));
-							return;
+		bot.request(
+			av_url, dpp::m_get,
+			[event, stats, u_id, u_ser, p_pct, xp_this, xp_next](const dpp::http_request_completion_t& result) {
+				if (result.status != 200 || result.body.empty()) {
+					event.edit_original_response(dpp::message("something went wrong fetching avatar"));
+					return;
+				}
+
+				std::string bg_path;
+				std::string artist;
+				bool invert = false;
+
+				std::string sv_bg =
+					db::get_setting_str(event.command.guild_id, "bg_override_" + std::to_string(u_id), "");
+				if (!sv_bg.empty()) {
+					std::string custom_path = "assets/bg/custom/" + sv_bg;
+					std::string bazaar_path = "assets/bg/bazaar/" + sv_bg;
+					bg_path = std::filesystem::exists(custom_path) ? custom_path : bazaar_path;
+					artist = db::get_setting_str(event.command.guild_id, "bg_artist_" + std::to_string(u_id), "");
+					invert = db::get_setting_bool(event.command.guild_id, "bg_invert_" + std::to_string(u_id), false);
+				} else {
+					db::InvItem equipped = db::inv_b_equipped(event.command.guild_id, u_id);
+					if (!equipped.data.empty()) {
+						bg_path = "assets/bg/bazaar/" + equipped.data;
+					} else {
+						db::GlobalBanner gb = db::gb_b_get(u_id);
+						if (gb.found) {
+							bg_path = "assets/bg/custom/" + gb.filename;
+							artist = gb.artist;
+							invert = gb.invert;
 						}
+					}
+				}
+				std::vector<std::string> badges = db::badge_get(u_id);
 
-						std::string bg =
-							db::get_setting_str(event.command.guild_id, "bg_override_" + std::to_string(u_id), "");
-						std::string artist =
-							db::get_setting_str(event.command.guild_id, "bg_artist_" + std::to_string(u_id), "");
-						bool invert =
-							db::get_setting_bool(event.command.guild_id, "bg_invert_" + std::to_string(u_id), 1);
-						std::vector<std::string> badges = db::badge_get(u_id);
+				is_rendering = true;
+				std::string card;
+				try {
+					card = image::img_gen_card(result.body, u_ser.username, stats.level, xp_this, xp_next, p_pct,
+											   bg_path, artist, invert, badges);
+				} catch (const std::exception& e) { std::cerr << e.what() << "\n"; }
+				malloc_trim(0);
+				is_rendering = false;
 
-						is_rendering = true;
-						std::string card;
-						try {
-							card = image::img_gen_card(result.body, u_ser.username, stats.level, xp_this, xp_next,
-													   p_pct, bg, artist, invert, badges);
-						} catch (const std::exception& e) { std::cerr << e.what() << "\n"; }
-						malloc_trim(0);
-						is_rendering = false;
+				if (card.empty()) {
+					event.edit_original_response(dpp::message("something went wrong generating preview"));
+					return;
+				}
 
-						if (card.empty()) {
-							event.edit_original_response(dpp::message("something went wrong generating preview"));
-							return;
-						}
-
-						dpp::message msg(event.command.channel_id, "");
-						msg.add_file("level.png", card);
-						event.edit_original_response(msg);
-					});
+				dpp::message msg(event.command.channel_id, "");
+				msg.add_file("level.png", card);
+				event.edit_original_response(msg);
+			});
 	}
 } // namespace commands

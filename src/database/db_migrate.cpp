@@ -28,6 +28,9 @@ namespace db {
 		{6, "CREATE TABLE IF NOT EXISTS starboard_channels ("
 			"guild_id TEXT NOT NULL, channel_id TEXT NOT NULL, "
 			"PRIMARY KEY (guild_id, channel_id));"},
+		{7, "CREATE TABLE IF NOT EXISTS global_banners ("
+			"user_id TEXT PRIMARY KEY, filename TEXT NOT NULL, "
+			"artist TEXT DEFAULT '', invert INTEGER DEFAULT 0);"},
 		{0, nullptr},
 	};
 

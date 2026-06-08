@@ -2,6 +2,7 @@
 // Licensed under the PolyForm Noncommercial License 1.0.0.
 
 #include <algorithm>
+#include <nlohmann/json.hpp>
 
 #include "commands.h"
 #include "config.h"
@@ -22,21 +23,26 @@ namespace commands {
 		bool changed = false;
 		std::vector<dpp::snowflake> c_roles = member.get_roles();
 
-		for (const auto& [lv, rid] : conf.lvl_roles) {
-			bool has_role = std::find(c_roles.begin(), c_roles.end(), rid) != c_roles.end();
-
-			if (c_lvl >= lv) {
-				if (!has_role) {
-					bot.guild_member_add_role(g_id, u_id, rid);
-					changed = true;
-				}
-			} else {
-				if (has_role) {
-					bot.guild_member_remove_role(g_id, u_id, rid);
-					changed = true;
+		std::string roles_json_str = db::get_setting_str(g_id, "xp_level_roles", "{}");
+		try {
+			nlohmann::json roles_map = nlohmann::json::parse(roles_json_str);
+			for (auto& [lv_str, role_val] : roles_map.items()) {
+				int lv = std::stoi(lv_str);
+				dpp::snowflake rid = std::stoull(role_val.get<std::string>());
+				bool has_role = std::find(c_roles.begin(), c_roles.end(), rid) != c_roles.end();
+				if (c_lvl >= lv) {
+					if (!has_role) {
+						bot.guild_member_add_role(g_id, u_id, rid);
+						changed = true;
+					}
+				} else {
+					if (has_role) {
+						bot.guild_member_remove_role(g_id, u_id, rid);
+						changed = true;
+					}
 				}
 			}
-		}
+		} catch (...) {}
 
 		if (changed) {
 			event.reply(dpp::message("did something, roles fixed.").set_flags(dpp::m_ephemeral));

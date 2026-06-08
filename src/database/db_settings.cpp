@@ -31,7 +31,7 @@ namespace db {
 	}
 
 	void set_setting(dpp::snowflake guild_id, const std::string& key, bool val) {
-		set_setting(guild_id, key, val ? "true" : "false");
+		set_setting(guild_id, key, std::string(val ? "true" : "false"));
 	}
 
 	std::string get_setting_str(dpp::snowflake guild_id, const std::string& key, std::string default_val) {

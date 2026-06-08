@@ -29,7 +29,7 @@ namespace config {
 
 	struct GuildConfig {
 		std::vector<dpp::snowflake> allowed_channels;
-		dpp::snowflake non_eng_ch = 0; // TODO: move this to a vec
+		dpp::snowflake non_eng_ch = 0;
 		dpp::snowflake log_ch = 0;
 		dpp::snowflake lvl_ch = 0;
 
@@ -51,13 +51,6 @@ namespace config {
 		int aurapassiveamt = 5;
 
 		std::vector<dpp::snowflake> specials;
-
-		std::map<int, dpp::snowflake> lvl_roles = {
-			{5, 1482905611535519877ULL},  {10, 1482903838443835452ULL}, {15, 1482903879686426876ULL},
-			{20, 1482904022355673231ULL}, {25, 1482904091083673763ULL}, {30, 1482475514022330470ULL},
-			{35, 1482904194838036530ULL}, {40, 1482904249749737583ULL}, {50, 1485095100236304464ULL},
-			{60, 1485095262312726709ULL}, {70, 1485095358626529280ULL}, {80, 1485095456488034325ULL},
-			{90, 1485095668124094616ULL}};
 
 		void update_stupid() { stupid_roles = {leader_role, num2_role, num3_role, loser_role, bot2_role, bot3_role}; }
 	};

@@ -13,13 +13,12 @@
 namespace image {
 
 	std::string img_gen_card(const std::string& av_png, const std::string& user, int level, int xp_now, int xp_next,
-							 float progress, const std::string& bg_c, const std::string& artist, bool invert,
+							 float progress, const std::string& bg_path, const std::string& artist, bool invert,
 							 const std::vector<std::string>& badges) {
 		try {
 			std::string bg_file;
-			if (!bg_c.empty()) {
-				if (!std::filesystem::exists("assets/bg/custom/" + bg_c)) { bg_file = "assets/bg/custom/" + bg_c; }
-				bg_file = "assets/bg/bazaar/" + bg_c;
+			if (!bg_path.empty()) {
+				bg_file = bg_path;
 			} else {
 				if (level >= 60)
 					bg_file = "assets/bg/60_tmp.png";
@@ -149,7 +148,7 @@ namespace image {
 				bg.strokeWidth(0);
 				bg.fillColor(Magick::Color(base));
 				bg.annotate(artist, Magick::Geometry("+10+10"), Magick::SouthEastGravity);
-			} else if (bg_c.empty()) {
+			} else if (bg_path.empty()) {
 				if (invert) {
 					bg.strokeColor("white");
 					bg.strokeWidth(6);

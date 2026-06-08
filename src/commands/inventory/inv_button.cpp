@@ -79,17 +79,13 @@ namespace commands {
 
 		if (inv.equipped) {
 			if (item.type == "role") bot.guild_member_remove_role(g_id, u_id, item.role_id);
-			if (item.type == "banner") bazaar::b_banner_unequip(g_id, u_id);
 			db::inv_uneq(g_id, u_id, inv.item_id);
 			event.reply(dpp::message("unequipped **" + item.name + "**.")
 							.set_flags(dpp::m_ephemeral)
 							.set_allowed_mentions(false, false, false, false, {}, {}));
 		} else {
 			if (item.type == "role") bot.guild_member_add_role(g_id, u_id, item.role_id);
-			if (item.type == "banner") {
-				db::inv_uneq_all_type(g_id, u_id, "banner");
-				bazaar::b_banner_equip(g_id, u_id, item);
-			}
+			if (item.type == "banner") { db::inv_uneq_all_type(g_id, u_id, "banner"); }
 			db::inv_eq(g_id, u_id, inv.item_id);
 			event.reply(dpp::message("equipped **" + item.name + "**.")
 							.set_flags(dpp::m_ephemeral)

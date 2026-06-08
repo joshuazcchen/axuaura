@@ -142,10 +142,20 @@ namespace db {
 	void badge_revoke(dpp::snowflake user_id, const std::string& badge_id);
 	std::vector<std::string> badge_get(dpp::snowflake user_id);
 
-	// xp boosts
+	// global stuff
 	void gb_set(dpp::snowflake user_id, double mult, long expires);
 	void gb_clear(dpp::snowflake user_id);
 	double gb_get(dpp::snowflake user_id);
+	struct GlobalBanner {
+		std::string filename;
+		std::string artist;
+		bool invert = false;
+		bool found = false;
+	};
+	GlobalBanner gb_b_get(dpp::snowflake user_id);
+	void gb_b_set(dpp::snowflake user_id, const std::string& filename, const std::string& artist, bool invert);
+	void gb_b_clear(dpp::snowflake user_id);
+	InvItem inv_b_equipped(dpp::snowflake g_id, dpp::snowflake u_id);
 
 	// starboard
 	void sb_add_channel(dpp::snowflake guild_id, dpp::snowflake channel_id);
