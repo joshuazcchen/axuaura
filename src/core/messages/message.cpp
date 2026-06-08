@@ -27,11 +27,11 @@ namespace message {
 		auto& allowed = conf.allowed_channels;
 		if (std::find(allowed.begin(), allowed.end(), event.msg.channel_id) == allowed.end()) return;
 
-		// TODO: discuss whether we still even want the special list since neat is no longer spl
 		auto is_special = std::find(conf.specials.begin(), conf.specials.end(), u_id);
 		if (is_special != conf.specials.end() && dis(gen) == 1) {
 			db::rmv_aura(g_id, u_id, 100);
-			bot.message_create(dpp::message(event.msg.channel_id, "\"" + event.msg.content + "\" HOLY AURA LOSS 💔"));
+			bot.message_create(dpp::message(
+				event.msg.channel_id, "\"" + event.msg.content + "\" HOLY AURA LOSS <:heartem:1485404606480515172>"));
 			return;
 		}
 

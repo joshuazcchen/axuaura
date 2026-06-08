@@ -10,7 +10,6 @@ namespace commands {
 	dpp::slashcommand settings_def(dpp::cluster& bot) {
 		return dpp::slashcommand("settings", "set ings", bot.me.id)
 			.set_default_permissions(dpp::p_administrator)
-			// TODO: make better
 			.add_option(dpp::command_option(dpp::co_string, "setting", "which one", true)
 							.add_choice(dpp::command_option_choice("aurachancegain", std::string("aurachancegain")))
 							.add_choice(dpp::command_option_choice("aurapassiveamt", std::string("aurapassiveamt")))

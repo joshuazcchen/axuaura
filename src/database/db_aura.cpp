@@ -11,7 +11,6 @@
 namespace db {
 	extern sqlite3* db_ptr;
 
-	// TODO: convert this into standard naming scheme of aura_(thing)
 	int get_aura(dpp::snowflake guild_id, dpp::snowflake user_id) {
 		std::string g_id_str = std::to_string(guild_id);
 		std::string u_id_str = std::to_string(user_id);

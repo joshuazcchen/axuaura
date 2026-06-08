@@ -37,7 +37,6 @@ namespace voice {
 						xp_del += dis(gen);
 					}
 					db::xp_add(event.state.guild_id, user_id, xp_del);
-					// TODO: make this handle it but rn itll just work with a message.
 				}
 				db::vc_clr(event.state.guild_id, user_id);
 			}
