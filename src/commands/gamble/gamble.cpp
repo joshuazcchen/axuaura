@@ -14,8 +14,8 @@ namespace commands {
 						int aura, const std::string& choice);
 
 	dpp::slashcommand gamble_def(dpp::cluster& bot) {
-		return dpp::slashcommand("gamble", "WHY ISNT THIS WORKING", bot.me.id)
-			.add_option(dpp::command_option(dpp::co_sub_command, "slots", "slots WHY ISNT THIS WORKING")
+		return dpp::slashcommand("gamble", "capitalism prime", bot.me.id)
+			.add_option(dpp::command_option(dpp::co_sub_command, "slots", "slots")
 							.add_option(dpp::command_option(dpp::co_integer, "bet", "ante", true)))
 			.add_option(dpp::command_option(dpp::co_sub_command, "flip", "lame")
 							.add_option(dpp::command_option(dpp::co_integer, "bet", "ante", true))
