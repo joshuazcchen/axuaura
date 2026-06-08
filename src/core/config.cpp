@@ -79,6 +79,9 @@ namespace config {
 		sqlite3_finalize(stmt);
 		for (auto& pair : guild_configs) {
 			pair.second.update_stupid();
+			pair.second.allowed_channels.shrink_to_fit();
+			pair.second.specials.shrink_to_fit();
+			pair.second.stupid_roles.shrink_to_fit();
 		}
 	}
 } // namespace config
