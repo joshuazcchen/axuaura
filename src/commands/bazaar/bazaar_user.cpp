@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <dppp/dppp.h>
+#include <malloc.h>
 
 #include "bazaar.h"
 #include "commands.h"
@@ -214,8 +215,10 @@ namespace bazaar {
 				msg->set_allowed_mentions(false, false, false, false, {}, {});
 
 				for (size_t i = 0; i < pages.size(); ++i) {
-					msg->add_file("bazaar_p" + std::to_string(i + 1) + ".png", pages[i]);
+					msg->add_file("bazaar_p" + std::to_string(i + 1) + ".png", std::move(pages[i]));
 				}
+				{ std::vector<std::string>{}.swap(pages); }
+				malloc_trim(0);
 
 				for (auto& row : pos_rows)
 					msg->add_component(row);
