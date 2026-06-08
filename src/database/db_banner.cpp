@@ -56,7 +56,7 @@ namespace db {
 		const char* sql =
 			"SELECT i.inv_id, s.item_id, s.name, s.type, s.role_id, i.equipped, i.acquired, i.expires, s.data"
 			" FROM inventory i JOIN shop_items s ON i.item_id = s.item_id"
-			" WHERE i.guild_id = ? AND i.user_id = ? AND s.type = 'Banner' AND i.equipped = 1"
+			" WHERE i.guild_id = ? AND i.user_id = ? AND s.type = 'banner' AND i.equipped = 1"
 			" LIMIT 1";
 		sqlite3_stmt* s;
 		if (sqlite3_prepare_v2(db_ptr, sql, -1, &s, nullptr) == SQLITE_OK) {
