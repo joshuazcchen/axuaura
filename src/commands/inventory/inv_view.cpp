@@ -47,10 +47,9 @@ namespace commands {
 			nav_row.set_type(dpp::cot_action_row);
 			if (page > 1) {
 				dpp::component b;
-				// TODO: find proper arrows
 				b.set_type(dpp::cot_button)
 					.set_id("inv_prev_" + std::to_string(page))
-					.set_label("<")
+					.set_label("◀")
 					.set_style(dpp::cos_secondary);
 				nav_row.add_component(b);
 			}
@@ -58,7 +57,7 @@ namespace commands {
 				dpp::component b;
 				b.set_type(dpp::cot_button)
 					.set_id("inv_next_" + std::to_string(page))
-					.set_label(">")
+					.set_label("▶")
 					.set_style(dpp::cos_secondary);
 				nav_row.add_component(b);
 			}

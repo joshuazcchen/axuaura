@@ -14,5 +14,6 @@ build_test/
 *.sqlite-wal
 *.db
 .env
-axuctl
+/axuctl
+!/axuctl/
 axuaura_tests

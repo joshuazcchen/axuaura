@@ -136,7 +136,6 @@ namespace commands {
 				int new_u = db::get_aura(event.command.guild_id, c_id);
 				int new_t = db::get_aura(event.command.guild_id, user_id);
 
-				// TODO: this is completely unreadable because its temporary formatting.
 				event.reply("<@" + std::to_string(c_id) + "> mogs <@" + std::to_string(user_id) + ">.\n" + "<@" +
 							std::to_string(c_id) + "> now at " + std::to_string(new_u) + "\n<@" +
 							std::to_string(user_id) + "> now at " + std::to_string(new_t));

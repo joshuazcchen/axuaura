@@ -16,6 +16,7 @@ namespace commands {
 							.add_choice(dpp::command_option_choice("aurapassiveamt", std::string("aurapassiveamt")))
 							.add_choice(dpp::command_option_choice("auralbozoamt", std::string("auralbozoamt")))
 							.add_choice(dpp::command_option_choice("auralossamt", std::string("auralbozoamt")))
+							.add_choice(dpp::command_option_choice("auralosscd", std::string("auralosscd")))
 							.add_choice(dpp::command_option_choice("status", std::string("status")))
 							.add_choice(dpp::command_option_choice("XP_MIN", std::string("XP_MIN")))
 							.add_choice(dpp::command_option_choice("XP_MAX", std::string("XP_MAX")))
@@ -66,7 +67,7 @@ namespace commands {
 				}
 				db::set_setting(g_id, target_setting, cost);
 			} catch (...) {
-				event.reply(dpp::message("kys").set_flags(dpp::m_ephemeral));
+				event.reply(dpp::message("invalid value, expected a positive int").set_flags(dpp::m_ephemeral));
 				return;
 			}
 		} else {
@@ -82,7 +83,7 @@ namespace commands {
 					config::guild_configs[g_id].xp_cooldown = rate;
 				}
 			} catch (...) {
-				event.reply(dpp::message("kys").set_flags(dpp::m_ephemeral));
+				event.reply(dpp::message("invalid value, expected an int").set_flags(dpp::m_ephemeral));
 				return;
 			}
 		}

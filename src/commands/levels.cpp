@@ -13,31 +13,7 @@
 
 namespace commands {
 
-	// TODO: move these into their own folder
-
-	std::atomic_bool is_rendering{false};
-
-	struct ImgTaskData {
-		std::string av_png;
-		std::string user;
-		int level;
-		int xp_now;
-		int xp_next;
-		float progress;
-		std::string bg_c;
-		std::string artist;
-		bool invert;
-		std::vector<std::string> badges;
-		std::string result;
-	};
-
-	// TODO: see above, but just tryna pass it thru now for functionality without massively messing up cmake
-	void* generate_image_worker(void* arg) {
-		ImgTaskData* data = static_cast<ImgTaskData*>(arg);
-		data->result = image::img_gen_card(data->av_png, data->user, data->level, data->xp_now, data->xp_next,
-										   data->progress, data->bg_c, data->artist, data->invert, data->badges);
-		return nullptr;
-	}
+	static std::atomic_bool is_rendering{false};
 
 	dpp::slashcommand level_def(dpp::cluster& bot) {
 		return dpp::slashcommand("level", "level", bot.me.id)
@@ -66,51 +42,38 @@ namespace commands {
 		int xp_next = nexp - cexp;
 		float p_pct = (xp_next > 0) ? (float)xp_this / xp_next : 0.0f;
 
-		bot.request(
-			av_url, dpp::m_get,
-			[event, stats, u_id, u_ser, p_pct, xp_this, xp_next](const dpp::http_request_completion_t& result) {
-				if (result.status != 200) {
-					event.edit_original_response(dpp::message("Something went wrong"));
-					return;
-				}
+		bot.request(av_url, dpp::m_get,
+					[event, stats, u_id, u_ser, p_pct, xp_this, xp_next](const dpp::http_request_completion_t& result) {
+						if (result.status != 200 || result.body.empty()) {
+							event.edit_original_response(dpp::message("something went wrong fetching avatar"));
+							return;
+						}
 
-				if (result.body.empty()) {
-					event.edit_original_response(dpp::message("Something went wrong!"));
-					return;
-				}
+						std::string bg =
+							db::get_setting_str(event.command.guild_id, "bg_override_" + std::to_string(u_id), "");
+						std::string artist =
+							db::get_setting_str(event.command.guild_id, "bg_artist_" + std::to_string(u_id), "");
+						bool invert =
+							db::get_setting_bool(event.command.guild_id, "bg_invert_" + std::to_string(u_id), 1);
+						std::vector<std::string> badges = db::badge_get(u_id);
 
-				std::string bg = db::get_setting_str(event.command.guild_id, "bg_override_" + std::to_string(u_id), "");
-				std::string artist =
-					db::get_setting_str(event.command.guild_id, "bg_artist_" + std::to_string(u_id), "");
-				bool invert = db::get_setting_bool(event.command.guild_id, "bg_invert_" + std::to_string(u_id), 1);
-				std::vector<std::string> badges = db::badge_get(u_id);
-				ImgTaskData task_data{result.body, u_ser.username, stats.level, xp_this, xp_next, p_pct,
-									  bg,		   artist,		   invert,		badges,	 ""};
+						is_rendering = true;
+						std::string card;
+						try {
+							card = image::img_gen_card(result.body, u_ser.username, stats.level, xp_this, xp_next,
+													   p_pct, bg, artist, invert, badges);
+						} catch (const std::exception& e) { std::cerr << e.what() << "\n"; }
+						malloc_trim(0);
+						is_rendering = false;
 
-				is_rendering = true;
-				std::string card;
+						if (card.empty()) {
+							event.edit_original_response(dpp::message("something went wrong generating preview"));
+							return;
+						}
 
-				{
-					try {
-						card = image::img_gen_card(task_data.av_png, task_data.user, task_data.level, task_data.xp_now,
-												   task_data.xp_next, task_data.progress, task_data.bg_c,
-												   task_data.artist, task_data.invert, task_data.badges);
-					} catch (const std::exception& e) {
-						std::cerr << e.what() << "\n";
-						card = "";
-					}
-				}
-				malloc_trim(0);
-
-				is_rendering = false;
-				if (card.empty()) {
-					event.edit_original_response(dpp::message("something went wrong generating preview"));
-					return;
-				}
-
-				dpp::message msg(event.command.channel_id, "");
-				msg.add_file("level.png", card);
-				event.edit_original_response(msg);
-			});
+						dpp::message msg(event.command.channel_id, "");
+						msg.add_file("level.png", card);
+						event.edit_original_response(msg);
+					});
 	}
 } // namespace commands

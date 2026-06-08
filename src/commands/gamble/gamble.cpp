@@ -34,7 +34,7 @@ namespace commands {
 				"while the slot machine is spinning, you currently have $0 in your pocket.\nHowever, once the slot "
 				"machine finishes spinning, it decides whether or not you earned money!\n-# earning money is generally "
 				"considered good.\nif you win 1.5x, you win back your original amount (1x) and everything else is "
-				"winnings.\n\nTODO: make this display rates"));
+				"winnings."));
 			return;
 		}
 

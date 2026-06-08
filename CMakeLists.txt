@@ -26,13 +26,16 @@ target_link_libraries(axuaxibot PRIVATE
     PkgConfig::ImageMagick
 )
 
-add_executable(axuctl tools/axuctl.cpp)
+file(GLOB AXUCTL_FILES "tools/axuctl/*.cpp")
+
+add_executable(axuctl ${AXUCTL_FILES})
 
 target_include_directories(axuctl PRIVATE
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/tools/axuctl
 )
 
-target_link_libraries(axuctl PRIVATE 
+target_link_libraries(axuctl PRIVATE
     SQLite::SQLite3
 )
 
