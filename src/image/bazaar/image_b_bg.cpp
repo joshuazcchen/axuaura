@@ -34,18 +34,36 @@ namespace image {
 		bg.textAntiAlias(true);
 
 		std::string dim = std::to_string(PLACARD_W) + "x" + std::to_string(PLACARD_H) + "!";
+
+		bool need_xp = false, need_banner = false;
+		for (const auto& item : pos_slice) {
+			if (item.type == "xp_boost")
+				need_xp = true;
+			else if (item.type == "banner")
+				need_banner = true;
+		}
+		for (const auto& item : neg_slice) {
+			if (item.type == "xp_boost")
+				need_xp = true;
+			else if (item.type == "banner")
+				need_banner = true;
+		}
+
 		Magick::Image tmpl_df("assets/bazaar/placard.png");
 		tmpl_df.resize(dim);
-
-		Magick::Image tmpl_xp("assets/bazaar/placard1.png");
-		tmpl_xp.resize(dim);
-
-		Magick::Image tmpl_b("assets/bazaar/placard2.png");
-		tmpl_b.resize(dim);
+		Magick::Image tmpl_xp, tmpl_b;
+		if (need_xp) {
+			tmpl_xp.read("assets/bazaar/placard1.png");
+			tmpl_xp.resize(dim);
+		}
+		if (need_banner) {
+			tmpl_b.read("assets/bazaar/placard2.png");
+			tmpl_b.resize(dim);
+		}
 
 		auto get_tmpl = [&](const db::ShopItem& item) -> Magick::Image& {
-			if (item.type == "xp_boost") return tmpl_xp;
-			if (item.type == "banner") return tmpl_b;
+			if (item.type == "xp_boost" && need_xp) return tmpl_xp;
+			if (item.type == "banner" && need_banner) return tmpl_b;
 			return tmpl_df;
 		};
 

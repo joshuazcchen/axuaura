@@ -61,16 +61,30 @@ namespace image {
 			}
 
 			std::string dim = std::to_string(PLACARD_W) + "x" + std::to_string(PLACARD_H) + "!";
+
+			bool need_xp = false, need_banner = false;
+			for (int i = 0; i < (int)items.size() && i < commands::INV_PGSZ; ++i) {
+				if (items[i].type == "xp_boost")
+					need_xp = true;
+				else if (items[i].type == "banner")
+					need_banner = true;
+			}
+
 			Magick::Image tmpl_df("assets/bazaar/placard.png");
 			tmpl_df.resize(dim);
-			Magick::Image tmpl_xp("assets/bazaar/placard1.png");
-			tmpl_xp.resize(dim);
-			Magick::Image tmpl_b("assets/bazaar/placard2.png");
-			tmpl_b.resize(dim);
+			Magick::Image tmpl_xp, tmpl_b;
+			if (need_xp) {
+				tmpl_xp.read("assets/bazaar/placard1.png");
+				tmpl_xp.resize(dim);
+			}
+			if (need_banner) {
+				tmpl_b.read("assets/bazaar/placard2.png");
+				tmpl_b.resize(dim);
+			}
 
 			auto get_tmpl = [&](const db::InvItem& item) -> Magick::Image& {
-				if (item.type == "xp_boost") return tmpl_xp;
-				if (item.type == "banner") return tmpl_b;
+				if (item.type == "xp_boost" && need_xp) return tmpl_xp;
+				if (item.type == "banner" && need_banner) return tmpl_b;
 				return tmpl_df;
 			};
 
