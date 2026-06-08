@@ -46,9 +46,9 @@ namespace commands {
 
 			dpp::message msg(event.command.channel_id, "");
 			msg.set_flags(dpp::m_ephemeral);
-			msg.add_file("inventory.png", img);
+			msg.add_file("inventory.png", std::move(img));
 			add_inv_buttons(msg, slice, new_page, total_pages);
-			event.edit_original_response(msg);
+			event.edit_original_response(std::move(msg));
 			return;
 		}
 

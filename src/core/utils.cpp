@@ -95,4 +95,9 @@ namespace utils {
 		if (!g) return true;
 		return g->members.find(user_id) != g->members.end();
 	}
+
+	std::string trunc(const std::string& s, size_t max_chars) {
+		if (s.size() <= max_chars) return s;
+		return s.substr(0, max_chars - 3) + "...";
+	}
 } // namespace utils

@@ -1,6 +1,9 @@
 // Copyright (c) 2026 Joshua Chen. All rights reserved.
 // Licensed under the PolyForm Noncommercial License 1.0.0.
 
+#include <dppp/dppp.h>
+#include <unordered_map>
+
 #include "inventory.h"
 
 namespace commands {
@@ -79,27 +82,89 @@ namespace commands {
 		if (page > total_pages) page = total_pages;
 
 		int start = (page - 1) * INV_PGSZ;
-		std::vector<db::InvItem> slice(all.begin() + start, all.begin() + std::min(start + INV_PGSZ, (int)all.size()));
+		int end = std::min(start + INV_PGSZ, (int)all.size());
 
-		while (inv_rendering.exchange(true)) {}
-		std::string img;
-		try {
-			img = image::img_gen_inventory(slice, page, total_pages, utils::get_display_name(g_id, u_id),
-										   utils::get_avatar_url(u_id, 64));
-		} catch (...) {}
-		inv_rendering = false;
-		malloc_trim(0);
+		std::vector<db::InvItem> slice(all.begin() + start, all.begin() + end);
+		{ std::vector<db::InvItem>{}.swap(all); }
 
-		if (img.empty()) {
-			event.edit_original_response(dpp::message("couldn't render inventory.").set_flags(dpp::m_ephemeral));
+		std::string display_name = utils::get_display_name(g_id, u_id);
+		std::string avatar_url = utils::get_avatar_url(u_id, 64);
+
+		auto rend = [page, total_pages, display_name = std::move(display_name), avatar_url = std::move(avatar_url),
+					 ch_id = event.command.channel_id, event](std::vector<db::InvItem> items) {
+			while (inv_rendering.exchange(true)) {}
+			std::string img;
+			try {
+				img = image::img_gen_inventory(items, page, total_pages, display_name, avatar_url);
+			} catch (...) {}
+			inv_rendering = false;
+			malloc_trim(0);
+
+			if (img.empty()) {
+				event.edit_original_response(dpp::message("couldn't render inventory.").set_flags(dpp::m_ephemeral));
+				return;
+			}
+
+			dpp::message msg(ch_id, "");
+			msg.set_flags(dpp::m_ephemeral);
+			msg.add_file("inventory.png", std::move(img));
+			add_inv_buttons(msg, items, page, total_pages);
+			event.edit_original_response(std::move(msg));
+		};
+
+		bool has_roles = false;
+		for (const auto& it : slice) {
+			if (it.type == "role") {
+				has_roles = true;
+				break;
+			}
+		}
+
+		if (!has_roles) {
+			rend(std::move(slice));
 			return;
 		}
 
-		dpp::message msg(event.command.channel_id, "");
-		msg.set_flags(dpp::m_ephemeral);
-		msg.add_file("inventory.png", img);
-		add_inv_buttons(msg, slice, page, total_pages);
-		event.edit_original_response(msg);
+		dppp::get_enhanced_roles(bot, g_id,
+								 [rend = std::move(rend), slice = std::move(slice)](
+									 const dppp::result<std::vector<dppp::enhanced_role>>& res) mutable {
+									 if (res.success) {
+										 std::unordered_map<dpp::snowflake, dppp::enhanced_role> role_map;
+										 role_map.reserve(res.value.size());
+										 for (const auto& r : res.value)
+											 role_map[r.id] = r;
+
+										 for (auto& item : slice) {
+											 if (item.type != "role" || !item.role_id) continue;
+											 auto it = role_map.find(item.role_id);
+											 if (it == role_map.end()) continue;
+
+											 const auto& r = it->second;
+											 std::string c1 = r.colours.primary_hex_colour();
+											 std::string c2 = r.colours.secondary_hex_colour().value_or("");
+											 std::string c3 =
+												 r.colours.tertiary_colour.has_value()
+													 ? dppp::to_hex_colour(r.colours.tertiary_colour.value())
+													 : "";
+											 std::string keys;
+
+											 if (!c1.empty()) keys += "\"colour1\":\"" + c1 + "\",";
+											 if (!c2.empty()) keys += "\"colour2\":\"" + c2 + "\",";
+											 if (!c3.empty()) keys += "\"colour3\":\"" + c3 + "\",";
+
+											 if (!keys.empty()) {
+												 keys.pop_back();
+												 if (item.data.empty() || item.data == "{}") {
+													 item.data = "{" + keys + "}";
+												 } else {
+													 size_t p = item.data.find_last_of('}');
+													 if (p != std::string::npos) item.data.insert(p, "," + keys);
+												 }
+											 }
+										 }
+									 }
+									 rend(std::move(slice));
+								 });
 	}
 
 } // namespace commands

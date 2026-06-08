@@ -57,7 +57,19 @@ namespace commands {
 		dpp::snowflake ch_id = event.command.channel_id;
 		dpp::snowflake u_id = event.command.get_issuing_user().id;
 
-		if (!db::sb_is_allowed(g_id, ch_id)) {
+		bool allowed = db::sb_is_allowed(g_id, ch_id);
+
+		if (!allowed) {
+			dpp::snowflake parent_id = event.command.channel.parent_id;
+
+			if (parent_id == 0) {
+				if (dpp::channel* ch = dpp::find_channel(ch_id); ch) { parent_id = ch->parent_id; }
+			}
+
+			if (parent_id != 0) { allowed = db::sb_is_allowed(g_id, parent_id); }
+		}
+
+		if (!allowed) {
 			event.reply(dpp::message("this channel isn't set up for starboard.").set_flags(dpp::m_ephemeral));
 			return;
 		}
@@ -67,6 +79,7 @@ namespace commands {
 		try {
 			sb_ch = std::stoull(sb_ch_str);
 		} catch (...) {}
+
 		if (sb_ch == 0) {
 			event.reply(dpp::message("no starboard channel configured.").set_flags(dpp::m_ephemeral));
 			return;
@@ -74,7 +87,6 @@ namespace commands {
 
 		int aura = db::get_aura(g_id, u_id);
 		bool is_positive = (aura >= 0);
-
 		int cost = std::abs(db::get_setting_int(g_id, is_positive ? "sb_pos_cost" : "sb_neg_cost", 1000));
 
 		const dpp::message& target = event.get_message();
@@ -179,9 +191,9 @@ namespace commands {
 
 				out += jump;
 
-				dpp::message msg(sb_ch, out);
+				dpp::message msg(sb_ch, std::move(out));
 				msg.set_allowed_mentions(false, false, false, false, {}, {});
-				bot.message_create(msg);
+				bot.message_create(std::move(msg));
 			});
 	}
 

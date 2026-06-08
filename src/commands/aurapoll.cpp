@@ -27,6 +27,7 @@ namespace commands {
 		auto cmd = event.command.get_command_interaction();
 		std::string scmd = cmd.options[0].name;
 		if (scmd == "place") {
+			// TODO: this should be migrated to the new system where you can have negative aura too.
 			int64_t p_id = std::get<int64_t>(event.get_parameter("id"));
 			std::string side = std::get<std::string>(event.get_parameter("side"));
 			int64_t amt = std::get<int64_t>(event.get_parameter("bet"));

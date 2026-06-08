@@ -11,6 +11,7 @@
 
 #include "image_constants.h"
 #include "inventory.h"
+#include "utils.h"
 
 static constexpr int INV_BG_W = 1200;
 static constexpr int INV_BG_H = 1800;
@@ -35,6 +36,7 @@ namespace image {
 			bg.font("assets/fonts/axufont.ttf");
 			bg.textAntiAlias(true);
 			if (!title_name.empty()) {
+				const std::string s_name = utils::trunc(title_name);
 				int text_x = LEFT_X;
 
 				if (!avatar_url.empty()) {
@@ -57,7 +59,7 @@ namespace image {
 				bg.fontPointsize(72);
 				bg.fillColor(Magick::Color("rgba(255,230,160,0.9)"));
 				bg.strokeWidth(0);
-				bg.draw(Magick::DrawableText(text_x, TITLE_Y, title_name + "'s inventory"));
+				bg.draw(Magick::DrawableText(text_x, TITLE_Y, s_name + "'s inventory"));
 			}
 
 			std::string dim = std::to_string(PLACARD_W) + "x" + std::to_string(PLACARD_H) + "!";
@@ -113,8 +115,12 @@ namespace image {
 			}
 
 			Magick::Blob blob;
-			bg.write(&blob, "PNG");
-			return std::string(static_cast<const char*>(blob.data()), blob.length());
+			{
+				Magick::Image tmp(std::move(bg));
+				tmp.write(&blob, "PNG");
+			}
+			std::string result(static_cast<const char*>(blob.data()), blob.length());
+			return result;
 		} catch (Magick::Exception& e) {
 			std::cerr << "img_gen_inventory: " << e.what() << "\n";
 			return "";
