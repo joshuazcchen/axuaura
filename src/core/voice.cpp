@@ -29,7 +29,7 @@ namespace voice {
 				if (time_m > 0) {
 					static std::philox4x32 gen(std::random_device{}());
 					dpp::snowflake g_id = event.state.guild_id;
-					auto conf = config::get_config(g_id);
+					const auto& conf = config::get_config(g_id);
 					std::uniform_int_distribution<> dis(conf.xp_min, conf.xp_max);
 
 					int xp_del = 0;

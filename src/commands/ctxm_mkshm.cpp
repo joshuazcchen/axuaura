@@ -17,7 +17,7 @@ namespace commands {
 		dpp::message target = event.get_message();
 		dpp::snowflake g_id = event.command.guild_id;
 		dpp::snowflake u_id = target.author.id;
-		auto conf = config::get_config(g_id);
+		const auto& conf = config::get_config(g_id);
 		bool non_eng = (target.channel_id == conf.non_eng_ch);
 
 		db::rmv_aura(g_id, u_id, db::get_setting_int(g_id, "auralossamt", 100));

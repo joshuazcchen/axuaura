@@ -16,7 +16,6 @@ namespace commands {
 		dpp::guild_member member = event.command.member;
 		dpp::snowflake u_id = event.command.get_issuing_user().id;
 		dpp::snowflake g_id = event.command.guild_id;
-		auto conf = config::get_config(g_id);
 
 		int c_lvl = db::lvl_get(event.command.guild_id, u_id);
 

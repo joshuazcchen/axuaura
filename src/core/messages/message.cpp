@@ -17,7 +17,7 @@ namespace message {
 		if (event.msg.author.is_bot()) return;
 		dpp::snowflake g_id = event.msg.guild_id;
 		dpp::snowflake u_id = event.msg.author.id;
-		auto conf = config::get_config(g_id);
+		const auto& conf = config::get_config(g_id);
 
 		xp::award(bot, g_id, u_id, event.msg.channel_id, conf.lvl_ch);
 
@@ -40,7 +40,7 @@ namespace message {
 		std::uniform_int_distribution<> drop_dis(1, 1000);
 		if (drop_dis(gen) == 1) do_item_drop(bot, g_id, u_id, event.msg.channel_id);
 
-		std::regex url_r(R"(https?://[^\s]+)");
+		static const std::regex url_r(R"(https?://[^\s]+)");
 		std::smatch match;
 		std::string content = event.msg.content;
 		if (!std::regex_search(content, match, url_r)) return;

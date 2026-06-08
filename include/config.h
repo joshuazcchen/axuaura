@@ -42,7 +42,6 @@ namespace config {
 
 		std::vector<dpp::snowflake> stupid_roles;
 
-		// TODO: make this server specific
 		int xp_cooldown = 60;
 		int xp_min = 15;
 		int xp_max = 30;
@@ -55,12 +54,13 @@ namespace config {
 		void update_stupid() { stupid_roles = {leader_role, num2_role, num3_role, loser_role, bot2_role, bot3_role}; }
 	};
 
-	// i dont particularly like this idea but its either i flood my database or i flood my ram with like 1MB of stuff
 	extern std::unordered_map<dpp::snowflake, GuildConfig> guild_configs;
 
-	inline GuildConfig get_config(dpp::snowflake guild_id) {
-		if (guild_configs.find(guild_id) != guild_configs.end()) return guild_configs[guild_id];
-		return GuildConfig();
+	inline const GuildConfig& get_config(dpp::snowflake guild_id) {
+		static const GuildConfig default_config{};
+		auto it = guild_configs.find(guild_id);
+		if (it != guild_configs.end()) return it->second;
+		return default_config;
 	}
 
 	void config_load();

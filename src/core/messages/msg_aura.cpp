@@ -21,6 +21,18 @@ namespace message {
 		std::string key = std::to_string(g_id) + "_" + std::to_string(u_id);
 		long now = std::time(nullptr);
 		std::lock_guard<std::mutex> lk(cd_mtx);
+
+		static int prune_ctr = 0;
+		if (++prune_ctr >= 500) {
+			prune_ctr = 0;
+			for (auto it = aura_loss_cd.begin(); it != aura_loss_cd.end();) {
+				if (now - it->second >= 300)
+					it = aura_loss_cd.erase(it);
+				else
+					++it;
+			}
+		}
+
 		auto it = aura_loss_cd.find(key);
 		if (it != aura_loss_cd.end() && now - it->second < cd_secs) return false;
 		aura_loss_cd[key] = now;
