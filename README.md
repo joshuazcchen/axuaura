@@ -23,11 +23,20 @@ No assistance will be offered in self hosting the bot, but a public version will
 
 ## Screenshots
 
-![aura loss](https://cdn.scallion.uk/raw/zcMqUu.png)
-![bazaar](https://cdn.scallion.uk/u/lcSkRp.png)
-![level banners](https://cdn.scallion.uk/u/zAiETZ.png)
-![starboard](https://cdn.scallion.uk/u/IRGsB6.png)
-![gambling](https://cdn.scallion.uk/u/h8J9Fq.png)
+<table>
+  <tr>
+    <td><img src="https://cdn.scallion.uk/raw/zcMqUu.png" alt="aura loss" width="100%"></td>
+    <td><img src="https://cdn.scallion.uk/u/lcSkRp.png" alt="bazaar" width="100%"></td>
+  </tr>
+  <tr>
+    <td><img src="https://cdn.scallion.uk/u/zAiETZ.png" alt="level banners" width="100%"></td>
+    <td><img src="https://cdn.scallion.uk/u/IRGsB6.png" alt="starboard" width="100%"></td>
+  </tr>
+  <tr>
+    <td><img src="https://i.imgur.com/RHUGVWQ.gif" alt="gambling" width="100%"></td>
+  </tr>
+</table>
+
 
 ---
 
