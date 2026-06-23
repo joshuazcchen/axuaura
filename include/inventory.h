@@ -2,13 +2,13 @@
 // Licensed under the PolyForm Noncommercial License 1.0.0.
 
 #pragma once
-#include "bazaar.h"
 #include "commands.h"
-#include "db.h"
-#include "image.h"
-#include "utils.h"
 #include <atomic>
-#include <malloc.h>
+#include <vector>
+
+namespace db {
+	struct InvItem;
+}
 
 namespace commands {
 	constexpr int INV_PGSZ = 14;

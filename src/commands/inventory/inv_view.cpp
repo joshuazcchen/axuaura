@@ -4,7 +4,11 @@
 #include <dppp/dppp.h>
 #include <unordered_map>
 
+#include "db.h"
+#include "image.h"
 #include "inventory.h"
+#include "utils.h"
+#include <malloc.h>
 
 namespace commands {
 

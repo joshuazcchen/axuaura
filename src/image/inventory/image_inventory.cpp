@@ -9,6 +9,7 @@
 #define MAGICKCORE_HDRI_ENABLE 1
 #include <Magick++.h>
 
+#include "db.h"
 #include "image_constants.h"
 #include "inventory.h"
 #include "utils.h"

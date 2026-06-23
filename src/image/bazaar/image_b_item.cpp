@@ -124,7 +124,7 @@ namespace image {
 		if (item.type == "banner")
 			preview_banner(bg, px, py, item.data);
 		else if (item.type == "xp_boost")
-			preview_xp(bg, px, py);
+			preview_xp(bg, px, py); // TODO: add variants to the xp booster icon
 		else if (item.type == "role")
 			preview_role(bg, px, py, item.data);
 

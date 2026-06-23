@@ -5,7 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "db.h"
+namespace db {
+	struct ShopItem;
+	struct InvItem;
+} // namespace db
 
 namespace image {
 	std::string img_gen_card(const std::string& av_png, const std::string& user, int level, int xp_now, int xp_next,

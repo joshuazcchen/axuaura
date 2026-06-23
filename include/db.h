@@ -111,6 +111,7 @@ namespace db {
 	void bazaar_rotation_clear_slot(dpp::snowflake g_id, int slot);
 	void bazaar_rotation_clear_all(dpp::snowflake g_id);
 
+	// inventory related
 	struct InvItem {
 		int inv_id = 0;
 		int item_id = 0;

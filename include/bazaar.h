@@ -4,8 +4,6 @@
 #pragma once
 #include <dpp/dpp.h>
 
-#include "db.h"
-
 namespace bazaar {
 	void b_post_ui(dpp::cluster& bot, dpp::snowflake g_id);
 	void b_refresh_guild(dpp::cluster& bot, dpp::snowflake g_id, bool force = false);

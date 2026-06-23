@@ -9,6 +9,8 @@
 #define MAGICKCORE_HDRI_ENABLE 1
 #include <Magick++.h>
 
+#include "db.h"
+
 namespace image {
 
 	void draw_placard(Magick::Image& bg, const Magick::Image& tmpl, int px, int py, const db::ShopItem& item);

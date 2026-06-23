@@ -1,7 +1,11 @@
 // Copyright (c) 2026 Joshua Chen. All rights reserved.
 // Licensed under the PolyForm Noncommercial License 1.0.0.
 
+#include "db.h"
+#include "image.h"
 #include "inventory.h"
+#include "utils.h"
+#include <malloc.h>
 
 namespace commands {
 
