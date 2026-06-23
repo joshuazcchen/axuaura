@@ -1,5 +1,4 @@
 # AXUAURA BOT
----
 
 A Discord bot written entirely in C++ using the [D++ library](https://dpp.dev/).
 
