@@ -34,7 +34,7 @@ Originally designed for the fan community of @axuaxi on Instagram, currently bei
   </tr>
   <tr>
     <td><img src="https://i.imgur.com/RHUGVWQ.gif" alt="gambling" width="100%"></td>
-    <td><img src="https://cdn.scallion.uk/u/a09Yfm.png" alt="diagnostics" width="100%"</td>
+    <td><img src="https://cdn.scallion.uk/u/a09Yfm.png" alt="diagnostics" width="100%"></td>
   </tr>
 </table>
 
