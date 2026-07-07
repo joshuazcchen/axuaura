@@ -22,7 +22,7 @@ jobs:
         files=$(find . -type f \( -name "*.cpp" -o -name "*.h" \) ! -path "*/build/*")
         
         for file in $files; do
-          if ! head -n 5 "$file" | grep -q "PolyForm Noncommercial License"; then
+          if ! head -n 5 "$file" | grep -q "AGPL"; then
             echo "::error file=$file,line=1::missing header"
             error_found=1
           fi

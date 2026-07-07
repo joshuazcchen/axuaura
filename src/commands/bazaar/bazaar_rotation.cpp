@@ -1,5 +1,5 @@
-// Copyright (c) 2026 Joshua Chen. All rights reserved.
-// Licensed under the PolyForm Noncommercial License 1.0.0.
+// Copyright (c) 2026 Joshua Chen.
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include <algorithm>
 #include <ctime>
