@@ -41,5 +41,3 @@ Originally designed for the fan community of @axuaxi on Instagram, currently bei
 ---
 
 If you wish to have an instance of the bot hosted for you, please contact me at corgi@scallion.uk with the subject line "AXUAURA".
-
-This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
