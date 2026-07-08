@@ -2,11 +2,42 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "utils.h"
+#include "db.h"
 
 namespace utils {
 	bool is_admin(const dpp::slashcommand_t& event) {
 		dpp::permission resolved = event.command.get_resolved_permission(event.command.get_issuing_user().id);
 		return resolved.has(dpp::p_administrator);
+	}
+
+	double get_xpboost(dpp::snowflake guild_id, dpp::snowflake user_id) {
+		double xp_mult = db::inv_xp_mult(guild_id, user_id);
+		xp_mult += db::gb_get(user_id);
+
+		std::string roles_json_str = db::get_setting_str(guild_id, "boost_roles", "{}");
+		try {
+			nlohmann::json roles_map = nlohmann::json::parse(roles_json_str);
+			dpp::guild_member member = dpp::find_guild_member(guild_id, user_id);
+			const auto& user_roles = member.get_roles();
+
+			bool found = false;
+			double highest_mult = 0.0;
+			for (auto& [role_id_str, mult_val] : roles_map.items()) {
+				dpp::snowflake role_id = static_cast<uint64_t>(std::stoull(role_id_str));
+				if (std::find(user_roles.begin(), user_roles.end(), role_id) != user_roles.end()) {
+					double mult = mult_val.get<double>();
+					if (!found || mult > highest_mult) {
+						highest_mult = mult;
+						found = true;
+					}
+				}
+			}
+			if (found) xp_mult += highest_mult;
+		} catch (...) {
+			; // nop
+		}
+
+		return xp_mult;
 	}
 
 	static std::string::size_type v_st(const std::string& j, const std::string& key) {

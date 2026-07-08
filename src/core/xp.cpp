@@ -8,6 +8,7 @@
 #include <random>
 
 #include "db.h"
+#include "utils.h"
 
 namespace xp {
 
@@ -61,35 +62,7 @@ namespace xp {
 
 		thread_local std::philox4x32 gen(std::random_device{}());
 		std::uniform_int_distribution<> dis(xp_min, xp_max);
-		double xp_mult = db::inv_xp_mult(guild_id, user_id);
-		xp_mult += db::gb_get(user_id);
-
-		std::string roles_json_str = db::get_setting_str(guild_id, "boost_roles", "{}");
-		try {
-			nlohmann::json roles_map = nlohmann::json::parse(roles_json_str);
-
-			dpp::guild_member member = dpp::find_guild_member(guild_id, user_id);
-			const auto& user_roles = member.get_roles();
-
-			bool found = false;
-			double highest_mult = 0.0;
-
-			for (auto& [role_id_str, mult_val] : roles_map.items()) {
-				dpp::snowflake role_id = static_cast<uint64_t>(std::stoull(role_id_str));
-
-				if (std::find(user_roles.begin(), user_roles.end(), role_id) != user_roles.end()) {
-					double mult = mult_val.get<double>();
-					if (!found || mult > highest_mult) {
-						highest_mult = mult;
-						found = true;
-					}
-				}
-			}
-
-			if (found) { xp_mult += highest_mult; }
-		} catch (...) {
-			; // nop
-		}
+		double xp_mult = utils::get_xpboost(guild_id, user_id);
 
 		int xp_del = (int)(dis(gen) * xp_mult);
 

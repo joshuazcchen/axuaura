@@ -93,13 +93,14 @@ namespace commands {
 
 		std::string display_name = utils::get_display_name(g_id, u_id);
 		std::string avatar_url = utils::get_avatar_url(u_id, 64);
+		double xp_boost = utils::get_xpboost(g_id, u_id);
 
 		auto rend = [page, total_pages, display_name = std::move(display_name), avatar_url = std::move(avatar_url),
-					 ch_id = event.command.channel_id, event](std::vector<db::InvItem> items) {
+					 ch_id = event.command.channel_id, xp_boost, event](std::vector<db::InvItem> items) {
 			while (inv_rendering.exchange(true)) {}
 			std::string img;
 			try {
-				img = image::img_gen_inventory(items, page, total_pages, display_name, avatar_url);
+				img = image::img_gen_inventory(items, page, total_pages, display_name, avatar_url, xp_boost);
 			} catch (...) {}
 			inv_rendering = false;
 			malloc_trim(0);

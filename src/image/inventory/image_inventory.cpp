@@ -30,7 +30,7 @@ namespace image {
 	static constexpr int TITLE_Y = 255;
 
 	std::string img_gen_inventory(const std::vector<db::InvItem>& items, int page, int total_pages,
-								  const std::string& title_name, const std::string& avatar_url) {
+								  const std::string& title_name, const std::string& avatar_url, double xp_boost) {
 		try {
 			Magick::Image bg("assets/inventory/inv_bg.png");
 			bg.resize(std::to_string(INV_BG_W) + "x" + std::to_string(INV_BG_H) + "!");
@@ -105,6 +105,13 @@ namespace image {
 				if (y + PLACARD_H > INV_BG_H - 30) break;
 				draw_inv_placard(bg, get_tmpl(items[i]), x, y, items[i]);
 			}
+
+			std::string boost_str = "XP Boost: " + std::to_string(xp_boost) + "x";
+			bg.fontPointsize(28);
+			bg.fillColor(Magick::Color("rgba(255,230,160,0.85)"));
+			Magick::TypeMetric boost_m;
+			bg.fontTypeMetrics(boost_str, &boost_m);
+			bg.draw(Magick::DrawableText((INV_BG_W - boost_m.textWidth()) / 2.0, 40, boost_str));
 
 			if (total_pages > 1) {
 				std::string pg = std::to_string(page) + " / " + std::to_string(total_pages);
