@@ -163,4 +163,6 @@ namespace db {
 	void sb_remove_channel(dpp::snowflake guild_id, dpp::snowflake channel_id);
 	bool sb_is_allowed(dpp::snowflake guild_id, dpp::snowflake channel_id);
 	std::vector<dpp::snowflake> sb_get_channels(dpp::snowflake guild_id);
+
+	void optimize();
 } // namespace db

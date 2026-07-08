@@ -44,7 +44,12 @@ int main(int argc, char** argv) {
 
 		backup::do_backup();
 		if (dpp::run_once<struct boot_bazaar_t>()) bazaar::b_refresh_all(bot);
-		bot.start_timer([](dpp::timer) { backup::do_backup(); }, 86400);
+		bot.start_timer(
+			[](dpp::timer) {
+				backup::do_backup();
+				db::optimize();
+			},
+			86400);
 	});
 
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) { commands::route_slash_command(bot, event); });
