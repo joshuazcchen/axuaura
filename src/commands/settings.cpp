@@ -10,26 +10,20 @@
 namespace commands {
 
 	dpp::slashcommand settings_def(dpp::cluster& bot) {
+		static const std::vector<std::string> setting_names = {
+			"aurachancegain", "aurapassiveamt", "auralbozoamt",	   "auralossamt", "auralosscd",	 "status",	   "XP_MIN",
+			"XP_MAX",		  "XP_COOLDOWN",	"levelup_channel", "sb_channel",  "sb_pos_cost", "sb_neg_cost"};
+
+		dpp::command_option setting_option(dpp::co_string, "setting", "which one", true);
+		for (const auto& name : setting_names) {
+			setting_option.add_choice(dpp::command_option_choice(name, name));
+		}
+
 		return dpp::slashcommand("settings", "server settings", bot.me.id)
 			.set_default_permissions(dpp::p_administrator)
-			.add_option(
-				dpp::command_option(dpp::co_sub_command, "config", "view or change a setting")
-					.add_option(
-						dpp::command_option(dpp::co_string, "setting", "which one", true)
-							.add_choice(dpp::command_option_choice("aurachancegain", std::string("aurachancegain")))
-							.add_choice(dpp::command_option_choice("aurapassiveamt", std::string("aurapassiveamt")))
-							.add_choice(dpp::command_option_choice("auralbozoamt", std::string("auralbozoamt")))
-							.add_choice(dpp::command_option_choice("auralossamt", std::string("auralbozoamt")))
-							.add_choice(dpp::command_option_choice("auralosscd", std::string("auralosscd")))
-							.add_choice(dpp::command_option_choice("status", std::string("status")))
-							.add_choice(dpp::command_option_choice("XP_MIN", std::string("XP_MIN")))
-							.add_choice(dpp::command_option_choice("XP_MAX", std::string("XP_MAX")))
-							.add_choice(dpp::command_option_choice("XP_COOLDOWN", std::string("XP_COOLDOWN")))
-							.add_choice(dpp::command_option_choice("levelup_channel", std::string("levelup_channel")))
-							.add_choice(dpp::command_option_choice("sb_channel", std::string("sb_channel")))
-							.add_choice(dpp::command_option_choice("sb_pos_cost", std::string("sb_pos_cost")))
-							.add_choice(dpp::command_option_choice("sb_neg_cost", std::string("sb_neg_cost"))))
-					.add_option(dpp::command_option(dpp::co_string, "value", "new value", false)))
+			.add_option(dpp::command_option(dpp::co_sub_command, "config", "view or change a setting")
+							.add_option(setting_option)
+							.add_option(dpp::command_option(dpp::co_string, "value", "new value", false)))
 			.add_option(dpp::command_option(dpp::co_sub_command, "levelrole", "assign a role to a level")
 							.add_option(dpp::command_option(dpp::co_integer, "level", "level threshold", true))
 							.add_option(dpp::command_option(dpp::co_role, "role", "role to grant", true)))
@@ -129,7 +123,7 @@ namespace commands {
 				nlohmann::json roles_map = nlohmann::json::parse(json_str);
 				roles_map[std::to_string(role)] = boost;
 				db::set_setting(g_id, "boost_roles", roles_map.dump());
-				event.reply(dpp::message("<@&" + std::to_string(role) + "> boost set to " + std::to_string(boost) + "+")
+				event.reply(dpp::message("<@&" + std::to_string(role) + "> boost set to +" + std::to_string(boost))
 								.set_flags(dpp::m_ephemeral));
 			} catch (...) { event.reply(dpp::message("failed").set_flags(dpp::m_ephemeral)); }
 		} else if (scmd == "aurarole") {
