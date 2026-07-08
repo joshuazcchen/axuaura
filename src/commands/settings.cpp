@@ -33,6 +33,9 @@ namespace commands {
 			.add_option(dpp::command_option(dpp::co_sub_command, "levelrole", "assign a role to a level")
 							.add_option(dpp::command_option(dpp::co_integer, "level", "level threshold", true))
 							.add_option(dpp::command_option(dpp::co_role, "role", "role to grant", true)))
+			.add_option(dpp::command_option(dpp::co_sub_command, "xpboostrole", "assign a role to an xp boost")
+							.add_option(dpp::command_option(dpp::co_integer, "mult", "xp boost amt", true))
+							.add_option(dpp::command_option(dpp::co_role, "role", "role to grant", true)))
 			.add_option(dpp::command_option(dpp::co_sub_command, "aurarole", "assign a role to an aura rank slot")
 							.add_option(dpp::command_option(dpp::co_string, "position", "which rank slot", true)
 											.add_choice(dpp::command_option_choice("no1", std::string("no1")))
@@ -117,6 +120,18 @@ namespace commands {
 								.set_flags(dpp::m_ephemeral));
 			} catch (...) { event.reply(dpp::message("failed to update level roles").set_flags(dpp::m_ephemeral)); }
 
+		} else if (scmd == "xpboostrole") {
+			int64_t boost = std::get<int64_t>(event.get_parameter("mult"));
+			dpp::snowflake role = std::get<dpp::snowflake>(event.get_parameter("role"));
+
+			std::string json_str = db::get_setting_str(g_id, "boost_roles", "{}");
+			try {
+				nlohmann::json roles_map = nlohmann::json::parse(json_str);
+				roles_map[std::to_string(role)] = boost;
+				db::set_setting(g_id, "boost_roles", roles_map.dump());
+				event.reply(dpp::message("<@&" + std::to_string(role) + "> boost set to " + std::to_string(boost) + "+")
+								.set_flags(dpp::m_ephemeral));
+			} catch (...) { event.reply(dpp::message("failed").set_flags(dpp::m_ephemeral)); }
 		} else if (scmd == "aurarole") {
 			std::string pos = std::get<std::string>(event.get_parameter("position"));
 			dpp::snowflake role = std::get<dpp::snowflake>(event.get_parameter("role"));
