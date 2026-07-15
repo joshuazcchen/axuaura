@@ -19,7 +19,7 @@ jobs:
       run: |
         error_found=0
         
-        files=$(find . -type f \( -name "*.cpp" -o -name "*.h" \) ! -path "*/build/*")
+        files=$(find . -type f \( -name "*.cpp" -o -name "*.h" \) ! -path "*/build/*" ! -path "*/include/dotenv.h")
         
         for file in $files; do
           if ! head -n 5 "$file" | grep -q "AGPL"; then
