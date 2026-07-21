@@ -6,6 +6,9 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <thread>
+#include <chrono>
+#include <cstdlib>
 
 #include "backup.h"
 #include "bazaar.h"
@@ -65,6 +68,24 @@ int main(int argc, char** argv) {
 	});
 
 	bot.on_voice_state_update([&bot](const dpp::voice_state_update_t& event) { events::handle_voice(event, bot); });
+
+	std::thread watchdog([]() {
+        bool prev_fail = false;
+        
+        while (true) {
+            int result = system("ping -c 1 -W 2 1.1.1.1 > /dev/null 2>&1");
+            
+            if (result != 0) {
+                prev_fail = true;
+            } else if (prev_fail) {
+                std::exit(1); 
+            }
+            
+            std::this_thread::sleep_for(std::chrono::seconds(60));
+        }
+    });
+    
+    watchdog.detach();
 
 	bot.start(dpp::st_wait);
 	return 0;
